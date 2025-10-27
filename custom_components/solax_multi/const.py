@@ -59,3 +59,10 @@ INVERTER_TYPES = {
     "3": "Solax X1 Pro",
     # Add more known type codes here as you discover them.
 }
+
+# Battery information
+BATTERY_STATUSES = {
+    "0": "Normal",
+    "1": "Fault", 
+    "2": "Disconnected"
+}
