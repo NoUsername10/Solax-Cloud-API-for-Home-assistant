@@ -51,13 +51,14 @@ ERROR_CODES = {
     2002: "Data not found",
 }
 
-# Inverter type mapping (example, extend as needed)
+# Update INVERTER_TYPES in const.py
 INVERTER_TYPES = {
-    "28": "Solax X1 Micro 2 in 1",
     "1": "Solax X1 Mini",
-    "2": "Solax X1 Boost",
+    "2": "Solax X1 Boost", 
     "3": "Solax X1 Pro",
-    # Add more known type codes here as you discover them.
+    "4": "Solax X3", 
+    "28": "Solax X1 Micro 2 in 1",
+    # Add more as discovered
 }
 
 # Battery information
