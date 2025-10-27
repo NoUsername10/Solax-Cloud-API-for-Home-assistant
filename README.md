@@ -1,7 +1,6 @@
 # Solax Multi Inverter Integration for Home Assistant
 
-! This code is created with AI (chatGPT and Deepseek) !
-! If you want to contribute, you are very welcome !
+! This code is created with AI (chatGPT and DeepSeek) If you want to contribute, you are very welcome !
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
