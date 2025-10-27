@@ -8,6 +8,9 @@ Home Assistant custom integration to monitor multiple Solax inverters using the 
 
 ## Features
 
+Created using the latest API from Solax.
+https://www.solaxcloud.com/user_api/SolaxCloud_Monitoring_API_V7.1.pdf
+
 - **🔢 Multiple Inverter Support** - Monitor one or multiple Solax inverters simultaneously
 - **🔐 Single API Token** - Use one token for all your inverters
 - **📊 Comprehensive Sensors** - Access all available inverter data:
