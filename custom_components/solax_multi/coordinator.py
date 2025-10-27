@@ -27,14 +27,23 @@ class SolaxCoordinator(DataUpdateCoordinator):
         headers = { "Content-Type": "application/json", "tokenId": self.token }
         payload = { "wifiSn": sn }
         try:
-            with async_timeout.timeout(15):
-                resp = await session.post(API_URL, json=payload, headers=headers)
-                text = await resp.text()
-                if resp.status != 200:
-                    _LOGGER.debug("Solax HTTP error %s for %s: %s", resp.status, sn, text)
-                    return { "error": f"HTTP {resp.status}", "raw": text }
-                j = await resp.json()
-                return j
+            async with async_timeout.timeout(15):
+                async with session.post(API_URL, json=payload, headers=headers) as resp:
+                    text = await resp.text()
+                    if resp.status != 200:
+                        _LOGGER.warning("Solax HTTP error %s for %s: %s", resp.status, sn, text)
+                        return { "error": f"HTTP {resp.status}", "raw": text }
+                    
+                    try:
+                        j = await resp.json()
+                    except Exception as json_err:
+                        _LOGGER.warning("JSON parse error for %s: %s", sn, json_err)
+                        return { "error": f"JSON Error: {json_err}", "raw": text }
+                        
+                    return j
+        except asyncio.TimeoutError:
+            _LOGGER.warning("Timeout fetching data for %s", sn)
+            return { "error": "Timeout" }
         except Exception as e:
             _LOGGER.warning("Failed request for %s: %s", sn, e)
             return { "error": str(e) }
@@ -66,5 +75,9 @@ class SolaxCoordinator(DataUpdateCoordinator):
                     continue
 
                 results[sn] = resp.get("result")
+        
+        successful_updates = len([r for r in results.values() if r and not r.get("error")])
+        _LOGGER.debug("Successfully updated data for %d/%d inverters", successful_updates, len(self.inverters))
+        
         self.data = results
         return self.data
