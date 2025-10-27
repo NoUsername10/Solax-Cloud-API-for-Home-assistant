@@ -4,6 +4,9 @@ from homeassistant.const import DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from .const import DOMAIN, RESULT_FIELDS, INVERTER_STATUSES, ERROR_CODES, INVERTER_TYPES
 
+import logging
+_LOGGER = logging.getLogger(__name__)
+
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     return
 
@@ -12,6 +15,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = data["coordinator"]
     inverters = entry.data.get("inverters", [])
 
+    # Wait for first data to be available to determine available fields
+    await coordinator.async_config_entry_first_refresh()
+    
     entities = []
     numeric_map = {
         "acpower": ("W", "power"),
@@ -25,10 +31,26 @@ async def async_setup_entry(hass, entry, async_add_entities):
         "feedinenergy": ("kWh", "energy"),
         "consumeenergy": ("kWh", "energy"),
         "batPower": ("W", "power"),
+        "soc": ("%", "battery"),
     }
 
     for sn in inverters:
-        for field in RESULT_FIELDS:
+        inverter_data = coordinator.data.get(sn)
+        
+        # Skip if no data available yet
+        if not inverter_data or not isinstance(inverter_data, dict):
+            _LOGGER.debug("No data available for inverter %s, creating all sensors", sn)
+            # Create all possible sensors if no data
+            available_fields = RESULT_FIELDS
+        else:
+            # Only create sensors for fields that have non-null values
+            available_fields = [
+                field for field in RESULT_FIELDS 
+                if field in inverter_data and inverter_data.get(field) is not None
+            ]
+            _LOGGER.debug("Available fields for inverter %s: %s", sn, available_fields)
+
+        for field in available_fields:
             name = f"Solax {field} {sn}"
             unique = f"{sn}_{field}".lower().replace(" ", "_")
             if field in numeric_map:
@@ -37,12 +59,18 @@ async def async_setup_entry(hass, entry, async_add_entities):
             else:
                 entities.append(SolaxFieldSensor(coordinator, sn, field, name, unique, None))
 
-        entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", f"Solax DC Total {sn}", f"{sn}_dc_total"))
+        # Only create DC total sensor if at least one DC channel has data
+        if inverter_data and isinstance(inverter_data, dict):
+            dc_channels = [inverter_data.get(f"powerdc{i}") for i in range(1, 5)]
+            if any(channel is not None for channel in dc_channels):
+                entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", f"Solax DC Total {sn}", f"{sn}_dc_total"))
 
-    entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", "Solax AC Total System"))
-    entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", "Solax DC Total System"))
-    entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total", "Solax Yield Today Total"))
-    entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total", "Solax Yield Total System"))
+    # System total sensors (only create if we have inverters with relevant data)
+    if any(coordinator.data.get(sn) for sn in inverters):
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", "Solax AC Total System"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", "Solax DC Total System"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total", "Solax Yield Today Total"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total", "Solax Yield Total System"))
 
     async_add_entities(entities, update_before_add=True)
 
@@ -55,6 +83,7 @@ class SolaxFieldSensor(CoordinatorEntity):
         self._attr_name = name
         self._attr_unique_id = unique_id
         self._unit = unit
+        self._available = True
 
     @property
     def name(self):
@@ -63,6 +92,15 @@ class SolaxFieldSensor(CoordinatorEntity):
     @property
     def unique_id(self):
         return self._attr_unique_id
+
+    @property
+    def available(self):
+        """Return if entity is available."""
+        data = self.coordinator.data.get(self._serial)
+        if not data or not isinstance(data, dict):
+            return False
+        # Entity is available if the field exists and is not None in current data
+        return self._field in data and data.get(self._field) is not None
 
     @property
     def device_info(self):
@@ -92,6 +130,8 @@ class SolaxFieldSensor(CoordinatorEntity):
             return SensorStateClass.TOTAL_INCREASING
         elif self._unit == "W":
             return SensorStateClass.MEASUREMENT
+        elif self._unit == "%":
+            return SensorStateClass.MEASUREMENT
         return None
 
     @property
@@ -100,6 +140,8 @@ class SolaxFieldSensor(CoordinatorEntity):
             return SensorDeviceClass.ENERGY
         elif self._unit == "W":
             return SensorDeviceClass.POWER
+        elif self._unit == "%":
+            return SensorDeviceClass.BATTERY
         return None
 
     @property
@@ -140,6 +182,16 @@ class SolaxComputedSensor(CoordinatorEntity):
         return self._unique_id
 
     @property
+    def available(self):
+        """Return if entity is available."""
+        data = self.coordinator.data.get(self._serial)
+        if not data or not isinstance(data, dict):
+            return False
+        # Check if we have at least one DC channel with data
+        dc_channels = [data.get(f"powerdc{i}") for i in range(1, 5)]
+        return any(channel is not None for channel in dc_channels)
+
+    @property
     def device_info(self):
         inv = self.coordinator.data.get(self._serial)
         inverter_sn = (inv.get("inverterSN") if isinstance(inv, dict) else self._serial) or self._serial
@@ -150,11 +202,12 @@ class SolaxComputedSensor(CoordinatorEntity):
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict):
             return None
-        dc1 = inv.get("powerdc1") or 0
-        dc2 = inv.get("powerdc2") or 0
-        dc3 = inv.get("powerdc3") or 0
-        dc4 = inv.get("powerdc4") or 0
-        return dc1 + dc2 + dc3 + dc4
+        total = 0
+        for i in range(1, 5):
+            power = inv.get(f"powerdc{i}")
+            if power is not None:
+                total += power
+        return total
 
     @property
     def state_class(self):
@@ -185,6 +238,22 @@ class SolaxSystemTotalSensor(CoordinatorEntity):
         return f"system_{self._metric}"
 
     @property
+    def available(self):
+        """Return if entity is available."""
+        for sn in self._inverters:
+            inv = self.coordinator.data.get(sn)
+            if inv and isinstance(inv, dict):
+                if self._metric == "ac_total" and inv.get("acpower") is not None:
+                    return True
+                elif self._metric == "dc_total" and any(inv.get(f"powerdc{i}") is not None for i in range(1, 5)):
+                    return True
+                elif self._metric == "yieldtoday_total" and inv.get("yieldtoday") is not None:
+                    return True
+                elif self._metric == "yieldtotal_total" and inv.get("yieldtotal") is not None:
+                    return True
+        return False
+
+    @property
     def state(self):
         total = 0
         for sn in self._inverters:
@@ -192,13 +261,24 @@ class SolaxSystemTotalSensor(CoordinatorEntity):
             if not inv or not isinstance(inv, dict):
                 continue
             if self._metric == "ac_total":
-                total += inv.get("acpower") or 0
+                power = inv.get("acpower")
+                if power is not None:
+                    total += power
             elif self._metric == "dc_total":
-                total += (inv.get("powerdc1") or 0) + (inv.get("powerdc2") or 0) + (inv.get("powerdc3") or 0) + (inv.get("powerdc4") or 0)
+                dc_total = 0
+                for i in range(1, 5):
+                    power = inv.get(f"powerdc{i}")
+                    if power is not None:
+                        dc_total += power
+                total += dc_total
             elif self._metric == "yieldtoday_total":
-                total += inv.get("yieldtoday") or 0
+                yield_today = inv.get("yieldtoday")
+                if yield_today is not None:
+                    total += yield_today
             elif self._metric == "yieldtotal_total":
-                total += inv.get("yieldtotal") or 0
+                yield_total = inv.get("yieldtotal")
+                if yield_total is not None:
+                    total += yield_total
         return total
 
     @property
