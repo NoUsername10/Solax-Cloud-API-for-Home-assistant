@@ -150,14 +150,23 @@ class SolaxFieldSensor(CoordinatorEntity):
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict):
             return attrs
+        
         status = inv.get("inverterStatus")
         if status is not None:
-            attrs["inverter_status_text"] = INVERTER_STATUSES.get(str(status), f"Unknown ({status})")
+        attrs["inverter_status_text"] = INVERTER_STATUSES.get(str(status), f"Unknown ({status})")
+    
+        # Add battery status mapping
+        bat_status = inv.get("batStatus")
+        if bat_status is not None:
+            attrs["battery_status_text"] = BATTERY_STATUSES.get(str(bat_status), f"Unknown ({bat_status})")
+    
         # map inverter type to friendly name if available
         itype = inv.get("inverterType")
         if itype is not None:
             attrs["inverter_type"] = INVERTER_TYPES.get(str(itype), str(itype))
+        
         attrs["last_update_raw"] = inv.get("uploadTime")
+        attrs["utc_date_time"] = inv.get("utcDateTime")
         return attrs
 
     @property
