@@ -12,7 +12,7 @@ RESULT_FIELDS = [
     "yieldtoday", "yieldtotal",
     "feedinpower", "feedinenergy", "consumeenergy", "feedinpowerM2",
     "soc", "peps1", "peps2", "peps3",
-    "inverterType", "inverterStatus", "uploadTime",
+    "inverterType", "inverterStatus", "uploadTime", "utcDateTime", 
     "batPower", "powerdc1", "powerdc2", "powerdc3", "powerdc4",
     "batStatus"
 ]
