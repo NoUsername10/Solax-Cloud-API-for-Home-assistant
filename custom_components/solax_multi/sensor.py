@@ -1,8 +1,6 @@
-from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.const import DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from .const import DOMAIN, RESULT_FIELDS, INVERTER_STATUSES, ERROR_CODES, INVERTER_TYPES, BATTERY_STATUSES
+from .const import DOMAIN, RESULT_FIELDS, INVERTER_STATUSES, INVERTER_TYPES, BATTERY_STATUSES
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -83,7 +81,6 @@ class SolaxFieldSensor(CoordinatorEntity):
         self._attr_name = name
         self._attr_unique_id = unique_id
         self._unit = unit
-        self._available = True
 
     @property
     def name(self):
