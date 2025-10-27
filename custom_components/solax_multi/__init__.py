@@ -20,16 +20,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         "entry": entry,
     }
 
-    for platform in PLATFORMS:
-        hass.async_create_task(
-            hass.helpers.discovery.async_load_platform(platform, DOMAIN, { "entry_id": entry.entry_id }, entry.data)
-        )
+    # Forward the setup to the sensor platform
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    unload_ok = all(
-        await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    )
-    hass.data[DOMAIN].pop(entry.entry_id, None)
+    """Unload a config entry."""
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if unload_ok:
+        hass.data[DOMAIN].pop(entry.entry_id, None)
     return unload_ok
