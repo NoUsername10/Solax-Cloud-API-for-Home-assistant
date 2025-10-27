@@ -1,7 +1,8 @@
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.const import DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY
-from .const import DOMAIN, RESULT_FIELDS, INVERTER_STATUSES, ERROR_CODES
+from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
+from .const import DOMAIN, RESULT_FIELDS, INVERTER_STATUSES, ERROR_CODES, INVERTER_TYPES
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     return
@@ -29,7 +30,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     for sn in inverters:
         for field in RESULT_FIELDS:
             name = f"Solax {field} {sn}"
-            unique = f"{sn}_{field}"
+            unique = f"{sn}_{field}".lower().replace(" ", "_")
             if field in numeric_map:
                 unit, kind = numeric_map[field]
                 entities.append(SolaxFieldSensor(coordinator, sn, field, name, unique, unit))
@@ -46,7 +47,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async_add_entities(entities, update_before_add=True)
 
 
-class SolaxFieldSensor(CoordinatorEntity, Entity):
+class SolaxFieldSensor(CoordinatorEntity):
     def __init__(self, coordinator, serial, field, name, unique_id, unit=None):
         super().__init__(coordinator)
         self._serial = serial
@@ -86,6 +87,22 @@ class SolaxFieldSensor(CoordinatorEntity, Entity):
         return val
 
     @property
+    def state_class(self):
+        if self._unit == "kWh":
+            return SensorStateClass.TOTAL_INCREASING
+        elif self._unit == "W":
+            return SensorStateClass.MEASUREMENT
+        return None
+
+    @property
+    def device_class(self):
+        if self._unit == "kWh":
+            return SensorDeviceClass.ENERGY
+        elif self._unit == "W":
+            return SensorDeviceClass.POWER
+        return None
+
+    @property
     def extra_state_attributes(self):
         attrs = {}
         inv = self.coordinator.data.get(self._serial)
@@ -106,7 +123,7 @@ class SolaxFieldSensor(CoordinatorEntity, Entity):
         return self._unit
 
 
-class SolaxComputedSensor(CoordinatorEntity, Entity):
+class SolaxComputedSensor(CoordinatorEntity):
     def __init__(self, coordinator, serial, metric, name, unique_id):
         super().__init__(coordinator)
         self._serial = serial
@@ -135,14 +152,24 @@ class SolaxComputedSensor(CoordinatorEntity, Entity):
             return None
         dc1 = inv.get("powerdc1") or 0
         dc2 = inv.get("powerdc2") or 0
-        return dc1 + dc2
+        dc3 = inv.get("powerdc3") or 0
+        dc4 = inv.get("powerdc4") or 0
+        return dc1 + dc2 + dc3 + dc4
+
+    @property
+    def state_class(self):
+        return SensorStateClass.MEASUREMENT
+
+    @property
+    def device_class(self):
+        return SensorDeviceClass.POWER
 
     @property
     def unit_of_measurement(self):
         return "W"
 
 
-class SolaxSystemTotalSensor(CoordinatorEntity, Entity):
+class SolaxSystemTotalSensor(CoordinatorEntity):
     def __init__(self, coordinator, inverters, metric, name):
         super().__init__(coordinator)
         self._inverters = inverters
@@ -173,6 +200,18 @@ class SolaxSystemTotalSensor(CoordinatorEntity, Entity):
             elif self._metric == "yieldtotal_total":
                 total += inv.get("yieldtotal") or 0
         return total
+
+    @property
+    def state_class(self):
+        if self._metric in ("yieldtoday_total", "yieldtotal_total"):
+            return SensorStateClass.TOTAL_INCREASING
+        return SensorStateClass.MEASUREMENT
+
+    @property
+    def device_class(self):
+        if self._metric in ("yieldtoday_total", "yieldtotal_total"):
+            return SensorDeviceClass.ENERGY
+        return SensorDeviceClass.POWER
 
     @property
     def unit_of_measurement(self):
