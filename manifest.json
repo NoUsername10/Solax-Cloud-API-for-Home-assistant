@@ -1,0 +1,11 @@
+{
+  "domain": "solax_multi",
+  "name": "Solax Multi Inverter",
+  "version": "0.2.0",
+  "documentation": "https://github.com/YOUR_GITHUB_USERNAME/ha-solax-multi",
+  "requirements": [],
+  "codeowners": [
+    "@YOUR_GITHUB_USERNAME"
+  ],
+  "iot_class": "cloud_polling"
+}
