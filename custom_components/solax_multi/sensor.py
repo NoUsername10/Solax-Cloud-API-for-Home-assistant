@@ -1,6 +1,6 @@
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from .const import DOMAIN, RESULT_FIELDS, INVERTER_STATUSES, INVERTER_TYPES, BATTERY_STATUSES
+from .const import DOMAIN, RESULT_FIELDS, FIELD_MAPPINGS, NUMERIC_FIELDS, MAPPED_FIELDS
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -13,35 +13,17 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = data["coordinator"]
     inverters = entry.data.get("inverters", [])
 
-    # Wait for first data to be available to determine available fields
     await coordinator.async_config_entry_first_refresh()
     
     entities = []
-    numeric_map = {
-        "acpower": ("W", "power"),
-        "powerdc1": ("W", "power"),
-        "powerdc2": ("W", "power"),
-        "powerdc3": ("W", "power"),
-        "powerdc4": ("W", "power"),
-        "yieldtoday": ("kWh", "energy"),
-        "yieldtotal": ("kWh", "energy"),
-        "feedinpower": ("W", "power"),
-        "feedinenergy": ("kWh", "energy"),
-        "consumeenergy": ("kWh", "energy"),
-        "batPower": ("W", "power"),
-        "soc": ("%", "battery"),
-    }
 
     for sn in inverters:
         inverter_data = coordinator.data.get(sn)
         
-        # Skip if no data available yet
         if not inverter_data or not isinstance(inverter_data, dict):
             _LOGGER.debug("No data available for inverter %s, creating all sensors", sn)
-            # Create all possible sensors if no data
             available_fields = RESULT_FIELDS
         else:
-            # Only create sensors for fields that have non-null values
             available_fields = [
                 field for field in RESULT_FIELDS 
                 if field in inverter_data and inverter_data.get(field) is not None
@@ -51,8 +33,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
         for field in available_fields:
             name = f"Solax {field} {sn}"
             unique = f"{sn}_{field}".lower().replace(" ", "_")
-            if field in numeric_map:
-                unit, kind = numeric_map[field]
+            
+            if field in NUMERIC_FIELDS:
+                unit, kind = NUMERIC_FIELDS[field]
                 entities.append(SolaxFieldSensor(coordinator, sn, field, name, unique, unit))
             else:
                 entities.append(SolaxFieldSensor(coordinator, sn, field, name, unique, None))
@@ -63,7 +46,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             if any(channel is not None for channel in dc_channels):
                 entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", f"Solax DC Total {sn}", f"{sn}_dc_total"))
 
-    # System total sensors (only create if we have inverters with relevant data)
+    # System total sensors
     if any(coordinator.data.get(sn) for sn in inverters):
         entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", "Solax AC Total System"))
         entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", "Solax DC Total System"))
@@ -83,20 +66,25 @@ class SolaxFieldSensor(CoordinatorEntity):
         self._unit = unit
 
     @property
-    def name(self):
-        return self._attr_name
-
-    @property
-    def unique_id(self):
-        return self._attr_unique_id
+    def state(self):
+        inv = self.coordinator.data.get(self._serial)
+        if not inv or not isinstance(inv, dict):
+            return None
+        
+        val = inv.get(self._field)
+        
+        # Return human-readable value if mapping exists
+        if self._field in FIELD_MAPPINGS and val is not None:
+            mapping = FIELD_MAPPINGS[self._field]
+            return mapping.get(str(val), f"Unknown ({val})")
+        
+        return val
 
     @property
     def available(self):
-        """Return if entity is available."""
         data = self.coordinator.data.get(self._serial)
         if not data or not isinstance(data, dict):
             return False
-        # Entity is available if the field exists and is not None in current data
         return self._field in data and data.get(self._field) is not None
 
     @property
@@ -109,16 +97,19 @@ class SolaxFieldSensor(CoordinatorEntity):
                 "identifiers": {(DOMAIN, inverter_sn)},
                 "name": f"Solax Inverter {inverter_sn}",
                 "manufacturer": "Solax",
-                "model": inv.get("inverterType"),
+                "model": self._get_mapped_value("inverterType"),
             }
         return {"identifiers": {ident}, "name": f"Solax Inverter {self._serial}"}
 
-    @property
-    def state(self):
+    def _get_mapped_value(self, field):
+        """Helper to get mapped value for a field."""
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict):
             return None
-        val = inv.get(self._field)
+        
+        val = inv.get(field)
+        if field in FIELD_MAPPINGS and val is not None:
+            return FIELD_MAPPINGS[field].get(str(val), str(val))
         return val
 
     @property
@@ -147,23 +138,19 @@ class SolaxFieldSensor(CoordinatorEntity):
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict):
             return attrs
-        
-        status = inv.get("inverterStatus")
-        if status is not None:
-            attrs["inverter_status_text"] = INVERTER_STATUSES.get(str(status), f"Unknown ({status})")
     
-        # Add battery status mapping
-        bat_status = inv.get("batStatus")
-        if bat_status is not None:
-            attrs["battery_status_text"] = BATTERY_STATUSES.get(str(bat_status), f"Unknown ({bat_status})")
+        # Store raw value for THIS sensor's field if it's a mapped field
+        if self._field in MAPPED_FIELDS and self._field in inv and inv[self._field] is not None:
+            attrs[f"{self._field}_raw"] = inv[self._field]
+            # Also include the mapped value as attribute for consistency
+            if self._field in FIELD_MAPPINGS:
+                mapped_value = FIELD_MAPPINGS[self._field].get(str(inv[self._field]), f"Unknown ({inv[self._field]})")
+                attrs[f"{self._field}_text"] = mapped_value
     
-        # map inverter type to friendly name if available
-        itype = inv.get("inverterType")
-        if itype is not None:
-            attrs["inverter_type"] = INVERTER_TYPES.get(str(itype), str(itype))
-        
+        # Add timestamp attributes (available for all sensors)
         attrs["last_update_raw"] = inv.get("uploadTime")
         attrs["utc_date_time"] = inv.get("utcDateTime")
+    
         return attrs
 
     @property
