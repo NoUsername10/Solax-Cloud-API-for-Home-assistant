@@ -7,8 +7,8 @@ Features
 - Single shared API token for all inverters
 - Per-inverter sensors: acpower, powerdc1, powerdc2, powerdc3, powerdc4, yieldtoday, yieldtotal, inverterType, inverterStatus, batStatus, etc.
 - Mapped inverter status and error codes
-- System total sensors (AC, DC, yields)
-- Configurable scan interval in the integration UI
+- System total sensors that combines all the inverters (AC, DC, yields)
+- Configurable scan interval in the integration UI (Solax API updates data every 5 min, so even if you set to 60s, 5 min is the interval new data is provided)
 
 Installation
 1. Copy the `custom_components/solax_multi` folder into your Home Assistant `custom_components` folder.
