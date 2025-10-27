@@ -74,7 +74,14 @@ class SolaxCoordinator(DataUpdateCoordinator):
                     results[sn] = { "error": True, "code": code, "exception": resp.get("exception"), "raw": resp }
                     continue
 
-                results[sn] = resp.get("result")
+                # Clean the result data - remove null values to save space
+                result_data = resp.get("result", {})
+                if result_data:
+                    # Remove keys with None values
+                    cleaned_data = {k: v for k, v in result_data.items() if v is not None}
+                    results[sn] = cleaned_data
+                else:
+                    results[sn] = {}
         
         successful_updates = len([r for r in results.values() if r and not r.get("error")])
         _LOGGER.debug("Successfully updated data for %d/%d inverters", successful_updates, len(self.inverters))
