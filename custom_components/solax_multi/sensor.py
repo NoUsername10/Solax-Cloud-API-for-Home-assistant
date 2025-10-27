@@ -2,7 +2,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.const import DEVICE_CLASS_POWER, DEVICE_CLASS_ENERGY
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from .const import DOMAIN, RESULT_FIELDS, INVERTER_STATUSES, ERROR_CODES, INVERTER_TYPES
+from .const import DOMAIN, RESULT_FIELDS, INVERTER_STATUSES, ERROR_CODES, INVERTER_TYPES, BATTERY_STATUSES
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -153,7 +153,7 @@ class SolaxFieldSensor(CoordinatorEntity):
         
         status = inv.get("inverterStatus")
         if status is not None:
-        attrs["inverter_status_text"] = INVERTER_STATUSES.get(str(status), f"Unknown ({status})")
+            attrs["inverter_status_text"] = INVERTER_STATUSES.get(str(status), f"Unknown ({status})")
     
         # Add battery status mapping
         bat_status = inv.get("batStatus")
