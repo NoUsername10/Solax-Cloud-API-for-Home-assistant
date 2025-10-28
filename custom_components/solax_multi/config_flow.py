@@ -1,49 +1,166 @@
 from typing import Any
 import voluptuous as vol
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.data_entry_flow import FlowResult
 from .const import DOMAIN, CONF_TOKEN, CONF_INVERTERS, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
-
-STEP_USER_DATA_SCHEMA = vol.Schema({
-    vol.Required(CONF_TOKEN): str,
-    vol.Required(CONF_INVERTERS, default=""): str,
-    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(vol.Coerce(int), vol.Range(min=120, max=3600)),
-})
 
 class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
+
+    def __init__(self):
+        super().__init__()
+        self._inverters = []
+        self._token = None
+        self._scan_interval = DEFAULT_SCAN_INTERVAL
 
     async def async_step_user(self, user_input: Any = None):
         errors = {}
         
         if user_input is not None:
             try:
-                # Validate input
+                # Validate token first
                 token = user_input[CONF_TOKEN].strip()
                 if not token:
                     raise ValueError("API token is required")
                 
-                inv_text = user_input[CONF_INVERTERS]
-                inverters = [s.strip() for s in inv_text.replace('\n',',').split(',') if s.strip()]
-                if not inverters:
-                    raise ValueError("At least one inverter serial number is required")
+                self._token = token
+                self._scan_interval = user_input.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
                 
-                scan_interval = user_input.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
-                
-                return self.async_create_entry(
-                    title="Solax Multi Inverter", 
-                    data={
-                        CONF_TOKEN: token,
-                        CONF_INVERTERS: inverters,
-                        CONF_SCAN_INTERVAL: scan_interval,
-                    }
-                )
+                # Move to inverter entry step
+                return await self.async_step_add_inverter()
                 
             except ValueError as err:
                 errors["base"] = str(err)
 
+        # Initial form - just ask for token and scan interval
+        data_schema = vol.Schema({
+            vol.Required(CONF_TOKEN): str,
+            vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): 
+                vol.All(vol.Coerce(int), vol.Range(min=120, max=3600)),
+        })
+
         return self.async_show_form(
             step_id="user", 
-            data_schema=STEP_USER_DATA_SCHEMA,
-            errors=errors
+            data_schema=data_schema,
+            errors=errors,
+            description_placeholders={"count": len(self._inverters)}
+        )
+
+    async def async_step_add_inverter(self, user_input: Any = None):
+        errors = {}
+        
+        if user_input is not None:
+            if "serial" in user_input:
+                # Adding a new inverter
+                serial = user_input["serial"].strip()
+                if serial and serial not in self._inverters:
+                    self._inverters.append(serial)
+                
+            if "finish" in user_input and user_input["finish"]:
+                if not self._inverters:
+                    errors["base"] = "At least one inverter serial number is required"
+                else:
+                    return self.async_create_entry(
+                        title=f"Solax Multi Inverter ({len(self._inverters)} inverters)", 
+                        data={
+                            CONF_TOKEN: self._token,
+                            CONF_INVERTERS: self._inverters,
+                            CONF_SCAN_INTERVAL: self._scan_interval,
+                        }
+                    )
+
+        # Show current inverters and option to add more
+        inverters_list = "\n".join([f"• {sn}" for sn in self._inverters]) if self._inverters else "No inverters added yet"
+        
+        data_schema = vol.Schema({
+            vol.Optional("serial"): str,
+            vol.Required("finish", default=bool(self._inverters)): bool,
+        })
+
+        return self.async_show_form(
+            step_id="add_inverter",
+            data_schema=data_schema,
+            errors=errors,
+            description_placeholders={
+                "count": len(self._inverters),
+                "inverters_list": inverters_list
+            }
+        )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry):
+        return SolaxOptionsFlowHandler(config_entry)
+
+
+class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
+    def __init__(self, config_entry: config_entries.ConfigEntry):
+        self.config_entry = config_entry
+        self._inverters = list(config_entry.data.get(CONF_INVERTERS, []))
+        self._token = config_entry.data.get(CONF_TOKEN)
+        self._scan_interval = config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+
+    async def async_step_init(self, user_input: Any = None):
+        """Manage the options."""
+        return await self.async_step_manage_inverters()
+
+    async def async_step_manage_inverters(self, user_input: Any = None):
+        errors = {}
+        
+        if user_input is not None:
+            if "serial" in user_input:
+                # Adding a new inverter
+                serial = user_input["serial"].strip()
+                if serial and serial not in self._inverters:
+                    self._inverters.append(serial)
+            
+            if "remove_serial" in user_input and user_input["remove_serial"]:
+                # Remove selected inverter
+                remove_sn = user_input["remove_serial"]
+                if remove_sn in self._inverters:
+                    self._inverters.remove(remove_sn)
+            
+            if "finish" in user_input and user_input["finish"]:
+                if not self._inverters:
+                    errors["base"] = "At least one inverter serial number is required"
+                else:
+                    # Update the config entry
+                    hass = self.hass
+                    entry_id = self.config_entry.entry_id
+                    
+                    # Create updated data
+                    updated_data = dict(self.config_entry.data)
+                    updated_data[CONF_INVERTERS] = self._inverters
+                    updated_data[CONF_SCAN_INTERVAL] = self._scan_interval
+                    
+                    hass.config_entries.async_update_entry(
+                        self.config_entry,
+                        data=updated_data
+                    )
+                    
+                    # Reload the entry to apply changes
+                    await hass.config_entries.async_reload(entry_id)
+                    
+                    return self.async_create_entry(title="", data={})
+
+        # Create options for remove dropdown
+        remove_options = {sn: sn for sn in self._inverters} if self._inverters else {"": "No inverters to remove"}
+        
+        inverters_list = "\n".join([f"• {sn}" for sn in self._inverters]) if self._inverters else "No inverters configured"
+        
+        data_schema = vol.Schema({
+            vol.Optional("serial"): str,
+            vol.Optional("remove_serial"): vol.In(remove_options),
+            vol.Required("finish", default=False): bool,
+        })
+
+        return self.async_show_form(
+            step_id="manage_inverters",
+            data_schema=data_schema,
+            errors=errors,
+            description_placeholders={
+                "count": len(self._inverters),
+                "inverters_list": inverters_list
+            }
         )
