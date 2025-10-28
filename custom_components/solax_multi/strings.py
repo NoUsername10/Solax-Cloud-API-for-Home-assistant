@@ -44,6 +44,7 @@ SENSOR_NAMES = {
 SYSTEM_SENSOR_NAMES = {
     "ac_total": "AC Power Total",
     "dc_total": "DC Power Total", 
+    "dc_total_inverter": "DC Power Inverter Total",  # ← Optional: for per-inverter totals
     "yieldtoday_total": "Today's Yield Total",
     "yieldtotal_total": "Total Yield Total",
 }
