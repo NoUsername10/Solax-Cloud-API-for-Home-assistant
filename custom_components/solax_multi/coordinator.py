@@ -94,7 +94,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
                 if code == 104:  # Rate limit exceeded
                     _LOGGER.warning(
                         "API rate limit exceeded for %s. Will skip for %.1f seconds.",
-                        sn, self.update_interval.total_seconds() * 0.8
+                        sn, self.update_interval.total_seconds() * 0.55
                     )
                     # Mark this inverter as rate-limited until next cycle
                     setattr(self, f'_last_rate_limit_{sn}', current_time)
@@ -102,7 +102,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
                         "error": "rate_limit", 
                         "code": code, 
                         "exception": resp.get("exception"),
-                        "skip_until": current_time + self.update_interval.total_seconds() * 0.8
+                        "skip_until": current_time + self.update_interval.total_seconds() * 0.55
                     }
                     
                     # Add extra delay before next inverter
