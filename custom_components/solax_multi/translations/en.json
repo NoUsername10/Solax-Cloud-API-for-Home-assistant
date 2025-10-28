@@ -1,1 +1,46 @@
-{"state":{"default":"Solax Multi Inverter"}}
+{
+  "state": {
+    "default": "Solax Multi Inverter"
+  },
+  "title": "Solax Multi Inverter",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Setup Solax Multi Inverter",
+        "description": "Enter your Solax Cloud API token and preferred scan interval.",
+        "data": {
+          "api_token": "API Token",
+          "scan_interval": "Scan Interval (seconds)"
+        }
+      },
+      "add_inverter": {
+        "title": "Add Inverters",
+        "description": "Current inverters ({count}):\n{inverters_list}\n\nAdd inverter serial numbers one by one. Check 'Finish' when done.",
+        "data": {
+          "serial": "Inverter Serial Number",
+          "finish": "Finish Setup"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Integration is already configured"
+    },
+    "error": {
+      "invalid_token": "Invalid API token",
+      "no_inverters": "At least one inverter serial number is required"
+    }
+  },
+  "options": {
+    "step": {
+      "manage_inverters": {
+        "title": "Manage Inverters",
+        "description": "Current inverters ({count}):\n{inverters_list}\n\nAdd new inverters or remove existing ones.",
+        "data": {
+          "serial": "Add New Serial Number",
+          "remove_serial": "Remove Inverter",
+          "finish": "Save Changes"
+        }
+      }
+    }
+  }
+}
