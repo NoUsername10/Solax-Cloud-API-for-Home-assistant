@@ -1,7 +1,7 @@
 # Solax Multi Inverter Integration for Home Assistant
 ![Solax Logo](https://raw.githubusercontent.com/NoUsername10/Solax-API-2.0-single-and-multiple-inverters-for-Home-assistant/main/custom_components/solax_multi/images/icon.png)
 
-! This code is created in collaboration with AI (chatGPT and DeepSeek) !
+! This code is created in collaboration with DeepSeek !
 If you want to contribute, you are very welcome.
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
