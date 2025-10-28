@@ -3,7 +3,7 @@
 # Human-readable sensor names
 SENSOR_NAMES = {
     # Power sensors
-    "acpower": "AC Power",
+    "acpower": "AC Output Power",
     "powerdc1": "DC Power String 1", 
     "powerdc2": "DC Power String 2",
     "powerdc3": "DC Power String 3",
@@ -13,8 +13,8 @@ SENSOR_NAMES = {
     "batPower": "Battery Power",
     
     # Energy sensors
-    "yieldtoday": "Today's Yield",
-    "yieldtotal": "Total Yield", 
+    "yieldtoday": "Yield Today",
+    "yieldtotal": "Yield Total", 
     "feedinenergy": "Grid Feed-in Energy",
     "consumeenergy": "Grid Consumption Energy",
     
@@ -32,11 +32,11 @@ SENSOR_NAMES = {
     "peps3": "EPS Phase 3 Power",
     
     # Identification sensors
-    "inverterSN": "Inverter Serial Number",
-    "sn": "Wi-Fi Module Serial",
+    "inverterSN": "Inverter Serial",
+    "sn": "Inverter Wi-Fi Serial",
     
     # Timestamp sensors
-    "uploadTime": "Last Data Upload",
+    "uploadTime": "Inverter Upload Time",
     "utcDateTime": "UTC Date Time",
 }
 
@@ -44,9 +44,9 @@ SENSOR_NAMES = {
 SYSTEM_SENSOR_NAMES = {
     "ac_total": "AC Power Total",
     "dc_total": "DC Power Total", 
-    "dc_total_inverter": "DC Power Inverter Total",  # ← Optional: for per-inverter totals
-    "yieldtoday_total": "Today's Yield Total",
-    "yieldtotal_total": "Total Yield Total",
+    "dc_total_inverter": "DC Power Inverter Total", 
+    "yieldtoday_total": "Yield Total System Today",
+    "yieldtotal_total": "Yield Total System",
 }
 
 # Device class descriptions (optional)
