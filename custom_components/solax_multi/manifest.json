@@ -1,7 +1,7 @@
 {
   "domain": "solax_multi",
   "name": "Solax API 2.0 Multi and Single Inverter",
-  "version": "0.1g",
+  "version": "0.2.1",
   "documentation": "https://github.com/NoUsername10/Solax-API-2.0-single-and-multiple-inverters-for-Home-assistant",
   "requirements": ["aiohttp>=3.8.0"],
   "dependencies": [],
