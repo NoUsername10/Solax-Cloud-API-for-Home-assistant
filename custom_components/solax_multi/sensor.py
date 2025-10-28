@@ -239,6 +239,17 @@ class SolaxSystemTotalSensor(CoordinatorEntity):
         return f"system_{self._metric}"
 
     @property
+    def device_info(self):
+        """Return device information for the system totals device."""
+        return {
+            "identifiers": {(DOMAIN, "system_totals")},
+            "name": "Solax System Totals",
+            "manufacturer": "Solax",
+            "model": "Multi-Inverter System",
+            "via_device": (DOMAIN, self._inverters[0]) if self._inverters else None,
+        }
+    
+    @property
     def available(self):
         """Return if entity is available."""
         for sn in self._inverters:
