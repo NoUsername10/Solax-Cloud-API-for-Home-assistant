@@ -10,10 +10,12 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     return
 
+
 async def async_setup_entry(hass, entry, async_add_entities):
     data = hass.data[DOMAIN][entry.entry_id]
     coordinator = data["coordinator"]
     inverters = entry.data.get("inverters", [])
+    system_name = entry.data.get("system_name", "Solax System")
 
     await coordinator.async_config_entry_first_refresh()
     
@@ -31,7 +33,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             ]
 
         for field in available_fields:
-            # Use human-readable name without serial number
+            # Use human-readable name without serial number (keep original names for inverter sensors)
             human_name = SENSOR_NAMES.get(field, f"Solax {field}")
             unique = f"{sn}_{field}".lower().replace(" ", "_")
             
@@ -45,16 +47,17 @@ async def async_setup_entry(hass, entry, async_add_entities):
         if inverter_data and isinstance(inverter_data, dict):
             dc_channels = [inverter_data.get(f"powerdc{i}") for i in range(1, 5)]
             if any(channel is not None for channel in dc_channels):
+                # KEEP ORIGINAL NAME for per-inverter DC total (no system name)
                 human_name = SYSTEM_SENSOR_NAMES["dc_total_inverter"]  
                 unique = f"{sn}_dc_total"
                 entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, unique))
 
-    # System total sensors with human-readable names
+    # System total sensors with Solax prefix and system name suffix
     if any(coordinator.data.get(sn) for sn in inverters):
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", SYSTEM_SENSOR_NAMES["ac_total"]))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", SYSTEM_SENSOR_NAMES["dc_total"]))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total", SYSTEM_SENSOR_NAMES["yieldtoday_total"]))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total", SYSTEM_SENSOR_NAMES["yieldtotal_total"]))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", f"Solax AC Power {system_name}"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", f"Solax DC Power {system_name}"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total", f"Solax Energy Today {system_name}"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total", f"Solax Energy Total {system_name}"))
 
     async_add_entities(entities, update_before_add=True)
 
@@ -241,17 +244,27 @@ class SolaxSystemTotalSensor(CoordinatorEntity):
 
     @property
     def unique_id(self):
-        return f"system_{self._metric}"
+        metric_map = {
+            "ac_total": "ac_power",
+            "dc_total": "dc_power", 
+            "yieldtoday_total": "energy_today",
+            "yieldtotal_total": "energy_total"
+        }
+        # Get system name from config and create slug for unique ID
+        system_name = self.coordinator.config_entry.data.get("system_name", "solax_system")
+        system_slug = system_name.lower().replace(" ", "_").replace("-", "_")
+        return f"solax_{metric_map[self._metric]}_{system_slug}"
 
     @property
     def device_info(self):
         """Return device information for the system totals device."""
         total_inverters = len(self._inverters)
         active_inverters = self._count_active_inverters()
+        system_name = self.coordinator.config_entry.data.get("system_name", "Solax System")
         
         return {
-            "identifiers": {(DOMAIN, "system_totals")},
-            "name": f"Solax System ({active_inverters}/{total_inverters} Inverters)",
+            "identifiers": {(DOMAIN, f"system_totals_{system_name.replace(' ', '_').lower()}")},
+            "name": f"{system_name} ({active_inverters}/{total_inverters} Inverters)",
             "manufacturer": "Solax",
             "model": f"Multi-Inverter System ({active_inverters} active, {total_inverters} total)",
         }
