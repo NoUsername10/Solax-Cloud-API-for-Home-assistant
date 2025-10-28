@@ -48,7 +48,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
             _LOGGER.warning("Failed request for %s: %s", sn, e)
             return { "error": str(e) }
 
-    async def _async_update_data(self):
+    async def _async_update_data(self):  # ← THIS LINE NEEDS TO BE INDENTED INSIDE THE CLASS
         results = {}
         timeout = aiohttp.ClientTimeout(total=20)
         async with aiohttp.ClientSession(timeout=timeout) as session:
@@ -69,7 +69,22 @@ class SolaxCoordinator(DataUpdateCoordinator):
 
                 code = resp.get("code")
                 success = resp.get("success", False)
-                if not success or (code is not None and code != 0):
+                
+                # Handle specific error codes
+                if code == 104:  # Rate limit exceeded
+                    _LOGGER.warning(
+                        "API rate limit exceeded for %s. Consider increasing scan interval or reducing inverter count.",
+                        sn
+                    )
+                    results[sn] = { "error": "rate_limit", "code": code, "exception": resp.get("exception") }
+                    continue
+                    
+                elif code == 1003:  # Data Unauthorized
+                    _LOGGER.error("API unauthorized for %s. Check token and inverter serial.", sn)
+                    results[sn] = { "error": "unauthorized", "code": code, "exception": resp.get("exception") }
+                    continue
+                    
+                elif not success or (code is not None and code != 0):
                     _LOGGER.warning("API error for %s: code=%s, exception=%s", sn, code, resp.get("exception"))
                     results[sn] = { "error": True, "code": code, "exception": resp.get("exception"), "raw": resp }
                     continue
@@ -77,13 +92,20 @@ class SolaxCoordinator(DataUpdateCoordinator):
                 # Clean the result data - remove null values to save space
                 result_data = resp.get("result", {})
                 if result_data:
-                    # Remove keys with None values
                     cleaned_data = {k: v for k, v in result_data.items() if v is not None}
                     results[sn] = cleaned_data
                 else:
                     results[sn] = {}
         
         successful_updates = len([r for r in results.values() if r and not r.get("error")])
+        rate_limited = len([r for r in results.values() if r and r.get("error") == "rate_limit"])
+        
+        if rate_limited > 0:
+            _LOGGER.warning(
+                "%d/%d inverters rate limited. Consider increasing scan interval from %ds",
+                rate_limited, len(self.inverters), self.update_interval.total_seconds()
+            )
+        
         _LOGGER.debug("Successfully updated data for %d/%d inverters", successful_updates, len(self.inverters))
         
         self.data = results
