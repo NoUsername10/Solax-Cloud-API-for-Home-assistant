@@ -1,6 +1,6 @@
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from .const import DOMAIN, RESULT_FIELDS, FIELD_MAPPINGS, NUMERIC_FIELDS, MAPPED_FIELDS
+from .const import DOMAIN, RESULT_FIELDS, FIELD_MAPPINGS, NUMERIC_FIELDS, MAPPED_FIELDS, SENSOR_NAMES, SYSTEM_SENSOR_NAMES
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -21,37 +21,38 @@ async def async_setup_entry(hass, entry, async_add_entities):
         inverter_data = coordinator.data.get(sn)
         
         if not inverter_data or not isinstance(inverter_data, dict):
-            _LOGGER.debug("No data available for inverter %s, creating all sensors", sn)
             available_fields = RESULT_FIELDS
         else:
             available_fields = [
                 field for field in RESULT_FIELDS 
                 if field in inverter_data and inverter_data.get(field) is not None
             ]
-            _LOGGER.debug("Available fields for inverter %s: %s", sn, available_fields)
 
         for field in available_fields:
-            name = f"Solax {field} {sn}"
+            # Use human-readable name without serial number
+            human_name = SENSOR_NAMES.get(field, f"Solax {field}")
             unique = f"{sn}_{field}".lower().replace(" ", "_")
             
             if field in NUMERIC_FIELDS:
                 unit, kind = NUMERIC_FIELDS[field]
-                entities.append(SolaxFieldSensor(coordinator, sn, field, name, unique, unit))
+                entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, unique, unit))
             else:
-                entities.append(SolaxFieldSensor(coordinator, sn, field, name, unique, None))
+                entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, unique, None))
 
         # Only create DC total sensor if at least one DC channel has data
         if inverter_data and isinstance(inverter_data, dict):
             dc_channels = [inverter_data.get(f"powerdc{i}") for i in range(1, 5)]
             if any(channel is not None for channel in dc_channels):
-                entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", f"Solax DC Total {sn}", f"{sn}_dc_total"))
+                human_name = SENSOR_NAMES.get("dc_total", "DC Power Total")
+                unique = f"{sn}_dc_total"
+                entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, unique))
 
-    # System total sensors
+    # System total sensors with human-readable names
     if any(coordinator.data.get(sn) for sn in inverters):
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", "Solax AC Total System"))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", "Solax DC Total System"))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total", "Solax Yield Today Total"))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total", "Solax Yield Total System"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", SYSTEM_SENSOR_NAMES["ac_total"]))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", SYSTEM_SENSOR_NAMES["dc_total"]))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total", SYSTEM_SENSOR_NAMES["yieldtoday_total"]))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total", SYSTEM_SENSOR_NAMES["yieldtotal_total"]))
 
     async_add_entities(entities, update_before_add=True)
 
