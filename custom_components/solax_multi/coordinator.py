@@ -4,6 +4,7 @@ import logging
 from datetime import timedelta
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.core import HomeAssistant
 import aiohttp
 
@@ -81,8 +82,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
                     
                 elif code == 1003:  # Data Unauthorized
                     _LOGGER.error("API unauthorized for %s. Check token and inverter serial.", sn)
-                    results[sn] = { "error": "unauthorized", "code": code, "exception": resp.get("exception") }
-                    continue
+                    raise ConfigEntryAuthFailed(f"API unauthorized for {sn}") from None
                     
                 elif not success or (code is not None and code != 0):
                     _LOGGER.warning("API error for %s: code=%s, exception=%s", sn, code, resp.get("exception"))
