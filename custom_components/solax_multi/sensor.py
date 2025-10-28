@@ -43,7 +43,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         if inverter_data and isinstance(inverter_data, dict):
             dc_channels = [inverter_data.get(f"powerdc{i}") for i in range(1, 5)]
             if any(channel is not None for channel in dc_channels):
-                human_name = SENSOR_NAMES.get("dc_total", "DC Power Total")
+                human_name = SYSTEM_SENSOR_NAMES["dc_total_inverter"]  
                 unique = f"{sn}_dc_total"
                 entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, unique))
 
