@@ -1,6 +1,6 @@
 {
   "domain": "solax_multi",
-  "name": "Solax API 2.0 Multi and Single Inverter",
+  "name": "Solax Cloud API 2.0 Multi and Single Inverter",
   "version": "0.1.0",
   "documentation": "https://github.com/NoUsername10/Solax-API-2.0-single-and-multiple-inverters-for-Home-assistant",
   "requirements": ["aiohttp>=3.8.0"],
@@ -9,5 +9,5 @@
   "config_flow": true,
   "iot_class": "cloud_polling",
   "translations": ["en"],
-  "icon": "images/icon.png"
+  "icon": "icon.png"
 }
