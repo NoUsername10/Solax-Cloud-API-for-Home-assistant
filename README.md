@@ -1,5 +1,3 @@
-Here's the updated README that accurately reflects your current implementation:
-
 # Solax Multi Inverter Integration for Home Assistant
 ![Solax Logo](https://raw.githubusercontent.com/NoUsername10/Solax-API-2.0-single-and-multiple-inverters-for-Home-assistant/main/custom_components/solax_multi/images/icon.png)
 
