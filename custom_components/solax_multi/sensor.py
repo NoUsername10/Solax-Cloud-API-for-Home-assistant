@@ -52,12 +52,12 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 unique = f"{sn}_dc_total"
                 entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, unique))
 
-    # System total sensors with Solax prefix and system name suffix
+    # System total sensors - use SYSTEM_SENSOR_NAMES mapping + system name
     if any(coordinator.data.get(sn) for sn in inverters):
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", f"Solax AC Power {system_name}"))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", f"Solax DC Power {system_name}"))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total", f"Solax Energy Today {system_name}"))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total", f"Solax Energy Total {system_name}"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", f"{system_name} {SYSTEM_SENSOR_NAMES['ac_total']}"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", f"{system_name} {SYSTEM_SENSOR_NAMES['dc_total']}"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total", f"{system_name} {SYSTEM_SENSOR_NAMES['yieldtoday_total']}"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total", f"{system_name} {SYSTEM_SENSOR_NAMES['yieldtotal_total']}"))
 
     async_add_entities(entities, update_before_add=True)
 
