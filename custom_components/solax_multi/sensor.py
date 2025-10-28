@@ -241,13 +241,27 @@ class SolaxSystemTotalSensor(CoordinatorEntity):
     @property
     def device_info(self):
         """Return device information for the system totals device."""
+        total_inverters = len(self._inverters)
+        active_inverters = self._count_active_inverters()
+        
         return {
             "identifiers": {(DOMAIN, "system_totals")},
-            "name": "Solax System Totals",
+            "name": f"Solax System ({active_inverters}/{total_inverters} Inverters)",
             "manufacturer": "Solax",
-            "model": "Multi-Inverter System",
-            "via_device": (DOMAIN, self._inverters[0]) if self._inverters else None,
+            "model": f"Multi-Inverter System ({active_inverters} active, {total_inverters} total)",
         }
+    
+    def _count_active_inverters(self):
+        """Count how many inverters are currently reporting data."""
+        active_count = 0
+        for sn in self._inverters:
+            inv_data = self.coordinator.data.get(sn)
+            if (inv_data and 
+                isinstance(inv_data, dict) and 
+                not inv_data.get("error") and
+                inv_data.get("acpower") is not None):
+                active_count += 1
+        return active_count
     
     @property
     def available(self):
