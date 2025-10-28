@@ -1,7 +1,7 @@
 # Solax Multi Inverter Integration for Home Assistant
 ![Solax Logo](https://raw.githubusercontent.com/NoUsername10/Solax-API-2.0-single-and-multiple-inverters-for-Home-assistant/main/custom_components/solax_multi/images/icon.png)
 
-! This code is created with AI (chatGPT and DeepSeek) !
+! This code is created in collaboration with AI (chatGPT and DeepSeek) !
 If you want to contribute, you are very welcome.
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
@@ -66,7 +66,7 @@ Before installation, you need:
 4. Enter your configuration:
    - **API Token**: Your Solax Cloud API token
    - **Inverter Serial Numbers**: Comma-separated list of Wi-Fi module SNs
-   - **Scan Interval**: Optional, polling frequency in seconds (default: 60)
+   - **Scan Interval**: Optional, polling frequency in seconds (default: 120)
 
 ## Important Notes
 
