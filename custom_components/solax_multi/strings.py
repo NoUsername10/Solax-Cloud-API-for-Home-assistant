@@ -46,7 +46,7 @@ SYSTEM_SENSOR_NAMES = {
     "dc_total": "System DC Power", 
     "dc_total_inverter": "DC Power Inverter Total", 
     "yieldtoday_total": "System Yield Today",
-    "yieldtotal_total": "System Yield Total Lifetime",
+    "yieldtotal_total": "System Yield Lifetime",
 }
 
 # Device class descriptions (optional)
