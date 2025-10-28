@@ -7,7 +7,7 @@ DEFAULT_SCAN_INTERVAL = 120
 API_URL = "https://global.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get"
 
 # Import string definitions
-from .strings import SENSOR_NAMES, SYSTEM_SENSOR_NAMES
+from .strings import SENSOR_NAMES, SYSTEM_SENSOR_NAMES, HIDDEN_SENSORS
 
 # All fields returned by result
 RESULT_FIELDS = [
