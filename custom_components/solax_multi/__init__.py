@@ -8,9 +8,10 @@ async def async_setup(hass: HomeAssistant, config: dict):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data.setdefault(DOMAIN, {})
-    token = entry.data.get("api_token")
+    #token = entry.data.get("api_token")
+    token = entry.data.get(CONF_TOKEN) 
     inverters = entry.data.get("inverters", [])
-    scan = entry.data.get("scan_interval", 60)
+    scan = entry.data.get("scan_interval", 120)
 
     coordinator = SolaxCoordinator(hass, token, inverters, scan)
     await coordinator.async_config_entry_first_refresh()
