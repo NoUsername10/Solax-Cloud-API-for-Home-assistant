@@ -1,4 +1,5 @@
 # Solax Multi Inverter Integration for Home Assistant
+![Solax Logo](https://raw.githubusercontent.com/NoUsername10/your-repo/main/custom_components/solax_multi/images/logo.png)
 
 ! This code is created with AI (chatGPT and DeepSeek) !
 If you want to contribute, you are very welcome.
