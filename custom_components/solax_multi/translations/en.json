@@ -7,14 +7,15 @@
     "step": {
       "user": {
         "title": "Setup Solax Multi Inverter",
-        "description": "Enter your Solax Cloud API token and preferred scan interval.",
+        "description": "Enter your Solax Cloud API token, system name, and preferred scan interval. Solax API only updates ever 5 min.",
         "data": {
           "api_token": "API Token",
+          "system_name": "System Name",
           "scan_interval": "Scan Interval (seconds)"
         }
       },
       "add_inverter": {
-        "title": "Add Inverters",
+        "title": "Add Inverters to {system_name}",
         "description": "Current inverters ({count}):\n{inverters_list}\n\nAdd inverter serial numbers one by one. Check 'Finish' when done.",
         "data": {
           "serial": "Inverter Serial Number",
@@ -27,7 +28,8 @@
     },
     "error": {
       "invalid_token": "Invalid API token",
-      "no_inverters": "At least one inverter serial number is required"
+      "no_inverters": "At least one inverter serial number is required",
+      "no_system_name": "System name is required"
     }
   },
   "options": {
