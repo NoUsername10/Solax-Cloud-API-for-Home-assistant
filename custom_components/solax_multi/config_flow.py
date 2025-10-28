@@ -7,7 +7,7 @@ from .const import DOMAIN, CONF_TOKEN, CONF_INVERTERS, CONF_SCAN_INTERVAL, DEFAU
 STEP_USER_DATA_SCHEMA = vol.Schema({
     vol.Required(CONF_TOKEN): str,
     vol.Required(CONF_INVERTERS, default=""): str,
-    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(vol.Coerce(int), vol.Range(min=65, max=3600)),
+    vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): vol.All(vol.Coerce(int), vol.Range(min=120, max=3600)),
 })
 
 class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
