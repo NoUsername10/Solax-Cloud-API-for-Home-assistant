@@ -6,6 +6,9 @@ CONF_SCAN_INTERVAL = "scan_interval"
 DEFAULT_SCAN_INTERVAL = 120
 API_URL = "https://global.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get"
 
+import logging
+LOGGER = logging.getLogger(__package__)
+
 # Import string definitions
 from .strings import SENSOR_NAMES, SYSTEM_SENSOR_NAMES, HIDDEN_SENSORS
 
