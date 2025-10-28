@@ -3,7 +3,9 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
-from .const import DOMAIN, CONF_TOKEN, CONF_INVERTERS, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL
+import aiohttp
+import async_timeout
+from .const import DOMAIN, CONF_TOKEN, CONF_INVERTERS, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, API_URL
 
 class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -15,6 +17,23 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         self._scan_interval = DEFAULT_SCAN_INTERVAL
         self._system_name = "Solax System"
 
+    async def _test_api_connection(self, token: str, serial: str = "TEST123") -> bool:
+        """Test if the API token is valid."""
+        try:
+            headers = {"Content-Type": "application/json", "tokenId": token}
+            payload = {"wifiSn": serial}
+            
+            async with async_timeout.timeout(10):
+                async with aiohttp.ClientSession() as session:
+                    async with session.post(API_URL, json=payload, headers=headers) as resp:
+                        if resp.status == 200:
+                            data = await resp.json()
+                            # Check if we get proper error response (not 1001 unauthorized)
+                            return data.get("code") != 1001
+                        return False
+        except Exception:
+            return False
+
     async def async_step_user(self, user_input: Any = None):
         errors = {}
         
@@ -23,20 +42,24 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 # Validate token first
                 token = user_input[CONF_TOKEN].strip()
                 if not token:
-                    raise ValueError("API token is required")
+                    raise ValueError("invalid_token")
+                
+                # Test API connection
+                if not await self._test_api_connection(token):
+                    raise ValueError("invalid_token")
                 
                 self._token = token
                 self._scan_interval = user_input.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
                 self._system_name = user_input.get("system_name", "Solax System").strip()
                 
                 if not self._system_name:
-                    raise ValueError("System name is required")
+                    raise ValueError("no_system_name")
                 
                 # Move to inverter entry step
                 return await self.async_step_add_inverter()
                 
             except ValueError as err:
-                errors["base"] = str(err)
+                errors["base"] = str(err.args[0]) if err.args else str(err)
 
         # Initial form - include system name
         data_schema = vol.Schema({
@@ -56,7 +79,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         
         if user_input is not None:
-            if "serial" in user_input:
+            if "serial" in user_input and user_input["serial"]:
                 # Adding a new inverter
                 serial = user_input["serial"].strip()
                 if serial and serial not in self._inverters:
@@ -64,7 +87,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 
             if "finish" in user_input and user_input["finish"]:
                 if not self._inverters:
-                    errors["base"] = "At least one inverter serial number is required"
+                    errors["base"] = "no_inverters"
                 else:
                     return self.async_create_entry(
                         title=self._system_name,
@@ -117,7 +140,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         errors = {}
         
         if user_input is not None:
-            if "serial" in user_input:
+            if "serial" in user_input and user_input["serial"]:
                 # Adding a new inverter
                 serial = user_input["serial"].strip()
                 if serial and serial not in self._inverters:
@@ -131,7 +154,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
             
             if "finish" in user_input and user_input["finish"]:
                 if not self._inverters:
-                    errors["base"] = "At least one inverter serial number is required"
+                    errors["base"] = "no_inverters"
                 else:
                     # Update the config entry
                     hass = self.hass
