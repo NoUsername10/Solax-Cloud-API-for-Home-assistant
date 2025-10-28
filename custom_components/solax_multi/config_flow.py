@@ -21,7 +21,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         """Test if the API token is valid."""
         try:
             headers = {"Content-Type": "application/json", "tokenId": token}
-            payload = {"wifiSn": serial}
+            payload = {"wifiSn": "TEST123"}
             
             async with async_timeout.timeout(10):
                 async with aiohttp.ClientSession() as session:
