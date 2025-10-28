@@ -4,8 +4,8 @@ import logging
 from datetime import timedelta
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 import aiohttp
 
 from .const import API_URL, DEFAULT_SCAN_INTERVAL
@@ -49,15 +49,34 @@ class SolaxCoordinator(DataUpdateCoordinator):
             _LOGGER.warning("Failed request for %s: %s", sn, e)
             return { "error": str(e) }
 
-    async def _async_update_data(self):  # ← THIS LINE NEEDS TO BE INDENTED INSIDE THE CLASS
+    async def _async_update_data(self):
         results = {}
-        timeout = aiohttp.ClientTimeout(total=20)
+        timeout = aiohttp.ClientTimeout(total=30)
+        
+        # Get current time for rate limit tracking
+        current_time = asyncio.get_event_loop().time()
+        
         async with aiohttp.ClientSession(timeout=timeout) as session:
-            tasks = [ self._fetch_one(session, sn) for sn in self.inverters ]
-            responses = await asyncio.gather(*tasks, return_exceptions=True)
-
-            for idx, resp in enumerate(responses):
-                sn = self.inverters[idx]
+            for idx, sn in enumerate(self.inverters):
+                # Add progressive delay based on position
+                if idx > 0:
+                    delay = min(2 + (idx * 1.0), 5)
+                    _LOGGER.debug("Waiting %.1f seconds before querying inverter %s", delay, sn)
+                    await asyncio.sleep(delay)
+                
+                # Check if this inverter was rate-limited - align with scan interval
+                last_rate_limit = getattr(self, f'_last_rate_limit_{sn}', 0)
+                skip_until = last_rate_limit + self.update_interval.total_seconds() * 0.8  # 80% of scan interval
+                
+                if current_time < skip_until:
+                    _LOGGER.debug("Skipping %s - recently rate limited (skip until: %.1fs)", 
+                                 sn, skip_until - current_time)
+                    results[sn] = {"error": "rate_limit_skip", "skip_until": skip_until}
+                    continue
+                
+                _LOGGER.debug("Fetching data for inverter %s (%d/%d)", sn, idx + 1, len(self.inverters))
+                resp = await self._fetch_one(session, sn)
+                
                 if isinstance(resp, Exception):
                     _LOGGER.warning("Fetch exception for %s: %s", sn, resp)
                     results[sn] = None
@@ -74,15 +93,27 @@ class SolaxCoordinator(DataUpdateCoordinator):
                 # Handle specific error codes
                 if code == 104:  # Rate limit exceeded
                     _LOGGER.warning(
-                        "API rate limit exceeded for %s. Consider increasing scan interval or reducing inverter count.",
-                        sn
+                        "API rate limit exceeded for %s. Will skip for %.1f seconds.",
+                        sn, self.update_interval.total_seconds() * 0.8
                     )
-                    results[sn] = { "error": "rate_limit", "code": code, "exception": resp.get("exception") }
+                    # Mark this inverter as rate-limited until next cycle
+                    setattr(self, f'_last_rate_limit_{sn}', current_time)
+                    results[sn] = { 
+                        "error": "rate_limit", 
+                        "code": code, 
+                        "exception": resp.get("exception"),
+                        "skip_until": current_time + self.update_interval.total_seconds() * 0.8
+                    }
+                    
+                    # Add extra delay before next inverter
+                    if idx < len(self.inverters) - 1:
+                        _LOGGER.debug("Adding 5 second delay after rate limit")
+                        await asyncio.sleep(5)
                     continue
                     
                 elif code == 1003:  # Data Unauthorized
                     _LOGGER.error("API unauthorized for %s. Check token and inverter serial.", sn)
-                    raise ConfigEntryAuthFailed(f"API unauthorized for {sn}") from None
+                    raise ConfigEntryAuthFailed(f"API unauthorized for {sn}")
                     
                 elif not success or (code is not None and code != 0):
                     _LOGGER.warning("API error for %s: code=%s, exception=%s", sn, code, resp.get("exception"))
@@ -94,9 +125,12 @@ class SolaxCoordinator(DataUpdateCoordinator):
                 if result_data:
                     cleaned_data = {k: v for k, v in result_data.items() if v is not None}
                     results[sn] = cleaned_data
+                    # Clear any previous rate limit flag on success
+                    if hasattr(self, f'_last_rate_limit_{sn}'):
+                        delattr(self, f'_last_rate_limit_{sn}')
                 else:
                     results[sn] = {}
-        
+                    
         successful_updates = len([r for r in results.values() if r and not r.get("error")])
         rate_limited = len([r for r in results.values() if r and r.get("error") == "rate_limit"])
         
