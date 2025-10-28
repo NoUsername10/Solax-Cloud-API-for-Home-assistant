@@ -33,7 +33,7 @@ SENSOR_NAMES = {
     
     # Identification sensors
     "inverterSN": "Inverter Serial",
-    "sn": "Inverter Wi-Fi Serial",
+    "sn": "Inverter Serial Wi-Fi Module",
     
     # Timestamp sensors
     "uploadTime": "Inverter Upload Time",
@@ -42,8 +42,8 @@ SENSOR_NAMES = {
 
 # System total sensor names
 SYSTEM_SENSOR_NAMES = {
-    "ac_total": "AC Power Total",
-    "dc_total": "DC Power Total", 
+    "ac_total": "System AC Power",
+    "dc_total": "System DC Power", 
     "dc_total_inverter": "DC Power Inverter Total", 
     "yieldtoday_total": "Yield Total System Today",
     "yieldtotal_total": "Yield Total System",
