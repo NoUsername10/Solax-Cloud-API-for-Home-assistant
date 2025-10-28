@@ -1,6 +1,8 @@
+from homeassistant.helpers.entity import
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
-from .const import DOMAIN, RESULT_FIELDS, FIELD_MAPPINGS, NUMERIC_FIELDS, MAPPED_FIELDS, SENSOR_NAMES, SYSTEM_SENSOR_NAMES
+from .const import DOMAIN, RESULT_FIELDS, FIELD_MAPPINGS, NUMERIC_FIELDS, MAPPED_FIELDS, SENSOR_NAMES, SYSTEM_SENSOR_NAMES, HIDDEN_SENSORS
+
 
 import logging
 _LOGGER = logging.getLogger(__name__)
@@ -65,6 +67,11 @@ class SolaxFieldSensor(CoordinatorEntity):
         self._attr_name = name
         self._attr_unique_id = unique_id
         self._unit = unit
+
+        # Set entity category for hidden sensors
+        if field in HIDDEN_SENSORS:
+            self._attr_entity_category = EntityCategory.DIAGNOSTIC
+
 
     @property
     def state(self):
