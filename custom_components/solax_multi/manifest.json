@@ -8,11 +8,15 @@
   "codeowners": ["@NoUsername10"],
   "config_flow": true,
   "iot_class": "cloud_polling"
-  "icons": [
     {
       "sizes": "512x512",
       "file": "images/icon.png",
       "purpose": "icon"
+    },
+    {
+      "sizes": "256x256", 
+      "file": "images/brand.png",
+      "purpose": "any"  # or "brand" depending on HA version
     }
   ]
 }
