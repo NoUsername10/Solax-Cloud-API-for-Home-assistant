@@ -72,7 +72,6 @@ class SolaxFieldSensor(CoordinatorEntity):
         if field in HIDDEN_SENSORS:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
-
     @property
     def state(self):
         inv = self.coordinator.data.get(self._serial)
@@ -96,24 +95,24 @@ class SolaxFieldSensor(CoordinatorEntity):
         return self._field in data and data.get(self._field) is not None
 
     @property
-     def device_info(self):
-            inv = self.coordinator.data.get(self._serial)
-            if not inv or not isinstance(inv, dict):
-                # Return basic device info even if data is unavailable
-                return {
-                    "identifiers": {(DOMAIN, self._serial)},
-                    "name": f"Solax Inverter {self._serial}",
-                    "manufacturer": "Solax",
-                    "model": "Unknown",
-                }
-    
-            inverter_sn = inv.get("inverterSN") or self._serial
+    def device_info(self):
+        inv = self.coordinator.data.get(self._serial)
+        if not inv or not isinstance(inv, dict):
+            # Return basic device info even if data is unavailable
             return {
-                "identifiers": {(DOMAIN, inverter_sn)},
-                "name": f"Solax Inverter {inverter_sn}",
+                "identifiers": {(DOMAIN, self._serial)},
+                "name": f"Solax Inverter {self._serial}",
                 "manufacturer": "Solax",
-                "model": self._get_mapped_value("inverterType") or "Unknown",
+                "model": "Unknown",
             }
+        
+        inverter_sn = inv.get("inverterSN") or self._serial
+        return {
+            "identifiers": {(DOMAIN, inverter_sn)},
+            "name": f"Solax Inverter {inverter_sn}",
+            "manufacturer": "Solax",
+            "model": self._get_mapped_value("inverterType") or "Unknown",
+        }
 
     def _get_mapped_value(self, field):
         """Helper to get mapped value for a field."""
