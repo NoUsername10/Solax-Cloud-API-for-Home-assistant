@@ -84,11 +84,11 @@ class SolaxFieldSensor(CoordinatorEntity):
         # Check for API errors
         if inv.get("error"):
             return "error"
+        
+        val = inv.get(self._field)
 
         if val is None:
             return "unavailable"
-        
-        val = inv.get(self._field)
         
         # Return human-readable value if mapping exists
         if self._field in FIELD_MAPPINGS and val is not None:
