@@ -79,7 +79,14 @@ class SolaxFieldSensor(CoordinatorEntity):
     def state(self):
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict):
-            return None
+            return "unavailable" 
+        
+        # Check for API errors
+        if inv.get("error"):
+            return "error"
+
+        if val is None:
+            return "unavailable"
         
         val = inv.get(self._field)
         
@@ -94,6 +101,9 @@ class SolaxFieldSensor(CoordinatorEntity):
     def available(self):
         data = self.coordinator.data.get(self._serial)
         if not data or not isinstance(data, dict):
+            return False
+        # Don't show sensors when there's an API error or rate limit
+        if data.get("error"):
             return False
         return self._field in data and data.get(self._field) is not None
 
