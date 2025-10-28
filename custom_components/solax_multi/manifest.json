@@ -16,7 +16,7 @@
     {
       "sizes": "256x256", 
       "file": "images/brand.png",
-      "purpose": "any"  # or "brand" depending on HA version
+      "purpose": "any"
     }
   ]
 }
