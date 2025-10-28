@@ -1,6 +1,6 @@
 {
   "name": "Solax Multi Inverter",
   "render_readme": true,
-  "icon": "icon.png",
-  "icon_filename": "icon.png"
+  "icon": "images/icon.png",
+  "icon_filename": "images/icon.png"
 }
