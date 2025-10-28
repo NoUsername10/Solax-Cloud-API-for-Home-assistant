@@ -1,6 +1,6 @@
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from .const import DOMAIN, PLATFORMS
+from .const import DOMAIN, PLATFORMS, CONF_TOKEN, CONF_INVERTERS, CONF_SCAN_INTERVAL
 from .coordinator import SolaxCoordinator
 
 async def async_setup(hass: HomeAssistant, config: dict):
