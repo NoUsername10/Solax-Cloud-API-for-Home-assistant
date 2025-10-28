@@ -9,5 +9,5 @@
   "config_flow": true,
   "iot_class": "cloud_polling",
   "translations": ["en"],
-  "icon": "icon.png"
+  "icon": "images/icon.png"
 }
