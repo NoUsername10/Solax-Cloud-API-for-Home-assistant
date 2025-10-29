@@ -102,11 +102,13 @@ class SolaxFieldSensor(CoordinatorEntity):
     def available(self):
         data = self.coordinator.data.get(self._serial)
         if not data or not isinstance(data, dict):
+            return True  # Keep sensor available
+    
+        # Only hide sensor for permanent issues, not temporary errors
+        if data.get("error") == "rate_limit_skip":
             return False
-        # Don't show sensors when there's an API error or rate limit
-        if data.get("error"):
-            return False
-        return self._field in data and data.get(self._field) is not None
+        
+        return True  # Always available for Statistics Card
 
     @property
     def device_info(self):
