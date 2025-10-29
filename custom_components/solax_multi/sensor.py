@@ -79,21 +79,22 @@ class SolaxFieldSensor(CoordinatorEntity):
     def state(self):
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict):
-            return "unavailable" 
+            return None # Change from "unavailable" to None
         
         # Check for API errors
         if inv.get("error"):
-            return "error"
+            return None # Change from "error" to None
         
         val = inv.get(self._field)
 
         if val is None:
-            return "unavailable"
+            return None # Change from "unavailable"
         
-        # Return human-readable value if mapping exists
+        # Return numeric value for statistics, human-readable goes to attributes
         if self._field in FIELD_MAPPINGS and val is not None:
-            mapping = FIELD_MAPPINGS[self._field]
-            return mapping.get(str(val), f"Unknown ({val})")
+            # Keep the numeric value for state (Statistics Card needs this)
+            # Human-readable version will be in attributes
+            return val  
         
         return val
 
