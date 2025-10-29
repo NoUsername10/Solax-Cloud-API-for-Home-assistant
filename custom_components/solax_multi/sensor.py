@@ -75,26 +75,53 @@ class SolaxFieldSensor(CoordinatorEntity):
         if field in HIDDEN_SENSORS:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
+        # Configure for statistics if it's a numeric field
+        if field in NUMERIC_FIELDS:
+            self._attr_state_class = self._get_state_class()
+            self._attr_device_class = self._get_device_class()
+            self._attr_suggested_display_precision = 0  # No decimals for power sensors
+
+    def _get_state_class(self):
+        """Get the proper state class for statistics."""
+        if self._unit == "kWh":
+            return SensorStateClass.TOTAL_INCREASING
+        elif self._unit in ["W", "%"]:
+            return SensorStateClass.MEASUREMENT
+        return None
+
+    def _get_device_class(self):
+        """Get the proper device class."""
+        if self._unit == "kWh":
+            return SensorDeviceClass.ENERGY
+        elif self._unit == "W":
+            return SensorDeviceClass.POWER
+        elif self._unit == "%":
+            return SensorDeviceClass.BATTERY
+        return None
+
     @property
     def state(self):
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict):
-            return None # Change from "unavailable" to None
+            return None
         
         # Check for API errors
         if inv.get("error"):
-            return None # Change from "error" to None
-        
-        val = inv.get(self._field)
+            return None
 
-        if val is None:
-            return None # Change from "unavailable"
+        val = inv.get(self._field)
         
-        # Return numeric value for statistics, human-readable goes to attributes
+        if val is None:
+            return None
+        
+        # For numeric fields, always return the numeric value
+        if self._field in NUMERIC_FIELDS:
+            return val
+        
+        # For status fields, return human-readable strings
         if self._field in FIELD_MAPPINGS and val is not None:
-            # Keep the numeric value for state (Statistics Card needs this)
-            # Human-readable version will be in attributes
-            return val  
+            mapping = FIELD_MAPPINGS[self._field]
+            return mapping.get(str(val), f"Unknown ({val})")
         
         return val
 
@@ -102,13 +129,12 @@ class SolaxFieldSensor(CoordinatorEntity):
     def available(self):
         data = self.coordinator.data.get(self._serial)
         if not data or not isinstance(data, dict):
-            return True  # Keep sensor available
-    
-        # Only hide sensor for permanent issues, not temporary errors
-        if data.get("error") == "rate_limit_skip":
-            return False
+            return True
         
-        return True  # Always available for Statistics Card
+        if data.get("error"):
+            return False
+            
+        return self._field in data and data.get(self._field) is not None
 
     @property
     def device_info(self):
