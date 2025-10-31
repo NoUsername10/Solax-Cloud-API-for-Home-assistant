@@ -9,5 +9,11 @@
   "config_flow": true,
   "iot_class": "cloud_polling",
   "translations": ["en"],
-  "icon": "icon.png"
+  "icons": [
+    {
+      "sizes": "256x256",
+      "file": "icon.png",
+      "purpose": "icon"
+    }
+  ]
 }
