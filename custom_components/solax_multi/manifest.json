@@ -1,5 +1,5 @@
 {
-  "domain": "solax_http",
+  "domain": "solax_custom",
   "name": "Solax Cloud API 2.0 Single and Multi Inverter, including Micro Inverters.",
   "version": "0.1.2",
   "documentation": "https://github.com/NoUsername10/Solax-API-2.0-single-and-multiple-inverters-for-Home-assistant",
