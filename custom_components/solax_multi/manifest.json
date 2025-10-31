@@ -9,11 +9,5 @@
   "config_flow": true,
   "iot_class": "cloud_polling",
   "translations": ["en"],
-  "icons": [
-    {
-      "sizes": "256x256",
-      "file": "icon.png",
-      "purpose": "icon"
-    }
-  ]
+  "icon": "mdi:solar-power"
 }
