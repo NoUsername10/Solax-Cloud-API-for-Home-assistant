@@ -6,7 +6,7 @@
   "config": {
     "step": {
       "user": {
-        "title": "Setup Solax Multi Inverter",
+        "title": "Setup SolaXCloud API Connection",
         "description": "Enter your Solax Cloud API token, system name, and preferred scan interval. Solax API only updates ever 5 min.",
         "data": {
           "api_token": "API Token",
