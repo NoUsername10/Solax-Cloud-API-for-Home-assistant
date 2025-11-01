@@ -1,4 +1,4 @@
-DOMAIN = "solax_multi"
+DOMAIN = "solax_cloud_api"
 PLATFORMS = ["sensor"]
 CONF_TOKEN = "api_token"
 CONF_INVERTERS = "inverters"
