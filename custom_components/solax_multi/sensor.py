@@ -16,6 +16,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     coordinator = data["coordinator"]
     inverters = entry.data.get("inverters", [])
     system_name = entry.data.get("system_name", "Solax System")
+    system_slug = system_name.lower().replace(" ", "_").replace("-", "_")
 
     await coordinator.async_config_entry_first_refresh()
     
@@ -34,8 +35,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         for field in available_fields:
             # Use human-readable name without serial number (keep original names for inverter sensors)
-            human_name = SENSOR_NAMES.get(field, f"Solax {field}")
-            unique = f"{sn}_{field}".lower().replace(" ", "_")
+            unique = f"{system_slug}_{field}_{sn}".lower().replace(" ", "_")
             
             if field in NUMERIC_FIELDS:
                 unit, kind = NUMERIC_FIELDS[field]
@@ -49,7 +49,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
             if any(channel is not None for channel in dc_channels):
                 # KEEP ORIGINAL NAME for per-inverter DC total (no system name)
                 human_name = SYSTEM_SENSOR_NAMES["dc_total_inverter"]  
-                unique = f"{sn}_dc_total"
+                unique = f"{system_slug}_dc_total_{sn}".lower().replace(" ", "_")
                 entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, unique))
 
     # System total sensors - use SYSTEM_SENSOR_NAMES mapping + system name
@@ -168,26 +168,6 @@ class SolaxFieldSensor(CoordinatorEntity):
         return val
 
     @property
-    def state_class(self):
-        if self._unit == "kWh":
-            return SensorStateClass.TOTAL_INCREASING
-        elif self._unit == "W":
-            return SensorStateClass.MEASUREMENT
-        elif self._unit == "%":
-            return SensorStateClass.MEASUREMENT
-        return None
-
-    @property
-    def device_class(self):
-        if self._unit == "kWh":
-            return SensorDeviceClass.ENERGY
-        elif self._unit == "W":
-            return SensorDeviceClass.POWER
-        elif self._unit == "%":
-            return SensorDeviceClass.BATTERY
-        return None
-
-    @property
     def extra_state_attributes(self):
         attrs = {}
         inv = self.coordinator.data.get(self._serial)
@@ -220,6 +200,8 @@ class SolaxComputedSensor(CoordinatorEntity):
         self._metric = metric
         self._name = name
         self._unique_id = unique_id
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_device_class = SensorDeviceClass.POWER
 
     @property
     def name(self):
@@ -258,14 +240,6 @@ class SolaxComputedSensor(CoordinatorEntity):
         return total
 
     @property
-    def state_class(self):
-        return SensorStateClass.MEASUREMENT
-
-    @property
-    def device_class(self):
-        return SensorDeviceClass.POWER
-
-    @property
     def unit_of_measurement(self):
         return "W"
 
@@ -292,7 +266,7 @@ class SolaxSystemTotalSensor(CoordinatorEntity):
         # Get system name from config and create slug for unique ID
         system_name = self.coordinator.config_entry.data.get("system_name", "solax_system")
         system_slug = system_name.lower().replace(" ", "_").replace("-", "_")
-        return f"solax_{metric_map[self._metric]}_{system_slug}"
+        return f"{system_slug}_{metric_map[self._metric]}_solax"
 
     @property
     def device_info(self):
