@@ -35,6 +35,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         for field in available_fields:
             # Use human-readable name without serial number (keep original names for inverter sensors)
+            human_name = SENSOR_NAMES.get(field, f"Solax {field}")
             unique = f"{system_slug}_{field}_{sn}".lower().replace(" ", "_")
             
             if field in NUMERIC_FIELDS:
