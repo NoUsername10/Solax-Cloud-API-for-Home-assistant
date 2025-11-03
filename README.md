@@ -6,6 +6,8 @@
 If you want to contribute, you are very welcome.
 
 I dont pretend to be a programmer, but with AI i got it all working.
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-orange.svg)](https://www.buymeacoffee.com/DefaultLogin)  
+
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
