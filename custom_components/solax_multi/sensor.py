@@ -417,10 +417,8 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
                 elif self._metric == "yieldtotal_total" and inv.get("yieldtotal") is not None:
                     return True
                 elif self._metric == "systemEfficiency":
-                    # Available if at least one inverter has AC and DC data
-                    ac = inv.get("acpower")
-                    dc = sum(inv.get(f"powerdc{i}", 0) for i in range(1, 5))
-                    if ac is not None and dc > 0:
+                    # Available if at least one inverter has AC and DC fields (even if 0)
+                    if "acpower" in inv and any(f"powerdc{i}" in inv for i in range(1, 5)):
                         return True
         return False
 
