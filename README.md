@@ -2,7 +2,9 @@
 ![Solax Logo](https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/custom_components/solax_multi/images/icon.png)
 
 ! This is vibe coded in collaboration with DeepSeek & ChatGPT !
+
 If you want to contribute, you are very welcome.
+
 I dont pretend to be a programmer, but with AI i got it all working.
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
