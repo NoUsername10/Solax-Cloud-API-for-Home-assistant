@@ -5,12 +5,9 @@
 
 If you want to contribute, you are very welcome.
 
-I dont pretend to be a programmer, but with AI i got it all working.
+I dont pretend to be a programmer, but with AI i got it all working after some days..
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-orange.svg)](https://www.buymeacoffee.com/DefaultLogin)  
-
-[![Buy Me a Coffee](https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHBxZHd3YzV4MGlpb3VsMGcxcXMzdmljb3FjaWF4MDFsemxyM2lmNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/7kZE0z52Sd9zSESzDA/giphy.gif)](https://www.buymeacoffee.com/DefaultLogin)  
-
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
