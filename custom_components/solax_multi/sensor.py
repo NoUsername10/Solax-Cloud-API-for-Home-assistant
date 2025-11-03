@@ -15,45 +15,42 @@ async def async_setup_entry(hass, entry, async_add_entities):
     data = hass.data[DOMAIN][entry.entry_id]
     coordinator = data["coordinator"]
     inverters = entry.data.get("inverters", [])
-    system_name = entry.data.get("system_name", "Solax System")
+    system_name = entry.data.get("system_name")
+    if not system_name:
+        raise ValueError("System name must be provided in integration setup")
     system_slug = system_name.lower().replace(" ", "_").replace("-", "_")
 
     await coordinator.async_config_entry_first_refresh()
-    
     entities = []
 
     for sn in inverters:
         inverter_data = coordinator.data.get(sn)
-        
+
         if not inverter_data or not isinstance(inverter_data, dict):
             available_fields = RESULT_FIELDS
         else:
             available_fields = [
-                field for field in RESULT_FIELDS 
+                field for field in RESULT_FIELDS
                 if field in inverter_data and inverter_data.get(field) is not None
             ]
 
+        # Sensors per inverter
         for field in available_fields:
-            # Use human-readable name without serial number (keep original names for inverter sensors)
             human_name = SENSOR_NAMES.get(field, f"Solax {field}")
             unique = f"{system_slug}_{field}_{sn}".lower().replace(" ", "_")
-            
-            if field in NUMERIC_FIELDS:
-                unit, kind = NUMERIC_FIELDS[field]
-                entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, unique, unit))
-            else:
-                entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, unique, None))
+            unit = NUMERIC_FIELDS[field][0] if field in NUMERIC_FIELDS else None
 
-        # Only create DC total sensor if at least one DC channel has data
+            entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, unique, unit, system_slug))
+
+        # DC total per inverter
         if inverter_data and isinstance(inverter_data, dict):
             dc_channels = [inverter_data.get(f"powerdc{i}") for i in range(1, 5)]
             if any(channel is not None for channel in dc_channels):
-                # KEEP ORIGINAL NAME for per-inverter DC total (no system name)
-                human_name = SYSTEM_SENSOR_NAMES["dc_total_inverter"]  
+                human_name = SYSTEM_SENSOR_NAMES["dc_total_inverter"]
                 unique = f"{system_slug}_dc_total_{sn}".lower().replace(" ", "_")
-                entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, unique))
-
-    # System total sensors - use SYSTEM_SENSOR_NAMES mapping + system name
+                entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, unique, system_slug))
+                
+    # System totals (only once)
     if any(coordinator.data.get(sn) for sn in inverters):
         entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", f"{system_name} {SYSTEM_SENSOR_NAMES['ac_total']}"))
         entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", f"{system_name} {SYSTEM_SENSOR_NAMES['dc_total']}"))
@@ -64,23 +61,33 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
 
 class SolaxFieldSensor(CoordinatorEntity):
-    def __init__(self, coordinator, serial, field, name, unique_id, unit=None):
+    def __init__(self, coordinator, serial, field, human_name, unique_id, unit=None, system_slug=None):
         super().__init__(coordinator)
         self._serial = serial
         self._field = field
-        self._attr_name = name
-        self._attr_unique_id = unique_id
         self._unit = unit
+        self._attr_unique_id = unique_id
+        self._attr_has_entity_name = False
+        self._attr_entity_registry_enabled_default = True
 
-        # Set entity category for hidden sensors
+        if not system_slug:
+            raise ValueError("System slug must be provided for SolaxFieldSensor")
+
+        # Friendly name only (same for all inverters)
+        self._attr_name = human_name
+
+        # Entity ID includes system prefix + field + serial
+        suggested_id = f"{system_slug}_{field}_{serial}".lower()
+        self._attr_suggested_object_id = suggested_id
+        self.entity_id = f"sensor.{suggested_id}"  # hard-set ID
+
         if field in HIDDEN_SENSORS:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
-        # Configure for statistics if it's a numeric field
         if field in NUMERIC_FIELDS:
             self._attr_state_class = self._get_state_class()
             self._attr_device_class = self._get_device_class()
-            self._attr_suggested_display_precision = 0  # No decimals for power sensors
+            self._attr_suggested_display_precision = 0
 
     def _get_state_class(self):
         """Get the proper state class for statistics."""
@@ -195,7 +202,7 @@ class SolaxFieldSensor(CoordinatorEntity):
 
 
 class SolaxComputedSensor(CoordinatorEntity):
-    def __init__(self, coordinator, serial, metric, name, unique_id):
+    def __init__(self, coordinator, serial, metric, name, unique_id, system_slug=None):
         super().__init__(coordinator)
         self._serial = serial
         self._metric = metric
@@ -203,6 +210,12 @@ class SolaxComputedSensor(CoordinatorEntity):
         self._unique_id = unique_id
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_device_class = SensorDeviceClass.POWER
+
+        if not system_slug:
+            raise ValueError("System slug must be provided for SolaxComputedSensor")
+
+        # Hard-set entity ID for computed sensor
+        self.entity_id = f"sensor.{system_slug}_{metric}_{serial}".lower()
 
     @property
     def name(self):
