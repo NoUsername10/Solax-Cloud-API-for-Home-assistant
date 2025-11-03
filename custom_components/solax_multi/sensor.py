@@ -1,6 +1,6 @@
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
+from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass, SensorEntity
 from .const import DOMAIN, RESULT_FIELDS, FIELD_MAPPINGS, NUMERIC_FIELDS, MAPPED_FIELDS, SENSOR_NAMES, SYSTEM_SENSOR_NAMES, HIDDEN_SENSORS
 
 
@@ -60,7 +60,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     async_add_entities(entities, update_before_add=True)
 
 
-class SolaxFieldSensor(CoordinatorEntity):
+class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, serial, field, human_name, unique_id, unit=None, system_slug=None):
         super().__init__(coordinator)
         self._serial = serial
@@ -84,10 +84,24 @@ class SolaxFieldSensor(CoordinatorEntity):
         if field in HIDDEN_SENSORS:
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
+
         if field in NUMERIC_FIELDS:
-            self._attr_state_class = self._get_state_class()
-            self._attr_device_class = self._get_device_class()
-            self._attr_suggested_display_precision = 0
+            unit, field_type = NUMERIC_FIELDS[field]
+            self._unit = unit
+
+            if field_type == "energy":  # kWh
+                self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+                self._attr_device_class = SensorDeviceClass.ENERGY
+                self._attr_suggested_display_precision = 1
+            elif field_type == "power":  # W
+                self._attr_state_class = SensorStateClass.MEASUREMENT
+                self._attr_device_class = SensorDeviceClass.POWER
+                self._attr_suggested_display_precision = 0
+            elif field_type == "battery":  # %
+                self._attr_state_class = SensorStateClass.MEASUREMENT
+                self._attr_device_class = SensorDeviceClass.BATTERY
+                self._attr_suggested_display_precision = 1
+
 
     def _get_state_class(self):
         """Get the proper state class for statistics."""
@@ -111,7 +125,7 @@ class SolaxFieldSensor(CoordinatorEntity):
     def state(self):
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict):
-            return None
+            return 0 if self._field in NUMERIC_FIELDS else None
         
         # Check for API errors
         if inv.get("error"):
@@ -134,15 +148,42 @@ class SolaxFieldSensor(CoordinatorEntity):
         return val
 
     @property
+    def device_class(self):
+        if self._field in NUMERIC_FIELDS:
+            field_type = NUMERIC_FIELDS[self._field][1]
+            if field_type == "energy":
+                return SensorDeviceClass.ENERGY
+            elif field_type == "power":
+                return SensorDeviceClass.POWER
+            elif field_type == "battery":
+                return SensorDeviceClass.BATTERY
+        return None
+
+    @property
+    def state_class(self):
+        if self._field in NUMERIC_FIELDS:
+            field_type = NUMERIC_FIELDS[self._field][1]
+            if field_type == "energy":
+                return SensorStateClass.TOTAL_INCREASING
+            else:
+                return SensorStateClass.MEASUREMENT
+        return None
+
+    @property
     def available(self):
+        """Return True only if numeric value exists (needed for Energy)."""
         data = self.coordinator.data.get(self._serial)
         if not data or not isinstance(data, dict):
-            return True
-        
+            return False  # was True
+    
         if data.get("error"):
             return False
-            
-        return self._field in data and data.get(self._field) is not None
+        
+        # Return True only for numeric fields with actual value
+        if self._field in NUMERIC_FIELDS:
+            return data.get(self._field) is not None
+
+        return True
 
     @property
     def device_info(self):
@@ -201,7 +242,7 @@ class SolaxFieldSensor(CoordinatorEntity):
         return self._unit
 
 
-class SolaxComputedSensor(CoordinatorEntity):
+class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, serial, metric, name, unique_id, system_slug=None):
         super().__init__(coordinator)
         self._serial = serial
@@ -258,7 +299,7 @@ class SolaxComputedSensor(CoordinatorEntity):
         return "W"
 
 
-class SolaxSystemTotalSensor(CoordinatorEntity):
+class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, inverters, metric, name):
         super().__init__(coordinator)
         self._inverters = inverters
