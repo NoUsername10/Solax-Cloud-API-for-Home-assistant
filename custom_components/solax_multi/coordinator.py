@@ -60,7 +60,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
             for idx, sn in enumerate(self.inverters):
                 # Add progressive delay based on position
                 if idx > 0:
-                    delay = min(2 + (idx * 0.5), 5)
+                    delay = min(1 + (idx * 0.5), 5)
                     _LOGGER.debug("Waiting %.1f seconds before querying inverter %s", delay, sn)
                     await asyncio.sleep(delay)
                 
@@ -69,8 +69,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
                 skip_until = last_rate_limit + self.update_interval.total_seconds() * 0.55  # 55% of scan interval
                 
                 if current_time < skip_until:
-                    _LOGGER.debug("Skipping %s - recently rate limited (skip until: %.1fs)", 
-                                 sn, skip_until - current_time)
+                    _LOGGER.debug("Skipping %s - recently rate limited (skip until: %.1fs)", sn, skip_until - current_time)
                     results[sn] = {"error": "rate_limit_skip", "skip_until": skip_until}
                     continue
                 
