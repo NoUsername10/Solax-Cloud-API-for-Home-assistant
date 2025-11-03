@@ -2,7 +2,7 @@
   "state": {
     "default": "SolaXCloud API 2.0 Single and Multi Inverter"
   },
-  "title": "Solax Multi Inverter",
+  "title": "Solax Cloud API SolaXCloud Config.",
   "config": {
     "step": {
       "user": {
