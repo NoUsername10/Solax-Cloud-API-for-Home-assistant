@@ -22,6 +22,7 @@ SENSOR_NAMES = {
     "inverterStatus": "Inverter Status",
     "batStatus": "Battery Status",
     "inverterType": "Inverter Type",
+    "inverterEfficiency": "Inverter Efficiency",
     
     # Battery sensors
     "soc": "Battery State of Charge",
@@ -43,7 +44,8 @@ SENSOR_NAMES = {
 # System total sensor names
 SYSTEM_SENSOR_NAMES = {
     "ac_total": "System AC Power",
-    "dc_total": "System DC Power", 
+    "dc_total": "System DC Power",
+    "systemEfficiency": "System Total Efficiency", 
     "dc_total_inverter": "DC Power Inverter Total", 
     "yieldtoday_total": "System Yield Today",
     "yieldtotal_total": "System Yield Lifetime",
