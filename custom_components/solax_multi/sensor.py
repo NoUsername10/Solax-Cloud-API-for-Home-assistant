@@ -41,6 +41,9 @@ async def async_setup_entry(hass, entry, async_add_entities):
             unit = NUMERIC_FIELDS[field][0] if field in NUMERIC_FIELDS else None
 
             entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, unique, unit, system_slug))
+        
+        # Add inverter efficiency sensor
+        entities.append(SolaxInverterEfficiencySensor(coordinator, sn, SENSOR_NAMES["inverterEfficiency"], f"{system_slug}_inverter_efficiency_{sn}", system_slug))
 
         # DC total per inverter
         if inverter_data and isinstance(inverter_data, dict):
@@ -56,6 +59,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", f"{system_name} {SYSTEM_SENSOR_NAMES['dc_total']}"))
         entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total", f"{system_name} {SYSTEM_SENSOR_NAMES['yieldtoday_total']}"))
         entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total", f"{system_name} {SYSTEM_SENSOR_NAMES['yieldtotal_total']}"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "systemEfficiency", f"{system_name} {SYSTEM_SENSOR_NAMES['systemEfficiency']}"))
 
     async_add_entities(entities, update_before_add=True)
 
@@ -242,6 +246,53 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         return self._unit
 
 
+class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
+    """Inverter efficiency: AC power / total DC power * 100"""
+
+    def __init__(self, coordinator, serial, human_name, unique_id, system_slug=None):
+        super().__init__(coordinator)
+        self._serial = serial
+        self._attr_name = human_name
+        self._attr_unique_id = unique_id
+        self._attr_device_class = None # SensorDeviceClass.POWER  # or leave generic
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_suggested_display_precision = 1
+        #self.entity_id = f"sensor.{system_slug}_inverter_efficiency_{serial}".lower()
+        if system_slug:
+            self._attr_suggested_object_id = f"{system_slug}_inverter_efficiency_{serial}".lower()
+
+    @property
+    def state(self):
+        inv = self.coordinator.data.get(self._serial)
+        if not inv or not isinstance(inv, dict):
+            return 0
+        dc_total = sum(inv.get(f"powerdc{i}", 0) for i in range(1, 5))
+        ac = inv.get("acpower") or 0
+        if dc_total > 0:
+            return round((ac / dc_total) * 100, 1)
+        return 0
+
+    @property
+    def unit_of_measurement(self):
+        return "%"
+
+    @property
+    def available(self):
+        inv = self.coordinator.data.get(self._serial)
+        if not inv or not isinstance(inv, dict):
+            return False
+        return any(inv.get(f"powerdc{i}") is not None for i in range(1, 5))
+    @property
+    def device_info(self):
+        inv = self.coordinator.data.get(self._serial)
+        inverter_sn = (inv.get("inverterSN") if isinstance(inv, dict) else self._serial) or self._serial
+        return {
+            "identifiers": {(DOMAIN, inverter_sn)},
+            "name": f"Solax Inverter {inverter_sn}",
+            "manufacturer": "Solax",
+            "model": inv.get("inverterType", "Unknown") if isinstance(inv, dict) else "Unknown",
+        }
+
 class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, serial, metric, name, unique_id, system_slug=None):
         super().__init__(coordinator)
@@ -316,8 +367,10 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
             "ac_total": "ac_power",
             "dc_total": "dc_power", 
             "yieldtoday_total": "energy_today",
-            "yieldtotal_total": "energy_total"
+            "yieldtotal_total": "energy_total",
+            "systemEfficiency": "system_efficiency"
         }
+        
         # Get system name from config and create slug for unique ID
         system_name = self.coordinator.config_entry.data.get("system_name", "solax_system")
         system_slug = system_name.lower().replace(" ", "_").replace("-", "_")
@@ -363,10 +416,31 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
                     return True
                 elif self._metric == "yieldtotal_total" and inv.get("yieldtotal") is not None:
                     return True
+                elif self._metric == "systemEfficiency":
+                    # Available if at least one inverter has AC and DC data
+                    ac = inv.get("acpower")
+                    dc = sum(inv.get(f"powerdc{i}", 0) for i in range(1, 5))
+                    if ac is not None and dc > 0:
+                        return True
         return False
 
     @property
     def state(self):
+        # Case for system efficiency
+        if self._metric == "systemEfficiency":
+            total_ac = 0
+            total_dc = 0
+            for sn in self._inverters:
+                inv = self.coordinator.data.get(sn)
+                if not inv or not isinstance(inv, dict):
+                    continue
+                ac = inv.get("acpower") or 0
+                dc = sum(inv.get(f"powerdc{i}", 0) for i in range(1, 5))
+                total_ac += ac
+                total_dc += dc
+            if total_dc > 0:
+                return round((total_ac / total_dc) * 100, 1)
+            return 0
         total = 0
         for sn in self._inverters:
             inv = self.coordinator.data.get(sn)
@@ -403,10 +477,14 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
     def device_class(self):
         if self._metric in ("yieldtoday_total", "yieldtotal_total"):
             return SensorDeviceClass.ENERGY
+        if self._metric == "systemEfficiency":
+            return None  # System Efficiency
         return SensorDeviceClass.POWER
 
     @property
     def unit_of_measurement(self):
+        if self._metric == "systemEfficiency":
+            return "%"
         if self._metric in ("ac_total", "dc_total"):
             return "W"
         return "kWh"
