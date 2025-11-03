@@ -1,4 +1,4 @@
-# String definitions for Solax Multi Inverter integration.
+# String definitions
 
 # Human-readable sensor names
 SENSOR_NAMES = {
