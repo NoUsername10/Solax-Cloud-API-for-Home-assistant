@@ -1,8 +1,9 @@
 # Solax Cloud API 2.0 Single and Multi Inverter Integration for Home Assistant
 ![Solax Logo](https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/custom_components/solax_multi/images/icon.png)
 
-! This code is created in collaboration with DeepSeek !
+! This is vibe coded in collaboration with DeepSeek & ChatGPT !
 If you want to contribute, you are very welcome.
+I dont pretend to be a programmer, but with AI i got it all working.
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
@@ -29,6 +30,7 @@ https://www.solaxcloud.com/user_api/SolaxCloud_Monitoring_API_V7.1.pdf
   - System DC Power Total
   - System Yield Today Total
   - System Yield Lifetime Total
+  - System Efficiency (Inverter DC to AC conversion %)
 - **🎯 Status Mapping** - Human-readable inverter and battery status with raw values in attributes
 - **⚙️ Configurable Polling** - Adjustable update interval (default: 120 seconds)
 - **🛡️ Rate Limit Protection** - Automatic backoff and retry logic for API limits
