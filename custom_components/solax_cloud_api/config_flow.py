@@ -1,11 +1,14 @@
 from typing import Any
 import voluptuous as vol
+import logging
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 import aiohttp
 import async_timeout
 from .const import DOMAIN, CONF_TOKEN, CONF_INVERTERS, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, API_URL
+
+_LOGGER = logging.getLogger(__name__)
 
 class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -38,28 +41,25 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
         
         if user_input is not None:
-            try:
-                # Validate token first
-                token = user_input[CONF_TOKEN].strip()
-                if not token:
-                    raise ValueError("invalid_token")
-                
-                # Test API connection
+            # Validate token first
+            token = user_input[CONF_TOKEN].strip()
+            if not token:
+                errors["base"] = "invalid_token"
+            
+            # Only test API if token is provided
+            if token and not errors:
                 if not await self._test_api_connection(token):
-                    raise ValueError("invalid_token")
-                
+                    errors["base"] = "invalid_token"
+            
+            self._system_name = user_input.get("system_name", "Solax System").strip()
+            if not self._system_name:
+                errors["base"] = "no_system_name"
+            
+            # Only proceed to next step if no errors
+            if not errors:
                 self._token = token
                 self._scan_interval = user_input.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
-                self._system_name = user_input.get("system_name", "Solax System").strip()
-                
-                if not self._system_name:
-                    raise ValueError("no_system_name")
-                
-                # Move to inverter entry step
                 return await self.async_step_add_inverter()
-                
-            except ValueError as err:
-                errors["base"] = str(err.args[0]) if err.args else str(err)
 
         # Initial form - include system name
         data_schema = vol.Schema({
@@ -118,6 +118,37 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             }
         )
 
+    async def async_step_import(self, import_config: dict) -> FlowResult:
+        """Handle configuration import from YAML."""
+        # Add this method for YAML import support
+        _LOGGER.debug("Importing Solax configuration from YAML: %s", import_config)
+        
+        # Validate imported config
+        token = import_config.get(CONF_TOKEN)
+        if not token:
+            return self.async_abort(reason="invalid_token")
+        
+        inverters = import_config.get(CONF_INVERTERS, [])
+        if not inverters:
+            return self.async_abort(reason="no_inverters")
+        
+        # Set the configuration
+        self._token = token
+        self._inverters = inverters
+        self._scan_interval = import_config.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
+        self._system_name = import_config.get("system_name", "Solax System")
+        
+        # Create the entry
+        return self.async_create_entry(
+            title=self._system_name,
+            data={
+                CONF_TOKEN: self._token,
+                CONF_INVERTERS: self._inverters,
+                CONF_SCAN_INTERVAL: self._scan_interval,
+                "system_name": self._system_name,
+            }
+        )
+
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
@@ -126,7 +157,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
 class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry):
-        self._config_entry = config_entry 
+        self._config_entry = config_entry
         self._inverters = list(config_entry.data.get(CONF_INVERTERS, []))
         self._token = config_entry.data.get(CONF_TOKEN)
         self._scan_interval = config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
@@ -141,11 +172,13 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         
         if user_input is not None:
             if "serial" in user_input and user_input["serial"]:
+                # Adding a new inverter
                 serial = user_input["serial"].strip()
                 if serial and serial not in self._inverters:
                     self._inverters.append(serial)
             
             if "remove_serial" in user_input and user_input["remove_serial"]:
+                # Remove selected inverter
                 remove_sn = user_input["remove_serial"]
                 if remove_sn in self._inverters:
                     self._inverters.remove(remove_sn)
@@ -154,23 +187,29 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                 if not self._inverters:
                     errors["base"] = "no_inverters"
                 else:
+                    # Update the config entry
                     hass = self.hass
                     entry_id = self._config_entry.entry_id
                     
-                    updated_data = dict(self._config_entry.data)
+                    # Create updated data
+                    updated_data = dict(self.config_entry.data)
                     updated_data[CONF_INVERTERS] = self._inverters
                     updated_data[CONF_SCAN_INTERVAL] = self._scan_interval
                     updated_data["system_name"] = self._system_name
                     
                     hass.config_entries.async_update_entry(
-                        self._config_entry,
+                        self.config_entry,
                         data=updated_data
                     )
                     
+                    # Reload the entry to apply changes
                     await hass.config_entries.async_reload(entry_id)
+                    
                     return self.async_create_entry(title="", data={})
 
+        # Create options for remove dropdown
         remove_options = {sn: sn for sn in self._inverters} if self._inverters else {"": "No inverters to remove"}
+        
         inverters_list = "\n".join([f"• {sn}" for sn in self._inverters]) if self._inverters else "No inverters configured"
         
         data_schema = vol.Schema({
