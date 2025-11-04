@@ -5,7 +5,7 @@ Home Assistant custom integration to monitor multiple Solax inverters using the 
 This integration supports both single and multiple inverter setups with real-time data and system-wide totals and efficiency data for each inverter and the system.
 
 This is vibe coded in collaboration with DeepSeek & ChatGPT <br>
-I dont pretend to be a real programmer, but with AI i got it all working after some long days... <br>
+I dont pretend to be a "real" programmer, but with AI i got it all working after some long days... <br>
 If you want to contribute to me or the code, you are very welcome.<br>
 
 
@@ -69,8 +69,8 @@ https://www.solaxcloud.com/user_api/SolaxCloud_Monitoring_API_V7.1.pdf
 
 Before installation, you need:
 1. **Solax Cloud Account** - Register at [solaxcloud.com](https://www.solaxcloud.com)
-2. **API Token** - Obtain from Solax Cloud under **Service → API**
-3. **Inverter Serial Numbers** - Wi-Fi module serial numbers
+2. **API Token** - Obtain from Solax Cloud under **Service → Third-party Ecosystem**
+3. **Inverter Serial Numbers** - Wi-Fi module serial (or SN for microinverters) under **Devices**
 
 ## Installation
 
@@ -83,13 +83,13 @@ Before installation, you need:
    `https://github.com/NoUsername10/Solax-API-2.0-single-and-multiple-inverters-for-Home-assistant`
 5. Select **Integration** as the category
 6. Click **Add**
-7. Search for "Solax Multi Inverter" and install
+7. Search for "Solax Cloud APi 2.0" and install
 8. Restart Home Assistant
 
 ### Method 2: Manual Installation
 
 1. Download the latest release
-2. Copy the `custom_components/solax_multi` folder to your Home Assistant `custom_components` directory
+2. Copy the `custom_components/solax_cloud_api` folder to your Home Assistant `custom_components` directory
 3. Restart Home Assistant
 
 ## Configuration
@@ -97,10 +97,10 @@ Before installation, you need:
 ### Initial Setup
 1. Go to **Settings** → **Devices & Services**
 2. Click **+ Add Integration**
-3. Search for **"Solax Multi Inverter"**
+3. Search for **"Solax Cloud API 2.0"**
 4. Enter your configuration:
    - **API Token**: Your Solax Cloud API token
-   - **System Name**: Name for your solar system (used for system total sensors)
+   - **System Name**: Name for your solar system (used for system total sensors and prefix of all entity ID´s)
    - **Scan Interval**: Polling frequency in seconds (default: 120, minimum: 120)
 
 ### Adding Inverters
@@ -110,7 +110,7 @@ Before installation, you need:
 
 ### Managing Inverters
 To add or remove inverters later:
-1. Go to your Solax Multi Inverter integration
+1. Go to your Solax Cloud API integration
 2. Click **Configure**
 3. Add new serial numbers or remove existing ones
 4. Click **Save Changes**
@@ -138,10 +138,10 @@ If you have an inverter type that you want to add to the mapping, please make a 
 ## Sensor Information
 
 ### Per-Inverter Sensors
-Each inverter gets its own set of sensors with names like:
-- `Solax AC Output Power [Serial]`
-- `Solax Battery State of Charge [Serial]`
-- `Solax DC Power Inverter Total [Serial]`
+Each inverter gets its own set of sensors with entity ID names like:
+- `[System Name] AC Output Power [Serial]`
+- `[System Name] Battery State of Charge [Serial]`
+- `[System Name] DC Power Inverter Total [Serial]`
 
 ### System Total Sensors
 System-wide totals are created with your system name:
@@ -164,7 +164,7 @@ System-wide totals are created with your system name:
 - Check Home Assistant logs for specific error messages
 
 **Rate limiting warnings?**
-- Increase your scan interval (recommended: 300+ seconds for multiple inverters)
+- Increase your scan interval (recommended: 120+ seconds for multiple inverters)
 - The integration automatically handles rate limits with backoff logic
 
 **Missing sensors?**
@@ -179,9 +179,8 @@ System-wide totals are created with your system name:
 
 ## Contributing
 
-Found a bug or have a feature request? Please open an issue on GitHub.
-
-Want to add support for more inverter types or features? Pull requests are welcome!
+Found a bug or have a feature request? Please open an issue on GitHub. <br>
+Want to add support for more inverter types or features? Pull requests are welcome!<br>
 
 ## License
 
@@ -189,7 +188,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Disclaimer
 
-This integration is not officially affiliated with Solax Power. Use at your own risk 😅
+This integration is not officially affiliated with Solax Power.
 
 ---
 
