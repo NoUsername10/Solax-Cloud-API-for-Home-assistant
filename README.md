@@ -13,7 +13,17 @@ I dont pretend to be a programmer, but with AI i got it all working after some l
 
 Home Assistant custom integration to monitor multiple Solax inverters using the official Solax Cloud V2 API. This integration supports both single and multiple inverter setups with real-time data and system-wide totals and efficiency data for each inverter and the system.
 
-<img src="https://img.shields.io/badge/HACS-Custom-41BDF5.svg" width="150" height="280">
+System information (this system contains 3 micro inverters): <br>
+<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_multi/images/info%20system.png" width=50% height=50%>
+
+Single inverter info: <br>
+<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_multi/images/info%20inverter.png" width=50% height=50%>
+
+Example of displaying useful information: <br>
+Total DC (sun) input, Total AC output from the system, and efficiency of DC/AC conversion. <br>
+As te system has micro inverters, we can also see individual panel performance. <br>
+<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_multi/images/info%20solar%20panels.png" width=40% height=40%>
+
 
 
 ## Features
