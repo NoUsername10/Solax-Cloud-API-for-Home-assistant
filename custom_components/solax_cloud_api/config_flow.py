@@ -192,13 +192,13 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                     entry_id = self._config_entry.entry_id
                     
                     # Create updated data
-                    updated_data = dict(self.config_entry.data)
+                    updated_data = dict(self._config_entry.data)
                     updated_data[CONF_INVERTERS] = self._inverters
                     updated_data[CONF_SCAN_INTERVAL] = self._scan_interval
                     updated_data["system_name"] = self._system_name
                     
                     hass.config_entries.async_update_entry(
-                        self.config_entry,
+                        self._config_entry,
                         data=updated_data
                     )
                     
