@@ -1,5 +1,5 @@
 # Solax Cloud API 2.0 Single and Multi Inverter Integration for Home Assistant
-![Solax Logo](https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/custom_components/solax_multi/images/icon.png)
+![Solax Logo](https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/custom_components/solax_cloud_api/images/icon.png)
 
 Home Assistant custom integration to monitor multiple Solax inverters using the official Solax Cloud V2 API. <br>
 This integration supports both single and multiple inverter setups with real-time data and system-wide totals and efficiency data for each inverter and the system.
@@ -19,19 +19,19 @@ If you want to contribute, you are very welcome.<br>
 
 
 System information (this system contains 3 micro inverters): <br>
-<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_multi/images/info%20system.png" width=50% height=50%>
+<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_cloud_api/images/info%20system.png" width=50% height=50%>
 
 Single inverter info: <br>
-<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_multi/images/info%20inverter.png" width=50% height=50%>
+<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_cloud_api/images/info%20inverter.png" width=50% height=50%>
 
 Example of displaying useful information: <br>
 Total DC (sun) input, Total AC output from the system, and efficiency of DC/AC conversion. <br>
 As the system has micro inverters, we can also see individual panel performance. <br>
-<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_multi/images/info%20solar%20panels.png" width=40% height=40%>
+<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_cloud_api/images/info%20solar%20panels.png" width=40% height=40%>
 
 Individual DC string performance over the day.<br>
 One of the panels is in some shade during the winter months..<br>
-<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_multi/images/info%20DC%20strings.png" width=40% height=40%>
+<img src="https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/blob/main/custom_components/solax_cloud_api/images/info%20DC%20strings.png" width=40% height=40%>
 
 
 
