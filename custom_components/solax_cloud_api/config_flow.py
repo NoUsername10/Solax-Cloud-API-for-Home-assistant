@@ -126,7 +126,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
 class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry):
-        self.config_entry = config_entry
+        self._config_entry = config_entry 
         self._inverters = list(config_entry.data.get(CONF_INVERTERS, []))
         self._token = config_entry.data.get(CONF_TOKEN)
         self._scan_interval = config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
@@ -141,13 +141,11 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         
         if user_input is not None:
             if "serial" in user_input and user_input["serial"]:
-                # Adding a new inverter
                 serial = user_input["serial"].strip()
                 if serial and serial not in self._inverters:
                     self._inverters.append(serial)
             
             if "remove_serial" in user_input and user_input["remove_serial"]:
-                # Remove selected inverter
                 remove_sn = user_input["remove_serial"]
                 if remove_sn in self._inverters:
                     self._inverters.remove(remove_sn)
@@ -156,29 +154,23 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                 if not self._inverters:
                     errors["base"] = "no_inverters"
                 else:
-                    # Update the config entry
                     hass = self.hass
-                    entry_id = self.config_entry.entry_id
+                    entry_id = self._config_entry.entry_id
                     
-                    # Create updated data
-                    updated_data = dict(self.config_entry.data)
+                    updated_data = dict(self._config_entry.data)
                     updated_data[CONF_INVERTERS] = self._inverters
                     updated_data[CONF_SCAN_INTERVAL] = self._scan_interval
                     updated_data["system_name"] = self._system_name
                     
                     hass.config_entries.async_update_entry(
-                        self.config_entry,
+                        self._config_entry,
                         data=updated_data
                     )
                     
-                    # Reload the entry to apply changes
                     await hass.config_entries.async_reload(entry_id)
-                    
                     return self.async_create_entry(title="", data={})
 
-        # Create options for remove dropdown
         remove_options = {sn: sn for sn in self._inverters} if self._inverters else {"": "No inverters to remove"}
-        
         inverters_list = "\n".join([f"• {sn}" for sn in self._inverters]) if self._inverters else "No inverters configured"
         
         data_schema = vol.Schema({
