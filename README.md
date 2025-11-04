@@ -1,7 +1,8 @@
 # Solax Cloud API 2.0 Single and Multi Inverter Integration for Home Assistant
 ![Solax Logo](https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/custom_components/solax_multi/images/icon.png)
 
-Home Assistant custom integration to monitor multiple Solax inverters using the official Solax Cloud V2 API. This integration supports both single and multiple inverter setups with real-time data and system-wide totals and efficiency data for each inverter and the system.
+Home Assistant custom integration to monitor multiple Solax inverters using the official Solax Cloud V2 API. <br>
+This integration supports both single and multiple inverter setups with real-time data and system-wide totals and efficiency data for each inverter and the system.
 
 ! This is vibe coded in collaboration with DeepSeek & ChatGPT !<br>
 I dont pretend to be a programmer, but with AI i got it all working after some long days... <br>
