@@ -83,7 +83,7 @@ Before installation, you need:
    `https://github.com/NoUsername10/Solax-API-2.0-single-and-multiple-inverters-for-Home-assistant`
 5. Select **Integration** as the category
 6. Click **Add**
-7. Search for "Solax Cloud APi 2.0" and install
+7. Search for "Solax Cloud API" and install
 8. Restart Home Assistant
 
 ### Method 2: Manual Installation
@@ -97,11 +97,11 @@ Before installation, you need:
 ### Initial Setup
 1. Go to **Settings** → **Devices & Services**
 2. Click **+ Add Integration**
-3. Search for **"Solax Cloud API 2.0"**
+3. Search for **"Solax Cloud API"**
 4. Enter your configuration:
    - **API Token**: Your Solax Cloud API token
    - **System Name**: Name for your solar system (used for system total sensors and prefix of all entity ID´s)
-   - **Scan Interval**: Polling frequency in seconds (default: 120, minimum: 120)
+   - **Scan Interval**: Polling frequency in seconds (default: 120, minimum suggested: 120)
 
 ### Adding Inverters
 5. After initial setup, you'll be guided to add inverters one by one
