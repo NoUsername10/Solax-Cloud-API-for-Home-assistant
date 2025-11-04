@@ -4,9 +4,9 @@
 Home Assistant custom integration to monitor multiple Solax inverters using the official Solax Cloud V2 API. <br>
 This integration supports both single and multiple inverter setups with real-time data and system-wide totals and efficiency data for each inverter and the system.
 
-! This is vibe coded in collaboration with DeepSeek & ChatGPT !<br>
-I dont pretend to be a programmer, but with AI i got it all working after some long days... <br>
-If you want to contribute, you are very welcome.<br>
+This is vibe coded in collaboration with DeepSeek & ChatGPT <br>
+I dont pretend to be a real programmer, but with AI i got it all working after some long days... <br>
+If you want to contribute to me or the code, you are very welcome.<br>
 
 
 <a href="https://www.buymeacoffee.com/DefaultLogin">
