@@ -9,9 +9,8 @@ I dont pretend to be a "real" programmer, but with AI i got it all working after
 If you want to contribute to me or the code, you are very welcome.<br>
 
 
-<a href="https://www.buymeacoffee.com/DefaultLogin">
-    <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-orange.svg" width="20%" height="auto">
-</a>
+<a href="https://www.buymeacoffee.com/DefaultLogin"> <img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-orange.svg" width="20%" height="auto"> </a>
+
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
 
