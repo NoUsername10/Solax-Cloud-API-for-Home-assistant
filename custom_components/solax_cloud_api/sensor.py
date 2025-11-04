@@ -207,6 +207,7 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
             "name": f"Solax Inverter {inverter_sn}",
             "manufacturer": "Solax",
             "model": self._get_mapped_value("inverterType") or "Unknown",
+            "serial_number": inverter_sn,
         }
 
     def _get_mapped_value(self, field):
@@ -290,7 +291,8 @@ class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
             "identifiers": {(DOMAIN, inverter_sn)},
             "name": f"Solax Inverter {inverter_sn}",
             "manufacturer": "Solax",
-            "model": inv.get("inverterType", "Unknown") if isinstance(inv, dict) else "Unknown",
+            "model": FIELD_MAPPINGS["inverterType"].get(str(inv.get("inverterType")), "Unknown"),
+            "serial_number": inverter_sn,
         }
 
 class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
@@ -331,8 +333,14 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
     def device_info(self):
         inv = self.coordinator.data.get(self._serial)
         inverter_sn = (inv.get("inverterSN") if isinstance(inv, dict) else self._serial) or self._serial
-        return {"identifiers": {(DOMAIN, inverter_sn)}, "name": f"Solax Inverter {inverter_sn}"}
-
+        return {
+            "identifiers": {(DOMAIN, inverter_sn)},
+            "name": f"Solax Inverter {inverter_sn}",
+            "manufacturer": "Solax",
+            "model": FIELD_MAPPINGS["inverterType"].get(str(inv.get("inverterType")), "Unknown") if isinstance(inv, dict) else "Unknown",
+            "serial_number": inverter_sn,
+        }
+        
     @property
     def state(self):
         inv = self.coordinator.data.get(self._serial)
