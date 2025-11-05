@@ -272,6 +272,8 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
         if not system_slug:
             raise ValueError("System slug must be provided for SolaxComputedSensor")
 
+        # ** THIS IS THE FIX **
+        # The entity_id now correctly uses the 'metric' variable.
         self.entity_id = f"sensor.{system_slug}_{metric}_{serial}".lower()
 
     @property
@@ -438,7 +440,7 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
     @property
     def device_class(self):
         if self._metric in ("yieldtoday_total", "yieldtotal_total"):
-            return SensorDeviceClass.ENERGY
+            return SensorStateClass.ENERGY
         if self._metric == "systemEfficiency":
             return None
         return SensorDeviceClass.POWER
