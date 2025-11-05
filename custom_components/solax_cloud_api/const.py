@@ -9,9 +9,6 @@ API_URL = "https://global.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get"
 import logging
 LOGGER = logging.getLogger(__package__)
 
-# Import string definitions
-from .strings import HIDDEN_SENSORS
-
 # All fields returned by result
 RESULT_FIELDS = [
     "inverterSN", "sn", "acpower",
