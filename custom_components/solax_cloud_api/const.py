@@ -43,5 +43,11 @@ NUMERIC_FIELDS = {
     "feedinpowerM2": ("W", "power"),
 }
 
+HIDDEN_SENSORS = {
+ #   "inverterSN": True,      # Serial numbers - usually not needed in UI
+ #   "uploadTime": True,      # Raw timestamp
+    "utcDateTime": True,     # UTC timestamp
+}
+
 # Fields whose states are mapped via translation files
 MAPPED_FIELDS = ["inverterStatus", "batStatus", "inverterType"]
