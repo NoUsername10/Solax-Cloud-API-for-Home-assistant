@@ -1,1 +1,121 @@
-
+{
+  "state": {
+    "default": "SolaX Cloud API 2.0 Singel och Multi Inverter (SolaxCloud)"
+  },
+  "title": "Solax Cloud API SolaXCloud Konfiguration",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfigurera SolaXCloud API Anslutning",
+        "description": "Ange din Solax Cloud API-token, systemnamn och önskat skanningsintervall. Solax API uppdateras bara var 5:e minut.",
+        "data": {
+          "api_token": "API Token",
+          "system_name": "Systemnamn",
+          "scan_interval": "Skanningsintervall (sekunder)"
+        }
+      },
+      "add_inverter": {
+        "title": "Lägg till Inverter till {system_name}",
+        "description": "Nuvarande inverter ({count}):\n{inverters_list}\n\nLägg till inverterares serienummer en efter en. Markera 'Avsluta' när du är klar.",
+        "data": {
+          "serial": "Inverters Serienummer",
+          "finish": "Avsluta Konfiguration"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Integrationen är redan konfigurerad"
+    },
+    "error": {
+      "invalid_token": "Ogiltig API-token",
+      "no_inverters": "Minst ett serienummer på inverterare krävs",
+      "no_system_name": "Systemnamn krävs"
+    }
+  },
+  "options": {
+    "step": {
+      "manage_inverters": {
+        "title": "Hantera Inverterare",
+        "description": "Nuvarande inverterare ({count}):\n{inverters_list}\n\nLägg till nya inverterare eller ta bort befintliga.",
+        "data": {
+          "serial": "Lägg till Nytt Serienummer",
+          "remove_serial": "Ta Bort Inverterare",
+          "finish": "Spara Ändringar"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": { "name": "AC Ut Effekt" },
+      "powerdc1": { "name": "DC Effekt Sträng 1" },
+      "powerdc2": { "name": "DC Effekt Sträng 2" },
+      "powerdc3": { "name": "DC Effekt Sträng 3" },
+      "powerdc4": { "name": "DC Effekt Sträng 4" },
+      "feedinpower": { "name": "Nätinsläpp Effekt" },
+      "feedinpowerM2": { "name": "Nätinsläpp Effekt Mätare 2" },
+      "batPower": { "name": "Batteri Effekt" },
+      "yieldtoday": { "name": "Produktion Idag" },
+      "yieldtotal": { "name": "Produktion Livstid" },
+      "feedinenergy": { "name": "Nätinsläpp Energi" },
+      "consumeenergy": { "name": "Nätförbrukning Energi" },
+      "soc": { "name": "Batteri Laddningstillstånd" },
+      "peps1": { "name": "EPS Fas 1 Effekt" },
+      "peps2": { "name": "EPS Fas 2 Effekt" },
+      "peps3": { "name": "EPS Fas 3 Effekt" },
+      "inverterSN": { "name": "Inverterare Serienummer" },
+      "sn": { "name": "Inverterare Serienummer Wi-Fi Modul" },
+      "uploadTime": { "name": "Inverterare Uppladdningstid" },
+      "utcDateTime": { "name": "UTC Datum Tid" },
+      "inverterEfficiency": { "name": "Inverterare Verkningsgrad" },
+      "dc_total_inverter": { "name": "DC Effekt Inverterare Total" },
+      "ac_total": { "name": "System AC Effekt" },
+      "dc_total": { "name": "System DC Effekt" },
+      "systemEfficiency": { "name": "System Total Verkningsgrad" },
+      "yieldtoday_total": { "name": "System Produktion Idag" },
+      "yieldtotal_total": { "name": "System Produktion Livstid" },
+      "inverterStatus": {
+        "name": "Inverterare Status",
+        "state": {
+          "100": "Väntar på drift",
+          "101": "Självtest",
+          "102": "Normal",
+          "103": "Återställningsbart fel",
+          "104": "Permanent fel",
+          "105": "Firmware uppgradering",
+          "106": "EPS detektion",
+          "107": "Off-grid",
+          "108": "Självtestläge (Italienska säkerhetsföreskrifter)",
+          "109": "Viloläge",
+          "110": "Vänteläge",
+          "111": "Fotovoltaiskt uppvaknande batteriläge",
+          "112": "Generator detektionsläge",
+          "113": "Generatorläge",
+          "114": "Snabb avstängning vänteläge",
+          "130": "VPP-läge",
+          "131": "TOU - Egen förbrukning",
+          "132": "TOU - Laddning",
+          "133": "TOU - Urladdning"
+        }
+      },
+      "batStatus": {
+        "name": "Batteri Status",
+        "state": {
+          "0": "Normal",
+          "1": "Fel",
+          "2": "Frånkopplad"
+        }
+      },
+      "inverterType": {
+        "name": "Inverterare Typ",
+        "state": {
+          "1": "Solax X1 Mini",
+          "2": "Solax X1 Boost",
+          "3": "Solax X1 Pro",
+          "4": "Solax X3",
+          "28": "Solax X1 Micro 2 i 1"
+        }
+      }
+    }
+  }
+}
