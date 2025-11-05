@@ -1,7 +1,7 @@
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass, SensorEntity
-from .const import DOMAIN, RESULT_FIELDS, FIELD_MAPPINGS, NUMERIC_FIELDS, MAPPED_FIELDS, SENSOR_NAMES, SYSTEM_SENSOR_NAMES, HIDDEN_SENSORS
+from .const import DOMAIN, RESULT_FIELDS, NUMERIC_FIELDS, MAPPED_FIELDS, HIDDEN_SENSORS
 
 
 import logging
@@ -36,49 +36,47 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         # Sensors per inverter
         for field in available_fields:
-            human_name = SENSOR_NAMES.get(field, f"Solax {field}")
             unique = f"{system_slug}_{field}_{sn}".lower().replace(" ", "_")
             unit = NUMERIC_FIELDS[field][0] if field in NUMERIC_FIELDS else None
 
-            entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, unique, unit, system_slug))
+            entities.append(SolaxFieldSensor(coordinator, sn, field, unique, unit, system_slug))
         
         # Add inverter efficiency sensor
-        entities.append(SolaxInverterEfficiencySensor(coordinator, sn, SENSOR_NAMES["inverterEfficiency"], f"{system_slug}_inverter_efficiency_{sn}", system_slug))
+        entities.append(SolaxInverterEfficiencySensor(coordinator, sn, f"{system_slug}_inverter_efficiency_{sn}", system_slug))
 
         # DC total per inverter
         if inverter_data and isinstance(inverter_data, dict):
             dc_channels = [inverter_data.get(f"powerdc{i}") for i in range(1, 5)]
             if any(channel is not None for channel in dc_channels):
-                human_name = SYSTEM_SENSOR_NAMES["dc_total_inverter"]
                 unique = f"{system_slug}_dc_total_{sn}".lower().replace(" ", "_")
-                entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, unique, system_slug))
+                entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", unique, system_slug))
                 
     # System totals (only once)
     if any(coordinator.data.get(sn) for sn in inverters):
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total", f"{system_name} {SYSTEM_SENSOR_NAMES['ac_total']}"))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total", f"{system_name} {SYSTEM_SENSOR_NAMES['dc_total']}"))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total", f"{system_name} {SYSTEM_SENSOR_NAMES['yieldtoday_total']}"))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total", f"{system_name} {SYSTEM_SENSOR_NAMES['yieldtotal_total']}"))
-        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "systemEfficiency", f"{system_name} {SYSTEM_SENSOR_NAMES['systemEfficiency']}"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "ac_total"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "dc_total"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtoday_total"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "yieldtotal_total"))
+        entities.append(SolaxSystemTotalSensor(coordinator, inverters, "systemEfficiency"))
 
     async_add_entities(entities, update_before_add=True)
 
 
 class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, coordinator, serial, field, human_name, unique_id, unit=None, system_slug=None):
+    _attr_has_entity_name = True
+
+    def __init__(self, coordinator, serial, field, unique_id, unit=None, system_slug=None):
         super().__init__(coordinator)
         self._serial = serial
         self._field = field
         self._unit = unit
         self._attr_unique_id = unique_id
-        self._attr_has_entity_name = False
         self._attr_entity_registry_enabled_default = True
 
         if not system_slug:
             raise ValueError("System slug must be provided for SolaxFieldSensor")
 
-        # Friendly name only (same for all inverters)
-        self._attr_name = human_name
+        self.translation_key = field
 
         # Entity ID includes system prefix + field + serial
         suggested_id = f"{system_slug}_{field}_{serial}".lower()
@@ -140,14 +138,14 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         if val is None:
             return None
         
-        # For numeric fields, always return the numeric value
+        # For fields with mapped states, return the raw value as a string.
+        # Home Assistant will handle the translation.
+        if self._field in MAPPED_FIELDS:
+            return str(val)
+
+        # For numeric fields, return the numeric value
         if self._field in NUMERIC_FIELDS:
             return val
-        
-        # For status fields, return human-readable strings
-        if self._field in FIELD_MAPPINGS and val is not None:
-            mapping = FIELD_MAPPINGS[self._field]
-            return mapping.get(str(val), f"Unknown ({val})")
         
         return val
 
@@ -178,13 +176,13 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         """Return True only if numeric value exists (needed for Energy)."""
         data = self.coordinator.data.get(self._serial)
         if not data or not isinstance(data, dict):
-            return False  # was True
+            return False
     
         if data.get("error"):
             return False
         
-        # Return True only for numeric fields with actual value
-        if self._field in NUMERIC_FIELDS:
+        # For mapped or numeric fields, available if value exists
+        if self._field in MAPPED_FIELDS or self._field in NUMERIC_FIELDS:
             return data.get(self._field) is not None
 
         return True
@@ -202,24 +200,21 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
             }
         
         inverter_sn = inv.get("inverterSN") or self._serial
+        
+        # Get inverter type from data if available, otherwise "Unknown"
+        model = "Unknown"
+        inverter_type_val = inv.get("inverterType")
+        if inverter_type_val is not None:
+             # This will show the raw number, HA will translate it in the UI
+            model = str(inverter_type_val)
+
         return {
             "identifiers": {(DOMAIN, inverter_sn)},
             "name": f"Solax Inverter {inverter_sn}",
             "manufacturer": "Solax",
-            "model": self._get_mapped_value("inverterType") or "Unknown",
+            "model": model,
             "serial_number": inverter_sn,
         }
-
-    def _get_mapped_value(self, field):
-        """Helper to get mapped value for a field."""
-        inv = self.coordinator.data.get(self._serial)
-        if not inv or not isinstance(inv, dict):
-            return None
-        
-        val = inv.get(field)
-        if field in FIELD_MAPPINGS and val is not None:
-            return FIELD_MAPPINGS[field].get(str(val), str(val))
-        return val
 
     @property
     def extra_state_attributes(self):
@@ -227,14 +222,6 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict):
             return attrs
-    
-        # Store raw value for THIS sensor's field if it's a mapped field
-        if self._field in MAPPED_FIELDS and self._field in inv and inv[self._field] is not None:
-            attrs[f"{self._field}_raw"] = inv[self._field]
-            # Also include the mapped value as attribute for consistency
-            if self._field in FIELD_MAPPINGS:
-                mapped_value = FIELD_MAPPINGS[self._field].get(str(inv[self._field]), f"Unknown ({inv[self._field]})")
-                attrs[f"{self._field}_text"] = mapped_value
     
         # Add timestamp attributes (available for all sensors)
         attrs["last_update_raw"] = inv.get("uploadTime")
@@ -249,16 +236,16 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
 
 class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
     """Inverter efficiency: AC power / total DC power * 100"""
+    _attr_has_entity_name = True
+    translation_key = "inverterEfficiency"
 
-    def __init__(self, coordinator, serial, human_name, unique_id, system_slug=None):
+    def __init__(self, coordinator, serial, unique_id, system_slug=None):
         super().__init__(coordinator)
         self._serial = serial
-        self._attr_name = human_name
         self._attr_unique_id = unique_id
-        self._attr_device_class = None # SensorDeviceClass.POWER  # or leave generic
+        self._attr_device_class = None
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_suggested_display_precision = 1
-        #self.entity_id = f"sensor.{system_slug}_inverter_efficiency_{serial}".lower()
         if system_slug:
             self._attr_suggested_object_id = f"{system_slug}_inverter_efficiency_{serial}".lower()
 
@@ -283,24 +270,32 @@ class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
         if not inv or not isinstance(inv, dict):
             return False
         return any(inv.get(f"powerdc{i}") is not None for i in range(1, 5))
+
     @property
     def device_info(self):
         inv = self.coordinator.data.get(self._serial)
         inverter_sn = (inv.get("inverterSN") if isinstance(inv, dict) else self._serial) or self._serial
+        
+        model = "Unknown"
+        if isinstance(inv, dict) and inv.get("inverterType") is not None:
+            model = str(inv.get("inverterType"))
+
         return {
             "identifiers": {(DOMAIN, inverter_sn)},
             "name": f"Solax Inverter {inverter_sn}",
             "manufacturer": "Solax",
-            "model": FIELD_MAPPINGS["inverterType"].get(str(inv.get("inverterType")), "Unknown"),
+            "model": model,
             "serial_number": inverter_sn,
         }
 
 class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, coordinator, serial, metric, name, unique_id, system_slug=None):
+    _attr_has_entity_name = True
+    translation_key = "dc_total_inverter"
+
+    def __init__(self, coordinator, serial, metric, unique_id, system_slug=None):
         super().__init__(coordinator)
         self._serial = serial
         self._metric = metric
-        self._name = name
         self._unique_id = unique_id
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_device_class = SensorDeviceClass.POWER
@@ -310,14 +305,6 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
 
         # Hard-set entity ID for computed sensor
         self.entity_id = f"sensor.{system_slug}_{metric}_{serial}".lower()
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def unique_id(self):
-        return self._unique_id
 
     @property
     def available(self):
@@ -333,11 +320,16 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
     def device_info(self):
         inv = self.coordinator.data.get(self._serial)
         inverter_sn = (inv.get("inverterSN") if isinstance(inv, dict) else self._serial) or self._serial
+
+        model = "Unknown"
+        if isinstance(inv, dict) and inv.get("inverterType") is not None:
+            model = str(inv.get("inverterType"))
+
         return {
             "identifiers": {(DOMAIN, inverter_sn)},
             "name": f"Solax Inverter {inverter_sn}",
             "manufacturer": "Solax",
-            "model": FIELD_MAPPINGS["inverterType"].get(str(inv.get("inverterType")), "Unknown") if isinstance(inv, dict) else "Unknown",
+            "model": model,
             "serial_number": inverter_sn,
         }
         
@@ -359,18 +351,15 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
 
 
 class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
-    def __init__(self, coordinator, inverters, metric, name):
+    _attr_has_entity_name = True
+
+    def __init__(self, coordinator, inverters, metric):
         super().__init__(coordinator)
         self._inverters = inverters
         self._metric = metric
-        self._name = name
-
-    @property
-    def name(self):
-        return self._name
-
-    @property
-    def unique_id(self):
+        self.translation_key = metric
+        
+        # Generate Unique ID
         metric_map = {
             "ac_total": "ac_power",
             "dc_total": "dc_power", 
@@ -379,10 +368,10 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
             "systemEfficiency": "system_efficiency"
         }
         
-        # Get system name from config and create slug for unique ID
         system_name = self.coordinator.config_entry.data.get("system_name", "solax_system")
         system_slug = system_name.lower().replace(" ", "_").replace("-", "_")
-        return f"{system_slug}_{metric_map[self._metric]}_solax"
+        self._attr_unique_id = f"{system_slug}_{metric_map.get(self._metric, self._metric)}_solax"
+
 
     @property
     def device_info(self):
@@ -425,8 +414,7 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
                 elif self._metric == "yieldtotal_total" and inv.get("yieldtotal") is not None:
                     return True
                 elif self._metric == "systemEfficiency":
-                    # Available if at least one inverter has AC and DC fields (even if 0)
-                    if "acpower" in inv and any(f"powerdc{i}" in inv for i in range(1, 5)):
+                    if inv.get("acpower") is not None and any(inv.get(f"powerdc{i}") is not None for i in range(1, 5)):
                         return True
         return False
 
@@ -438,7 +426,7 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
             total_dc = 0
             for sn in self._inverters:
                 inv = self.coordinator.data.get(sn)
-                if not inv or not isinstance(inv, dict):
+                if not inv or not isinstance(inv, dict) or inv.get("error"):
                     continue
                 ac = inv.get("acpower") or 0
                 dc = sum(inv.get(f"powerdc{i}", 0) for i in range(1, 5))
@@ -447,15 +435,23 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
             if total_dc > 0:
                 return round((total_ac / total_dc) * 100, 1)
             return 0
+
         total = 0
         for sn in self._inverters:
             inv = self.coordinator.data.get(sn)
-            if not inv or not isinstance(inv, dict):
+            if not inv or not isinstance(inv, dict) or inv.get("error"):
                 continue
-            if self._metric == "ac_total":
-                power = inv.get("acpower")
-                if power is not None:
-                    total += power
+
+            field_map = {
+                "ac_total": "acpower",
+                "yieldtoday_total": "yieldtoday",
+                "yieldtotal_total": "yieldtotal"
+            }
+
+            if self._metric in field_map:
+                value = inv.get(field_map[self._metric])
+                if value is not None:
+                    total += value
             elif self._metric == "dc_total":
                 dc_total = 0
                 for i in range(1, 5):
@@ -463,14 +459,7 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
                     if power is not None:
                         dc_total += power
                 total += dc_total
-            elif self._metric == "yieldtoday_total":
-                yield_today = inv.get("yieldtoday")
-                if yield_today is not None:
-                    total += yield_today
-            elif self._metric == "yieldtotal_total":
-                yield_total = inv.get("yieldtotal")
-                if yield_total is not None:
-                    total += yield_total
+
         return total
 
     @property
@@ -484,7 +473,7 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
         if self._metric in ("yieldtoday_total", "yieldtotal_total"):
             return SensorDeviceClass.ENERGY
         if self._metric == "systemEfficiency":
-            return None  # System Efficiency
+            return None
         return SensorDeviceClass.POWER
 
     @property
