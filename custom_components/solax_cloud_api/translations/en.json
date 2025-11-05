@@ -1,6 +1,6 @@
 {
   "state": {
-    "default": "SolaXCloud API 2.0 Single and Multi Inverter"
+    "default": "SolaX Cloud API 2.0 Single and Multi Inverter (SolaxCloud)"
   },
   "title": "Solax Cloud API SolaXCloud Config.",
   "config": {
@@ -41,6 +41,79 @@
           "serial": "Add New Serial Number",
           "remove_serial": "Remove Inverter",
           "finish": "Save Changes"
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": { "name": "AC Output Power" },
+      "powerdc1": { "name": "DC Power String 1" },
+      "powerdc2": { "name": "DC Power String 2" },
+      "powerdc3": { "name": "DC Power String 3" },
+      "powerdc4": { "name": "DC Power String 4" },
+      "feedinpower": { "name": "Grid Feed-in Power" },
+      "feedinpowerM2": { "name": "Grid Feed-in Power Meter 2" },
+      "batPower": { "name": "Battery Power" },
+      "yieldtoday": { "name": "Yield Today" },
+      "yieldtotal": { "name": "Yield Total" },
+      "feedinenergy": { "name": "Grid Feed-in Energy" },
+      "consumeenergy": { "name": "Grid Consumption Energy" },
+      "soc": { "name": "Battery State of Charge" },
+      "peps1": { "name": "EPS Phase 1 Power" },
+      "peps2": { "name": "EPS Phase 2 Power" },
+      "peps3": { "name": "EPS Phase 3 Power" },
+      "inverterSN": { "name": "Inverter Serial" },
+      "sn": { "name": "Inverter Serial Wi-Fi Module" },
+      "uploadTime": { "name": "Inverter Upload Time" },
+      "utcDateTime": { "name": "UTC Date Time" },
+      "inverterEfficiency": { "name": "Inverter Efficiency" },
+      "dc_total_inverter": { "name": "DC Power Inverter Total" },
+      "ac_total": { "name": "System AC Power" },
+      "dc_total": { "name": "System DC Power" },
+      "systemEfficiency": { "name": "System Total Efficiency" },
+      "yieldtoday_total": { "name": "System Yield Today" },
+      "yieldtotal_total": { "name": "System Yield Lifetime" },
+      "inverterStatus": {
+        "name": "Inverter Status",
+        "state": {
+          "100": "Waiting for operation",
+          "101": "Self-test",
+          "102": "Normal",
+          "103": "Recoverable fault",
+          "104": "Permanent fault",
+          "105": "Firmware upgrade",
+          "106": "EPS detection",
+          "107": "Off-grid",
+          "108": "Self-test mode (Italian safety regulations)",
+          "109": "Sleep mode",
+          "110": "Standby mode",
+          "111": "Photovoltaic wake-up battery mode",
+          "112": "Generator detection mode",
+          "113": "Generator mode",
+          "114": "Fast shutdown standby mode",
+          "130": "VPP mode",
+          "131": "TOU - Self use",
+          "132": "TOU - Charging",
+          "133": "TOU - Discharging"
+        }
+      },
+      "batStatus": {
+        "name": "Battery Status",
+        "state": {
+          "0": "Normal",
+          "1": "Fault",
+          "2": "Disconnected"
+        }
+      },
+      "inverterType": {
+        "name": "Inverter Type",
+        "state": {
+          "1": "Solax X1 Mini",
+          "2": "Solax X1 Boost",
+          "3": "Solax X1 Pro",
+          "4": "Solax X3",
+          "28": "Solax X1 Micro 2 in 1"
         }
       }
     }
