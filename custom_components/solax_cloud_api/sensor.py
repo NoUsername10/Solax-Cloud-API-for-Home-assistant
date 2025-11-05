@@ -45,11 +45,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
         entities.append(SolaxInverterEfficiencySensor(coordinator, sn, f"{system_slug}_inverter_efficiency_{sn}", system_slug))
 
         # DC total per inverter
-        if inverter_data and isinstance(inverter_data, dict):
-            dc_channels = [inverter_data.get(f"powerdc{i}") for i in range(1, 5)]
-            if any(channel is not None for channel in dc_channels):
-                unique = f"{system_slug}_dc_total_{sn}".lower().replace(" ", "_")
-                entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", unique, system_slug))
+        # This sensor should always be created for each inverter.
+        # The 'available' property within the class will handle its state.
+        unique_dc_total = f"{system_slug}_dc_total_{sn}".lower().replace(" ", "_")
+        entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", unique_dc_total, system_slug))
                 
     # System totals (only once)
     if any(coordinator.data.get(sn) for sn in inverters):
@@ -312,9 +311,8 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
         data = self.coordinator.data.get(self._serial)
         if not data or not isinstance(data, dict):
             return False
-        # Check if we have at least one DC channel with data
-        dc_channels = [data.get(f"powerdc{i}") for i in range(1, 5)]
-        return any(channel is not None for channel in dc_channels)
+        # The sensor is available if there's no error, even if DC power is 0.
+        return not data.get("error")
 
     @property
     def device_info(self):
@@ -337,12 +335,26 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
     def state(self):
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict):
-            return None
+            return 0 # Return 0 if the inverter data is missing
+        
         total = 0
+        has_any_dc_field = False
         for i in range(1, 5):
-            power = inv.get(f"powerdc{i}")
-            if power is not None:
-                total += power
+            field = f"powerdc{i}"
+            if field in inv:
+                has_any_dc_field = True
+                power = inv.get(field)
+                if power is not None:
+                    total += power
+        
+        # If the API response includes at least one powerdc field, we can return the total.
+        # Otherwise, the inverter might not support DC fields, so we return None to make it unavailable.
+        if not has_any_dc_field:
+             # Check if we have data at all. If not, maybe it's just not polled yet.
+            if inv.get("acpower") is None: # A proxy to see if any data exists
+                return 0
+            return None
+
         return total
 
     @property
