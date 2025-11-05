@@ -79,7 +79,7 @@ Before installation, you need:
 2. Click on **Integrations**
 3. Click the three dots in the top right corner → **Custom repositories**
 4. Add this repository URL:  
-   `https://github.com/NoUsername10/Solax-API-2.0-single-and-multiple-inverters-for-Home-assistant`
+   `https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant`
 5. Select **Integration** as the category
 6. Click **Add**
 7. Search for "Solax Cloud API" and install
