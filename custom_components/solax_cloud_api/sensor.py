@@ -12,6 +12,20 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     return
 
 
+def get_translation_name(translations, domain, key, default=None):
+    """Safely get a translated name for a given sensor key."""
+    return (
+        translations.get("component", {})
+                    .get(domain, {})
+                    .get("entity", {})
+                    .get("sensor", {})
+                    .get(key, {})
+                    .get("name")
+        or default
+        or key
+    )
+
+
 async def async_setup_entry(hass, entry, async_add_entities):
     data = hass.data[DOMAIN][entry.entry_id]
     coordinator = data["coordinator"]
@@ -23,19 +37,20 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
     # Fetch the translations for the integration's sensor platform
     translations = await async_get_translations(
-        hass, entry.data.get("lang", "en"), DOMAIN
+        hass, entry.data.get("lang", "en"), "sensor"
     )
+
 
     # Build inverter type map
     type_map = {}
     for k, v in translations.items():
-        if "entity.sensor.inverterType.state." in k:
+        if f"component.{DOMAIN}.entity.sensor.inverterType.state." in k:
             key = k.split(".")[-1]
             type_map[key] = v
 
     await coordinator.async_config_entry_first_refresh()
     entities = []
-
+    
     for sn in inverters:
         inverter_data = coordinator.data.get(sn)
 
@@ -46,29 +61,24 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         # Standard sensors from API fields
         for field in available_fields:
-            name_key = f"entity.sensor.{field}.name"
-            human_name = translations.get(name_key, f"Solax {field}")
+            human_name = get_translation_name(translations, DOMAIN, field)
             entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, system_slug, translations, type_map))
         
         # Inverter Efficiency computed sensor
-        name_key = f"entity.sensor.inverterEfficiency.name"
-        human_name = translations.get(name_key, "Inverter Efficiency")
+        human_name = get_translation_name(translations, DOMAIN, "inverterEfficiency") or "Inverter Efficiency"
         entities.append(SolaxInverterEfficiencySensor(coordinator, sn, human_name, system_slug, type_map))
 
-        # DC Total per inverter computed sensor (based on original logic)
+        # DC Total per inverter computed sensor
         if inverter_data and isinstance(inverter_data, dict) and any(inverter_data.get(f"powerdc{i}") is not None for i in range(1, 5)):
-            name_key = f"entity.sensor.dc_total_inverter.name"
-            human_name = translations.get(name_key, "DC Power Inverter Total")
-            # The metric passed to the constructor MUST be "dc_total" to match the original entity_id and unique_id pattern
+            human_name = get_translation_name(translations, DOMAIN, "dc_total_inverter") or "DC Power Inverter Total"
             entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, system_slug, type_map))
                 
-    # System total sensors (based on original logic)
+    # System total sensors
     if any(coordinator.data.get(sn) for sn in inverters):
         system_sensor_keys = ["ac_total", "dc_total", "yieldtoday_total", "yieldtotal_total", "systemEfficiency"]
         for key in system_sensor_keys:
-            name_key = f"entity.sensor.{key}.name"
-            sensor_name = translations.get(name_key, key.replace("_", " ").title())
-            full_name = f"{system_name} {sensor_name}"
+            human_name = get_translation_name(translations, DOMAIN, key) or key.replace("_", " ").title()
+            full_name = f"{system_name} {human_name}"
             entities.append(SolaxSystemTotalSensor(coordinator, inverters, key, full_name))
 
     async_add_entities(entities, update_before_add=True)
@@ -121,7 +131,7 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         
         if self._field in MAPPED_FIELDS:
             # Build the translation key for this field and value
-            state_key = f"entity.sensor.{self._field}.state.{val}"
+            state_key = f"component.{DOMAIN}.entity.sensor.{self._field}.state.{val}"
             # Return the translated state, or fallback to string value
             translated_state = self._translations.get(state_key)
             if translated_state:
@@ -215,7 +225,7 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
             attrs[f"{self._field}_raw"] = raw_val
             
             # Get the translated text value
-            state_key = f"entity.sensor.{self._field}.state.{raw_val}"
+            state_key = f"component.{DOMAIN}.entity.sensor.{self._field}.state.{raw_val}"
             mapped_value = self._translations.get(state_key, f"Unknown ({raw_val})")
             attrs[f"{self._field}_text"] = mapped_value
     
@@ -389,8 +399,16 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
     @property
     def state(self):
         if self._metric == "systemEfficiency":
-            total_ac = sum(inv.get("acpower", 0) or 0 for sn in self._inverters if (inv := self.coordinator.data.get(sn)) and isinstance(inv, dict) and not inv.get("error"))
-            total_dc = sum(inv.get(f"powerdc{i}", 0) or 0 for sn in self._inverters if (inv := self.coordinator.data.get(sn)) and isinstance(inv, dict) and not inv.get("error"))
+            total_ac = 0
+            total_dc = 0
+            for sn in self._inverters:
+                inv = self.coordinator.data.get(sn)
+                if not inv or not isinstance(inv, dict) or inv.get("error"):
+                    continue
+                total_ac += inv.get("acpower", 0) or 0
+                for i in range(1, 5):
+                    total_dc += inv.get(f"powerdc{i}", 0) or 0
+                    
             return round((total_ac / total_dc) * 100, 1) if total_dc > 0 else 0
         
         total = 0
