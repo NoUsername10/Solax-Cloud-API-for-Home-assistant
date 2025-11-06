@@ -4,6 +4,7 @@ import logging
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers import config_validation as cv
 import aiohttp
 import async_timeout
 from .const import DOMAIN, CONF_TOKEN, CONF_INVERTERS, CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL, API_URL
@@ -104,7 +105,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         
         data_schema = vol.Schema({
             vol.Optional("serial"): str,
-            vol.Required("finish", default=bool(self._inverters)): bool,
+            vol.Required("finish", default=bool(self._inverters)): cv.boolean,
         })
 
         return self.async_show_form(
