@@ -1,11 +1,20 @@
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass, SensorEntity
+from homeassistant.helpers.translation import async_get_translations
 from .const import DOMAIN, RESULT_FIELDS, NUMERIC_FIELDS, MAPPED_FIELDS, HIDDEN_SENSORS
-
 
 import logging
 _LOGGER = logging.getLogger(__name__)
+
+
+async def get_inverter_type_name(hass, inverter_type):
+    translations = await async_get_translations(
+        hass, "en", "entity", [f"component.{DOMAIN}.sensor"]
+    )
+    path = f"component.{DOMAIN}.entity.sensor.inverterType.state.{inverter_type}"
+    return translations.get(path, str(inverter_type))
+
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     return
@@ -25,6 +34,13 @@ async def async_setup_entry(hass, entry, async_add_entities):
         hass, entry.data.get("lang", "en"), "sensor"
     )
 
+    # Build inverter type map
+    type_map = {}
+    for k, v in translations.items():
+        if "inverterType.state." in k:
+            key = k.split(".")[-1]  # e.g. "1", "2"
+            type_map[key] = v
+
     await coordinator.async_config_entry_first_refresh()
     entities = []
 
@@ -40,19 +56,19 @@ async def async_setup_entry(hass, entry, async_add_entities):
         for field in available_fields:
             name_key = f"component.{DOMAIN}.entity.sensor.{field}.name"
             human_name = translations.get(name_key, f"Solax {field}")
-            entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, system_slug))
+            entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, system_slug, type_map))
         
         # Inverter Efficiency computed sensor
         name_key = f"component.{DOMAIN}.entity.sensor.inverterEfficiency.name"
         human_name = translations.get(name_key, "Inverter Efficiency")
-        entities.append(SolaxInverterEfficiencySensor(coordinator, sn, human_name, system_slug))
+        entities.append(SolaxInverterEfficiencySensor(coordinator, sn, human_name, system_slug, type_map))
 
         # DC Total per inverter computed sensor (based on original logic)
         if inverter_data and isinstance(inverter_data, dict) and any(inverter_data.get(f"powerdc{i}") is not None for i in range(1, 5)):
             name_key = f"component.{DOMAIN}.entity.sensor.dc_total_inverter.name"
             human_name = translations.get(name_key, "DC Power Inverter Total")
             # The metric passed to the constructor MUST be "dc_total" to match the original entity_id and unique_id pattern
-            entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, system_slug))
+            entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, system_slug, type_map))
                 
     # System total sensors (based on original logic)
     if any(coordinator.data.get(sn) for sn in inverters):
@@ -239,11 +255,11 @@ class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
     def device_info(self):
         inv = self.coordinator.data.get(self._serial)
         inverter_sn = (inv.get("inverterSN") if isinstance(inv, dict) else self._serial) or self._serial
+        inverter_type = str(inv.get("inverterType")) if isinstance(inv, dict) else None
+        model = self._type_map.get(inverter_type, inverter_type or "Unknown")
         
-        model = "Unknown"
         if isinstance(inv, dict) and inv.get("inverterType") is not None:
-            model = str(inv.get("inverterType"))
-
+            
         return {
             "identifiers": {(DOMAIN, inverter_sn)},
             "name": f"Solax Inverter {inverter_sn}",
