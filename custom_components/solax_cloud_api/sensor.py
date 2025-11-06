@@ -304,14 +304,16 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
     def device_info(self):
         inv = self.coordinator.data.get(self._serial)
         inverter_sn = (inv.get("inverterSN") if isinstance(inv, dict) else self._serial) or self._serial
-            
+        
+        model = "Unknown"
+        inverter_type_val = inv.get("inverterType") if isinstance(inv, dict) else None
         if inverter_type_val is not None:
-            #Use type_map for human-readable model names
+            # FIXED: Use type_map for human-readable model names (consistent with other sensors)
             model = self._type_map.get(str(inverter_type_val), str(inverter_type_val))
-    
+        
         return {
             "identifiers": {(DOMAIN, inverter_sn)},
-            "name": f"Solax Inverter {inverter_sn}", 
+            "name": f"Solax Inverter {inverter_sn}",
             "manufacturer": "Solax",
             "model": model,
             "serial_number": inverter_sn,
