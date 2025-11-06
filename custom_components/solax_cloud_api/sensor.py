@@ -8,14 +8,6 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-async def get_inverter_type_name(hass, inverter_type):
-    translations = await async_get_translations(
-        hass, "en", "entity", [f"component.{DOMAIN}.sensor"]
-    )
-    path = f"component.{DOMAIN}.entity.sensor.inverterType.state.{inverter_type}"
-    return translations.get(path, str(inverter_type))
-
-
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     return
 
@@ -85,10 +77,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
 class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = False # We provide the name manually, so this must be False
 
-    def __init__(self, coordinator, serial, field, human_name, system_slug):
+    def __init__(self, coordinator, serial, field, human_name, system_slug, type_map):
         super().__init__(coordinator)
         self._serial = serial
         self._field = field
+        self._type_map = type_map
         self._attr_name = human_name # Use the name passed from async_setup_entry
         self._attr_unique_id = f"{system_slug}_{field}_{serial}".lower().replace(" ", "_")
         
@@ -98,7 +91,6 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         if field in HIDDEN_SENSORS: self._attr_entity_category = EntityCategory.DIAGNOSTIC
         if field in NUMERIC_FIELDS:
             unit, field_type = NUMERIC_FIELDS[field]
-            self._attr_native_unit_of_measurement = unit
             if field_type == "energy":
                 self._attr_state_class = SensorStateClass.TOTAL_INCREASING
                 self._attr_device_class = SensorDeviceClass.ENERGY
@@ -210,7 +202,10 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def unit_of_measurement(self):
-        return self._unit
+    if self._field in NUMERIC_FIELDS:
+        unit, _ = NUMERIC_FIELDS[self._field]
+            return unit
+    return None
 
 class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = False # We provide the name manually, so this must be False
@@ -218,9 +213,10 @@ class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
     _attr_native_unit_of_measurement = "%"
     _attr_suggested_display_precision = 1
 
-    def __init__(self, coordinator, serial, human_name, system_slug):
+    def __init__(self, coordinator, serial, human_name, system_slug, type_map):
         super().__init__(coordinator)
         self._serial = serial
+        self._type_map = type_map
         self._attr_name = human_name
         self._attr_device_class = None
         self._attr_suggested_display_precision = 1
@@ -257,9 +253,7 @@ class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
         inverter_sn = (inv.get("inverterSN") if isinstance(inv, dict) else self._serial) or self._serial
         inverter_type = str(inv.get("inverterType")) if isinstance(inv, dict) else None
         model = self._type_map.get(inverter_type, inverter_type or "Unknown")
-        
-        if isinstance(inv, dict) and inv.get("inverterType") is not None:
-            
+                    
         return {
             "identifiers": {(DOMAIN, inverter_sn)},
             "name": f"Solax Inverter {inverter_sn}",
@@ -275,14 +269,13 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
     _attr_device_class = SensorDeviceClass.POWER
     _attr_native_unit_of_measurement = "W"
 
-    def __init__(self, coordinator, serial, metric, name, system_slug):
+    def __init__(self, coordinator, serial, metric, name, system_slug, type_map):
         super().__init__(coordinator)
         self._serial = serial
-        self._metric = metric # This will be "dc_total"
-        self._attr_name = name # This will be "DC Power Inverter Total"
-        
-        # This matches the original file's logic exactly to create a stable ID.
-        # Both unique_id and entity_id are built from the metric "dc_total".
+        self._type_map = type_map
+        self._metric = metric 
+        self._attr_name = name 
+     
         self._attr_unique_id = f"{system_slug}_{metric}_{serial}".lower().replace(" ", "_")
         self.entity_id = f"sensor.{system_slug}_{metric}_{serial}".lower()
 
