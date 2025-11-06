@@ -186,6 +186,7 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         model = "Unknown"
         inverter_type_val = inv.get("inverterType")
         if inverter_type_val is not None:
+            # Use the pre-built type_map from the constructor
             model = self._type_map.get(str(inverter_type_val), str(inverter_type_val))
 
         return {
