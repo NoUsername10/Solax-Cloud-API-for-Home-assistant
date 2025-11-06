@@ -48,7 +48,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         for field in available_fields:
             name_key = f"component.{DOMAIN}.entity.sensor.{field}.name"
             human_name = translations.get(name_key, f"Solax {field}")
-            entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, system_slug, type_map))
+            entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, system_slug, translations))
         
         # Inverter Efficiency computed sensor
         name_key = f"component.{DOMAIN}.entity.sensor.inverterEfficiency.name"
@@ -81,6 +81,7 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self._serial = serial
         self._field = field
+        self._translations = translations 
         self._type_map = type_map
         self._attr_name = human_name # Use the name passed from async_setup_entry
         self._attr_unique_id = f"{system_slug}_{field}_{serial}".lower().replace(" ", "_")
@@ -119,7 +120,14 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
             return None
         
         if self._field in MAPPED_FIELDS:
-            return str(val)
+            # Build the translation key for this field and value
+            state_key = f"component.{DOMAIN}.entity.sensor.{self._field}.state.{val}"
+            # Return the translated state, or fallback to string value
+            translated_state = self._translations.get(state_key)
+        if translated_state:
+            return translated_state
+        # Fallback to raw value if no translation found
+        return str(val)
 
         if self._field in NUMERIC_FIELDS:
             return val
@@ -178,7 +186,7 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         model = "Unknown"
         inverter_type_val = inv.get("inverterType")
         if inverter_type_val is not None:
-            model = str(inverter_type_val)
+            model = self._type_map.get(str(inverter_type_val), str(inverter_type_val))
 
         return {
             "identifiers": {(DOMAIN, inverter_sn)},
@@ -195,6 +203,17 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         if not inv or not isinstance(inv, dict):
             return attrs
     
+        # Add raw and text attributes for mapped fields
+        if self._field in MAPPED_FIELDS and self._field in inv and inv[self._field] is not None:
+            raw_val = inv[self._field]
+            attrs[f"{self._field}_raw"] = raw_val
+            
+            # Get the translated text value
+            state_key = f"component.{DOMAIN}.entity.sensor.{self._field}.state.{raw_val}"
+            mapped_value = self._translations.get(state_key, f"Unknown ({raw_val})")
+            attrs[f"{self._field}_text"] = mapped_value
+    
+        # Add timestamp attributes (available for all sensors)
         attrs["last_update_raw"] = inv.get("uploadTime")
         attrs["utc_date_time"] = inv.get("utcDateTime")
     
@@ -235,10 +254,6 @@ class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
         if dc_total > 0:
             return round((ac / dc_total) * 100, 1)
         return 0
-
-    @property
-    def unit_of_measurement(self):
-        return "%"
 
     @property
     def available(self):
@@ -289,18 +304,24 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
     def device_info(self):
         inv = self.coordinator.data.get(self._serial)
         inverter_sn = (inv.get("inverterSN") if isinstance(inv, dict) else self._serial) or self._serial
-        return {"identifiers": {(DOMAIN, inverter_sn)}, "name": f"Solax Inverter {inverter_sn}", "manufacturer": "Solax",
-                "model": str(inv.get("inverterType")) if isinstance(inv, dict) and inv.get("inverterType") is not None else "Unknown", "serial_number": inverter_sn}
+            
+        if inverter_type_val is not None:
+            #Use type_map for human-readable model names
+            model = self._type_map.get(str(inverter_type_val), str(inverter_type_val))
+    
+        return {
+            "identifiers": {(DOMAIN, inverter_sn)},
+            "name": f"Solax Inverter {inverter_sn}", 
+            "manufacturer": "Solax",
+            "model": model,
+            "serial_number": inverter_sn,
+        }
         
     @property
     def state(self):
         inv = self.coordinator.data.get(self._serial)
         if not inv or not isinstance(inv, dict): return None
         return sum(inv.get(f"powerdc{i}") or 0 for i in range(1, 5))
-
-    @property
-    def unit_of_measurement(self):
-        return "W"
 
 
 class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
@@ -310,27 +331,20 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self._inverters = inverters
         self._metric = metric
-        self._attr_name = name # Use the full name passed in, as per original code
+        self._attr_name = name 
 
-        # We DO NOT set self.entity_id here. We let Home Assistant generate it from self._attr_name,
-        # which is the original, correct behavior that preserves your entity IDs.
-
-        # Set device class and other attributes in __init__ as per original
+        # Set device class and other attributes in __init__ 
         if self._metric in ("yieldtoday_total", "yieldtotal_total"):
             self._attr_device_class = SensorDeviceClass.ENERGY
             self._attr_state_class = SensorStateClass.TOTAL_INCREASING
-            self._attr_native_unit_of_measurement = "kWh"
         elif self._metric == "systemEfficiency":
             self._attr_state_class = SensorStateClass.MEASUREMENT
-            self._attr_native_unit_of_measurement = "%"
         else: # ac_total, dc_total
             self._attr_device_class = SensorDeviceClass.POWER
             self._attr_state_class = SensorStateClass.MEASUREMENT
-            self._attr_native_unit_of_measurement = "W"
 
     @property
     def unique_id(self):
-        # This `unique_id` logic is IDENTICAL to the original working file's property
         metric_map = {
             "ac_total": "ac_power", "dc_total": "dc_power", 
             "yieldtoday_total": "energy_today", "yieldtotal_total": "energy_total",
