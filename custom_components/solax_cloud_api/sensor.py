@@ -11,19 +11,33 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     return
 
+def flatten_translations(d, parent_key=""):
+    items = {}
+    for k, v in d.items():
+        new_key = f"{parent_key}.{k}" if parent_key else k
+        if isinstance(v, dict):
+            # Special handling: if this dict has a "state" sub-dict, flatten it with parent key
+            state_dict = v.get("state")
+            if state_dict and isinstance(state_dict, dict):
+                for state_key, state_val in state_dict.items():
+                    items[f"{new_key}.state.{state_key}"] = state_val
+            # Remove the state key before recursion to avoid duplication
+            nested_dict = {kk: vv for kk, vv in v.items() if kk != "state"}
+            items.update(flatten_translations(nested_dict, new_key))
+        else:
+            items[new_key] = v
+    return items
 
-def get_translation_name(translations, domain, key, default=None):
-    """Safely get a translated name for a given sensor key."""
-    return (
-        translations.get("component", {})
-                    .get(domain, {})
-                    .get("entity", {})
-                    .get("sensor", {})
-                    .get(key, {})
-                    .get("name")
-        or default
-        or key
-    )
+
+def get_translation_name(translations, domain, sensor_key, state_value=None, default=None):
+    if state_value is not None:
+        flat_state_key = f"component.{domain}.entity.sensor.{sensor_key}.state.{state_value}"
+        if flat_state_key in translations:
+            return translations[flat_state_key]
+        return str(state_value)
+
+    flat_name_key = f"component.{domain}.entity.sensor.{sensor_key}.name"
+    return translations.get(flat_name_key, default or sensor_key)
 
 
 async def async_setup_entry(hass, entry, async_add_entities):
@@ -35,19 +49,29 @@ async def async_setup_entry(hass, entry, async_add_entities):
         raise ValueError("System name must be provided in integration setup")
     system_slug = system_name.lower().replace(" ", "_").replace("-", "_")
 
-    # Fetch the translations for the integration's sensor platform
-    translations = await async_get_translations(
-        hass, entry.data.get("lang", "en"), DOMAIN
+    import json
+    import os
+
+    # Use HA's configured UI language if available, fallback to 'en'
+    lang = getattr(hass.config, "language", "en")
+
+    translations_file = os.path.join(
+        hass.config.path("custom_components/solax_cloud_api/translations"), f"{lang}.json"
     )
+    if os.path.exists(translations_file):
+        with open(translations_file, "r", encoding="utf-8") as f:
+            translations = json.load(f)
+    else:
+        translations = {}
 
-    _LOGGER.warning("Loaded translations keys: %s", list(translations.keys()))
+    # Flatten translations so nested keys (including states) are accessible
+    translations = flatten_translations(translations)
 
-    # Build inverter type map
-    type_map = {}
-    for k, v in translations.items():
-        if f"component.{DOMAIN}.entity.sensor.inverterType.state." in k:
-            key = k.split(".")[-1]
-            type_map[key] = v
+    #Check for loaded translations
+    #_LOGGER.warning("Loaded translations keys: %s", list(translations.keys()))
+
+    # Build inverter type map once
+    type_map = {k.split(".")[-1]: v for k, v in translations.items() if "entity.sensor.inverterType.state." in k}
 
     await coordinator.async_config_entry_first_refresh()
     entities = []
@@ -131,14 +155,8 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
             return None
         
         if self._field in MAPPED_FIELDS:
-            # Build the translation key for this field and value
-            state_key = f"component.{DOMAIN}.entity.sensor.{self._field}.state.{val}"
-            # Return the translated state, or fallback to string value
-            translated_state = self._translations.get(state_key)
-            if translated_state:
-                return translated_state
-            # Fallback to raw value if no translation found
-            return str(val)
+            # Get human-readable mapped state
+            return get_translation_name(self._translations, DOMAIN, self._field, state_value=val, default=str(val))
 
         if self._field in NUMERIC_FIELDS:
             return val
@@ -197,12 +215,7 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         model = "Unknown"
         inverter_type_val = inv.get("inverterType")
         if inverter_type_val is not None:
-            # Build type_map from translations for this specific use
-            type_map = {}
-            for k, v in self._translations.items():
-                if "entity.sensor.inverterType.state." in k:
-                    key = k.split(".")[-1]
-                    type_map[key] = v
+            #Inverter model
             model = self._type_map.get(str(inverter_type_val), str(inverter_type_val))
 
         return {
@@ -224,11 +237,12 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         if self._field in MAPPED_FIELDS and self._field in inv and inv[self._field] is not None:
             raw_val = inv[self._field]
             attrs[f"{self._field}_raw"] = raw_val
-            
+            attrs[f"{self._field}_text"] = get_translation_name(self._translations,DOMAIN, self._field, state_value=raw_val, default=str(raw_val))
             # Get the translated text value
             state_key = f"component.{DOMAIN}.entity.sensor.{self._field}.state.{raw_val}"
             mapped_value = self._translations.get(state_key, f"Unknown ({raw_val})")
             attrs[f"{self._field}_text"] = mapped_value
+            
     
         # Add timestamp attributes (available for all sensors)
         attrs["last_update_raw"] = inv.get("uploadTime")
@@ -366,7 +380,7 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
     def unique_id(self):
         metric_map = {
             "ac_total": "ac_power", "dc_total": "dc_power", 
-            "yieldtoday_total": "energy_today", "yieldtotal_total": "energy_total",
+            "yieldtoday_total": "yield_today", "yieldtotal_total": "yield_total",
             "systemEfficiency": "system_efficiency"
         }
         system_name = self.coordinator.config_entry.data.get("system_name", "solax_system")
