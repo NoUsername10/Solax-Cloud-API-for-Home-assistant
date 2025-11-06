@@ -205,7 +205,6 @@ class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator, serial, human_name, system_slug):
         super().__init__(coordinator)
         self._serial = serial
-        self._attr_unique_id = unique_id
         self._attr_name = human_name
         self._attr_device_class = None
         self._attr_suggested_display_precision = 1
