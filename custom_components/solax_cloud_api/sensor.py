@@ -202,10 +202,10 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def unit_of_measurement(self):
-    if self._field in NUMERIC_FIELDS:
-        unit, _ = NUMERIC_FIELDS[self._field]
+        if self._field in NUMERIC_FIELDS:
+            unit, _ = NUMERIC_FIELDS[self._field]
             return unit
-    return None
+        return None
 
 class SolaxInverterEfficiencySensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = False # We provide the name manually, so this must be False
@@ -392,7 +392,7 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
     @property
     def device_class(self):
         if self._metric in ("yieldtoday_total", "yieldtotal_total"):
-            return SensorStateClass.ENERGY
+            return SensorDeviceClass.ENERGY
         if self._metric == "systemEfficiency":
             return None
         return SensorDeviceClass.POWER
