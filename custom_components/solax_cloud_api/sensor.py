@@ -23,14 +23,14 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
     # Fetch the translations for the integration's sensor platform
     translations = await async_get_translations(
-        hass, entry.data.get("lang", "en"), "sensor"
+        hass, entry.data.get("lang", "en"), DOMAIN
     )
 
     # Build inverter type map
     type_map = {}
     for k, v in translations.items():
-        if "inverterType.state." in k:
-            key = k.split(".")[-1]  # e.g. "1", "2"
+        if "entity.sensor.inverterType.state." in k:
+            key = k.split(".")[-1]
             type_map[key] = v
 
     await coordinator.async_config_entry_first_refresh()
@@ -46,18 +46,18 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
         # Standard sensors from API fields
         for field in available_fields:
-            name_key = f"component.{DOMAIN}.entity.sensor.{field}.name"
+            name_key = f"entity.sensor.{field}.name"
             human_name = translations.get(name_key, f"Solax {field}")
             entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, system_slug, translations, type_map))
         
         # Inverter Efficiency computed sensor
-        name_key = f"component.{DOMAIN}.entity.sensor.inverterEfficiency.name"
+        name_key = f"entity.sensor.inverterEfficiency.name"
         human_name = translations.get(name_key, "Inverter Efficiency")
         entities.append(SolaxInverterEfficiencySensor(coordinator, sn, human_name, system_slug, type_map))
 
         # DC Total per inverter computed sensor (based on original logic)
         if inverter_data and isinstance(inverter_data, dict) and any(inverter_data.get(f"powerdc{i}") is not None for i in range(1, 5)):
-            name_key = f"component.{DOMAIN}.entity.sensor.dc_total_inverter.name"
+            name_key = f"entity.sensor.dc_total_inverter.name"
             human_name = translations.get(name_key, "DC Power Inverter Total")
             # The metric passed to the constructor MUST be "dc_total" to match the original entity_id and unique_id pattern
             entities.append(SolaxComputedSensor(coordinator, sn, "dc_total", human_name, system_slug, type_map))
@@ -66,7 +66,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     if any(coordinator.data.get(sn) for sn in inverters):
         system_sensor_keys = ["ac_total", "dc_total", "yieldtoday_total", "yieldtotal_total", "systemEfficiency"]
         for key in system_sensor_keys:
-            name_key = f"component.{DOMAIN}.entity.sensor.{key}.name"
+            name_key = f"entity.sensor.{key}.name"
             sensor_name = translations.get(name_key, key.replace("_", " ").title())
             full_name = f"{system_name} {sensor_name}"
             entities.append(SolaxSystemTotalSensor(coordinator, inverters, key, full_name))
@@ -121,7 +121,7 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         
         if self._field in MAPPED_FIELDS:
             # Build the translation key for this field and value
-            state_key = f"component.{DOMAIN}.entity.sensor.{self._field}.state.{val}"
+            state_key = f"entity.sensor.{self._field}.state.{val}"
             # Return the translated state, or fallback to string value
             translated_state = self._translations.get(state_key)
             if translated_state:
@@ -186,7 +186,12 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         model = "Unknown"
         inverter_type_val = inv.get("inverterType")
         if inverter_type_val is not None:
-            # Use the pre-built type_map from the constructor
+            # Build type_map from translations for this specific use
+            type_map = {}
+            for k, v in self._translations.items():
+                if "entity.sensor.inverterType.state." in k:
+                    key = k.split(".")[-1]
+                    type_map[key] = v
             model = self._type_map.get(str(inverter_type_val), str(inverter_type_val))
 
         return {
@@ -210,7 +215,7 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
             attrs[f"{self._field}_raw"] = raw_val
             
             # Get the translated text value
-            state_key = f"component.{DOMAIN}.entity.sensor.{self._field}.state.{raw_val}"
+            state_key = f"entity.sensor.{self._field}.state.{raw_val}"
             mapped_value = self._translations.get(state_key, f"Unknown ({raw_val})")
             attrs[f"{self._field}_text"] = mapped_value
     
