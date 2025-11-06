@@ -48,7 +48,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         for field in available_fields:
             name_key = f"component.{DOMAIN}.entity.sensor.{field}.name"
             human_name = translations.get(name_key, f"Solax {field}")
-            entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, system_slug, translations))
+            entities.append(SolaxFieldSensor(coordinator, sn, field, human_name, system_slug, translations, type_map))
         
         # Inverter Efficiency computed sensor
         name_key = f"component.{DOMAIN}.entity.sensor.inverterEfficiency.name"
@@ -77,7 +77,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
 class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = False # We provide the name manually, so this must be False
 
-    def __init__(self, coordinator, serial, field, human_name, system_slug, type_map):
+    def __init__(self, coordinator, serial, field, human_name, system_slug, translations, type_map):
         super().__init__(coordinator)
         self._serial = serial
         self._field = field
@@ -124,10 +124,10 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
             state_key = f"component.{DOMAIN}.entity.sensor.{self._field}.state.{val}"
             # Return the translated state, or fallback to string value
             translated_state = self._translations.get(state_key)
-        if translated_state:
-            return translated_state
-        # Fallback to raw value if no translation found
-        return str(val)
+            if translated_state:
+                return translated_state
+            # Fallback to raw value if no translation found
+            return str(val)
 
         if self._field in NUMERIC_FIELDS:
             return val
