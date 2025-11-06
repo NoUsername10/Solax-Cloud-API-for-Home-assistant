@@ -37,9 +37,10 @@ async def async_setup_entry(hass, entry, async_add_entities):
 
     # Fetch the translations for the integration's sensor platform
     translations = await async_get_translations(
-        hass, entry.data.get("lang", "en"), "sensor"
+        hass, entry.data.get("lang", "en"), DOMAIN
     )
 
+    _LOGGER.warning("Loaded translations keys: %s", list(translations.keys()))
 
     # Build inverter type map
     type_map = {}
