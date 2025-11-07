@@ -52,19 +52,21 @@ async def async_setup_entry(hass, entry, async_add_entities):
     import json
     import os
 
-    # Use HA's configured UI language if available, fallback to 'en'
     lang = getattr(hass.config, "language", "en")
-
     translations_file = os.path.join(
         hass.config.path("custom_components/solax_cloud_api/translations"), f"{lang}.json"
     )
-    if os.path.exists(translations_file):
-        with open(translations_file, "r", encoding="utf-8") as f:
-            translations = json.load(f)
-    else:
-        translations = {}
 
-    # Flatten translations so nested keys (including states) are accessible
+    if not os.path.exists(translations_file):
+        translations_file = os.path.join(
+            hass.config.path("custom_components/solax_cloud_api/translations"), "en.json"
+        )
+
+    def _load_translations():
+        with open(translations_file, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    translations = await hass.async_add_executor_job(_load_translations)
     translations = flatten_translations(translations)
 
     #Check for loaded translations
@@ -321,7 +323,7 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
         self._type_map = type_map
         self._metric = metric 
         self._attr_name = name 
-     
+
         self._attr_unique_id = f"{system_slug}_{metric}_{serial}".lower().replace(" ", "_")
         self.entity_id = f"sensor.{system_slug}_{metric}_{serial}".lower()
 
