@@ -49,7 +49,7 @@
       },
       "entity": {
         "sensor": {
-          "acpower": { "name": "AC Utgangseffekt" },
+          "acpower": { "name": "AC Effekt" },
           "powerdc1": { "name": "DC Effekt Sträng 1" },
           "powerdc2": { "name": "DC Effekt Sträng 2" },
           "powerdc3": { "name": "DC Effekt Sträng 3" },
@@ -58,7 +58,7 @@
           "feedinpowerM2": { "name": "Nätinmatning Effekt Mätare 2" },
           "batPower": { "name": "Batteri Effekt" },
           "yieldtoday": { "name": "Produktion Idag" },
-          "yieldtotal": { "name": "Total Produktion" },
+          "yieldtotal": { "name": "Produktion Total" },
           "feedinenergy": { "name": "Nätinmatning Energi" },
           "consumeenergy": { "name": "Nätförbrukning Energi" },
           "soc": { "name": "Batteri Laddningstillstånd" },
