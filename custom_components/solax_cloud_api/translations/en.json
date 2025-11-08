@@ -112,9 +112,9 @@
             "name": "Inverter Type",
             "state": {
               "1": "Solax X1 Mini",
-              "2": "X‑Hybrid",
-              "3": "X1‑Hybrid‑G3",
-              "4": "X1‑Boost/Air/Mini",
+              "2": "Solax X1 Boost",
+              "3": "Solax X1 Pro",
+              "4": "Solax X3",
               "5": "X3‑Hybrid‑G1/G2",
               "6": "X3‑20K/30K",
               "7": "X3‑MIC/PRO",
