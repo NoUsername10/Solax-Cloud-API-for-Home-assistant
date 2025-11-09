@@ -1,6 +1,6 @@
 {
   "domain": "solax_cloud_api",
-  "name": "Solax Cloud API Single and Multi Inverter, including Micro Inverters.",
+  "name": "Solax Cloud API Single and Multi Inverter systems, including Micro Inverters.",
   "version": "0.1.6.1",
   "documentation": "https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant",
   "issue_tracker": "https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/issues",
