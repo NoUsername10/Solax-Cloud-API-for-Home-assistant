@@ -1,0 +1,3 @@
+manual_refresh:
+  name: Manual Refresh
+  description: Trigger an immediate refresh for all configured Solax inverters.

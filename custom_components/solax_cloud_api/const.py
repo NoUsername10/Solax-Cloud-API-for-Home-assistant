@@ -1,10 +1,16 @@
 DOMAIN = "solax_cloud_api"
-PLATFORMS = ["sensor"]
+PLATFORMS = ["sensor", "switch"]
 CONF_TOKEN = "api_token"
 CONF_INVERTERS = "inverters"
 CONF_SCAN_INTERVAL = "scan_interval"
+CONF_SYSTEM_NAME = "system_name"
+CONF_ENTITY_PREFIX = "entity_prefix"
+CONF_RATE_LIMIT_NOTIFICATIONS = "rate_limit_notifications"
 DEFAULT_SCAN_INTERVAL = 120
 API_URL = "https://global.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get"
+SERVICE_MANUAL_REFRESH = "manual_refresh"
+RUNTIME_RELOAD_STATE = f"{DOMAIN}_reload_state"
+RUNTIME_INITIAL_SETUP_STATE = "__initial_setup__"
 
 import logging
 LOGGER = logging.getLogger(__package__)
