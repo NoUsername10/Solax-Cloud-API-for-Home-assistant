@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v0.1.8.7] - 2026-02-12
+
+### Release Notes
+- Clean version after passing HACS and Hassfest validations.
+
+
 ## [v0.1.8.6] - 2026-02-12
 
 ### Release Notes
@@ -22,6 +28,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 - Prevented translation-key regressions that can fail Hassfest validation.
+
 
 ## [v0.1.8.5] - 2026-02-12
 
