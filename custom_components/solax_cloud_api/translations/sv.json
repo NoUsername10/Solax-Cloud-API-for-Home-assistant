@@ -99,10 +99,10 @@
       "feedinpower": {
         "name": "Nätinmatning Effekt"
       },
-      "feedinpowerM2": {
+      "feedinpower_m2": {
         "name": "Nätinmatning Effekt Mätare 2"
       },
-      "batPower": {
+      "bat_power": {
         "name": "Batteri Effekt"
       },
       "yieldtoday": {
@@ -129,19 +129,19 @@
       "peps3": {
         "name": "EPS Fas 3 Effekt"
       },
-      "inverterSN": {
+      "inverter_sn": {
         "name": "Inverter Serienummer"
       },
       "sn": {
         "name": "Inverter Serienummer Wi-Fi Modul"
       },
-      "uploadTime": {
+      "upload_time": {
         "name": "Inverter Uppladdningstid"
       },
-      "utcDateTime": {
+      "utc_date_time": {
         "name": "UTC Datum Tid"
       },
-      "inverterEfficiency": {
+      "inverter_efficiency": {
         "name": "Inverter Verkningsgrad"
       },
       "dc_total_inverter": {
@@ -153,10 +153,10 @@
       "dc_total": {
         "name": "System DC Effekt"
       },
-      "systemEfficiency": {
+      "system_efficiency": {
         "name": "System Total Verkningsgrad"
       },
-      "systemHealth": {
+      "system_health": {
         "name": "Systemhälsa",
         "state": {
           "ok": "OK",
@@ -165,7 +165,7 @@
           "unknown": "Okänd"
         }
       },
-      "rateLimitStatus": {
+      "rate_limit_status": {
         "name": "API Hastighetsbegränsning Status",
         "state": {
           "ok": "OK",
@@ -173,13 +173,13 @@
           "unknown": "Okänd"
         }
       },
-      "lastPollAttempt": {
+      "last_poll_attempt": {
         "name": "Senaste Pollförsök"
       },
-      "nextScheduledPoll": {
+      "next_scheduled_poll": {
         "name": "Nästa Schemalagda Pollning"
       },
-      "apiAccessStatus": {
+      "api_access_status": {
         "name": "API Access Status",
         "state": {
           "ok": "OK",
@@ -195,7 +195,7 @@
       "yieldtotal_total": {
         "name": "System Total Produktion"
       },
-      "inverterStatus": {
+      "inverter_status": {
         "name": "Inverter Status",
         "state": {
           "100": "Väntar på drift",
@@ -219,7 +219,7 @@
           "133": "TOU - Urladdning"
         }
       },
-      "batStatus": {
+      "bat_status": {
         "name": "Batteri Status",
         "state": {
           "0": "Normal",
@@ -227,7 +227,7 @@
           "2": "Frånkopplad"
         }
       },
-      "inverterType": {
+      "inverter_type": {
         "name": "Inverter Typ",
         "state": {
           "1": "X1-LX",
