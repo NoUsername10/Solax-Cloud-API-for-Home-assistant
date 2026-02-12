@@ -1,5 +1,5 @@
 # Solax Cloud API for Single and Multi Inverter Systems
-![Solax Logo](https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/icon.png)
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/icon.png" width=20% height=20%>
 
 Home Assistant custom integration to monitor Solax inverters using the official Solax Cloud API V2.0. <br>
 Supports both single and multi-inverter systems, dynamic sensors, system totals, and reliability-focused error handling.
@@ -16,7 +16,7 @@ Contributions, issues, and pull requests are welcome.<br>
 
 
 
-System information (this system contains 3 micro-inverters): <br>
+Total System information (this system contains 3 micro-inverters): <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20system.png" width=50% height=50%>
 
 Single-inverter info: <br>
