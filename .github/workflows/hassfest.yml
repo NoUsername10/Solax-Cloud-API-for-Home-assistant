@@ -12,4 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Translation key guard
+        run: python3 scripts/check_translation_keys.py
       - uses: home-assistant/actions/hassfest@master
