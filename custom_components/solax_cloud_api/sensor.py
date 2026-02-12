@@ -1,3 +1,4 @@
+import re
 from datetime import timedelta
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.helpers import device_registry as dr
@@ -24,14 +25,22 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
 
 
 def get_translation_name(translations, domain, sensor_key, state_value=None, default=None):
+    normalized_sensor_key = _translation_sensor_key(sensor_key)
     if state_value is not None:
-        flat_state_key = f"component.{domain}.entity.sensor.{sensor_key}.state.{state_value}"
+        flat_state_key = f"component.{domain}.entity.sensor.{normalized_sensor_key}.state.{state_value}"
         if flat_state_key in translations:
             return translations[flat_state_key]
         return str(state_value)
 
-    flat_name_key = f"component.{domain}.entity.sensor.{sensor_key}.name"
+    flat_name_key = f"component.{domain}.entity.sensor.{normalized_sensor_key}.name"
     return translations.get(flat_name_key, default or sensor_key)
+
+
+def _translation_sensor_key(sensor_key):
+    key = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", str(sensor_key))
+    key = re.sub(r"[^a-zA-Z0-9_-]+", "_", key)
+    return key.lower().strip("_-")
+
 
 def _flatten_translations(data, parent_key=""):
     items = {}
@@ -76,6 +85,7 @@ async def _load_local_translations(hass, lang):
 
     flattened = _flatten_translations(domain_block)
     return {f"component.{DOMAIN}.{key}": value for key, value in flattened.items()}
+
 
 def _cleanup_removed_inverter_artifacts(hass, entry, system_slug, inverters):
     configured_casefold = {sn.casefold() for sn in inverters}
@@ -132,10 +142,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
         translations = await _load_local_translations(hass, lang)
 
     # Build inverter type map once
+    inverter_type_key = _translation_sensor_key("inverterType")
     type_map = {
         k.split(".")[-1]: v
         for k, v in translations.items()
-        if "entity.sensor.inverterType.state." in k
+        if f"entity.sensor.{inverter_type_key}.state." in k
     }
 
     entities = []
@@ -340,7 +351,8 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         if self._field in MAPPED_FIELDS and self._field in inv and inv[self._field] is not None:
             raw_val = inv[self._field]
             attrs[f"{self._field}_raw"] = raw_val
-            state_key = f"component.{DOMAIN}.entity.sensor.{self._field}.state.{raw_val}"
+            field_key = _translation_sensor_key(self._field)
+            state_key = f"component.{DOMAIN}.entity.sensor.{field_key}.state.{raw_val}"
             mapped_value = self._translations.get(state_key, f"Unknown ({raw_val})")
             attrs[f"{self._field}_text"] = mapped_value
 
