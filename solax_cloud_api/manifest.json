@@ -1,0 +1,12 @@
+{
+  "domain": "solax_cloud_api",
+  "name": "Solax Cloud API for Single and Multi Inverter Systems",
+  "codeowners": ["@NoUsername10"],
+  "config_flow": true,
+  "documentation": "https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/issues",
+  "requirements": ["aiohttp>=3.8.0"],
+  "single_config_entry": true,
+  "version": "v0.1.8.5"
+}
