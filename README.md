@@ -54,6 +54,7 @@ https://www.solaxcloud.com/user_api/SolaxCloud_Monitoring_API_V7.1.pdf
 - **Persistent Notifications + Toggle** - Rate-limit notifications can be enabled/disabled from System Totals
 - **Entity/Device Cleanup** - Removed serials clean up stale entities/devices from the registry
 - **Stable Entity Prefix** - Entity IDs remain stable when system name changes
+- **UI Language Support** - Built-in translations for English (`en`), Swedish (`sv`), and Spanish (`es`)
 
 ## ✅ Prerequisites
 

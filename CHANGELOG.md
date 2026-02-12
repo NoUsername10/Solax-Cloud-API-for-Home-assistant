@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - `Last Poll Attempt` (diagnostic, disabled by default)
   - `Next Scheduled Poll` (diagnostic, disabled by default)
 - System-level rate-limit diagnostic details in attributes (affected inverters, counts, details).
+- Added Spanish (`es`) UI translations, alongside English (`en`) and Swedish (`sv`).
 
 ### Changed
 - Integration name shortened to `Solax Cloud API for Single and Multi Inverter Systems`.
