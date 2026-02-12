@@ -1,6 +1,7 @@
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.components import persistent_notification
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import config_validation as cv
 from .const import (
     DOMAIN,
     PLATFORMS,
@@ -13,6 +14,9 @@ from .const import (
     SERVICE_MANUAL_REFRESH,
 )
 from .coordinator import SolaxCoordinator
+
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 def _rate_limit_notification_id(entry_id: str) -> str:

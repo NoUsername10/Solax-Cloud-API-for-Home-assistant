@@ -65,7 +65,17 @@ async def _load_local_translations(hass, lang):
             return json.load(file)
 
     loaded = await hass.async_add_executor_job(_load)
-    return _flatten_translations(loaded)
+
+    # translations/*.json for custom integrations are rooted at the integration
+    # level (title/config/options/entity/...). Keep backward compatibility with
+    # older nested "component.<domain>" layouts if encountered.
+    if isinstance(loaded, dict) and "component" in loaded and isinstance(loaded.get("component"), dict):
+        domain_block = loaded.get("component", {}).get(DOMAIN, {})
+    else:
+        domain_block = loaded
+
+    flattened = _flatten_translations(domain_block)
+    return {f"component.{DOMAIN}.{key}": value for key, value in flattened.items()}
 
 def _cleanup_removed_inverter_artifacts(hass, entry, system_slug, inverters):
     configured_casefold = {sn.casefold() for sn in inverters}
