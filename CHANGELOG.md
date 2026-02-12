@@ -6,7 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v0.1.8.6] - 2026-02-12
+
+### Release Notes
+- Patch release focused on translation quality and release validation hardening.
+- Keeps `v0.1.8.5` feature history intact and adds a clear delta for this bump.
+
+### Added
+- Spanish (`es`) UI translations.
+- Translation key guard script (`scripts/check_translation_keys.py`) for CI.
+
+### Changed
+- CI now validates translation keys and language parity before Hassfest.
+- Integration version bumped to `v0.1.8.6`.
+
+### Fixed
+- Prevented translation-key regressions that can fail Hassfest validation.
+
 ## [v0.1.8.5] - 2026-02-12
+
+### Release Notes
+- This release focuses on production hardening for setup/reload behavior, API rate-limit handling, and invalid-serial (`1003`) handling.
+- System diagnostics and usability were expanded with clear status sensors, polling diagnostics, and a rate-limit notifications control in System Totals.
 
 ### Added
 - Per-inverter `API Access Status` diagnostic sensor.
@@ -19,7 +40,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - `Last Poll Attempt` (diagnostic, disabled by default)
   - `Next Scheduled Poll` (diagnostic, disabled by default)
 - System-level rate-limit diagnostic details in attributes (affected inverters, counts, details).
-- Added Spanish (`es`) UI translations, alongside English (`en`) and Swedish (`sv`).
 
 ### Changed
 - Integration name shortened to `Solax Cloud API for Single and Multi Inverter Systems`.
