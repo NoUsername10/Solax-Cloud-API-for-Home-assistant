@@ -1,5 +1,5 @@
 {
-  "name": "Solax Cloud API 2.0 for Single and Multi Inverter systems.",
+  "name": "Solax Cloud API for Single and Multi Inverter Systems",
   "render_readme": true,
   "homeassistant": "2023.1.0"
 }
