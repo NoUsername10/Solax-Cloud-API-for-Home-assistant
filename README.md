@@ -9,10 +9,10 @@ It has been iteratively improved with a focus on reliability, maintainability, a
 Contributions, issues, and pull requests are welcome.<br>
 
 
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
+
+
 [![coffee_badge](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-orange.svg)](https://www.buymeacoffee.com/DefaultLogin)
-
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
-
 
 
 
@@ -61,23 +61,20 @@ https://www.solaxcloud.com/user_api/SolaxCloud_Monitoring_API_V7.1.pdf
 Before installation, you need:
 1. **Solax Cloud Account** - Register at [solaxcloud.com](https://www.solaxcloud.com)
 2. **API Token** - Obtain from Solax Cloud under **Service → Third-party Ecosystem**
-3. **Inverter Serial Numbers** - Wi-Fi module serial (or SN for microinverters) under **Devices**
+3. **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
+      - If your system uses a Solax LAN/WiFi dongle, use the dongle serial.
+      - If your inverter has built-in WiFi, use the inverter serial.
+      - For microinverter systems, use the microinverter serial.
 
-## 📦 Installation
+## 📦 Installation (HACS - Recommended)
 
-### Method 1: HACS (Recommended)
+[<img src="https://my.home-assistant.io/badges/hacs_repository.svg" />](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
 
-1. Open **HACS** in your Home Assistant
-2. Click on **Integrations**
-3. Click the three dots in the top right corner → **Custom repositories**
-4. Add this repository URL:  
-   `https://github.com/NoUsername10/Solax-Cloud-API-for-Home-assistant`
-5. Select **Integration** as the category
-6. Click **Add**
-7. Search for "Solax Cloud API" and install
-8. Restart Home Assistant
+1. Add/install **Solax Cloud API for Single and Multi Inverter Systems** from HACS (**Integration** category).
+2. Restart Home Assistant.
+3. Go to **Settings -> Devices & Services -> Add Integration** and add **Solax Cloud API for Single and Multi Inverter Systems**.
 
-### Method 2: Manual Installation
+### Manual Installation (Backup)
 
 1. Download the latest release
 2. Copy the `custom_components/solax_cloud_api` folder to your Home Assistant `custom_components` directory
@@ -95,8 +92,11 @@ Before installation, you need:
    - **Scan Interval**: Polling frequency in seconds (default: 120, minimum suggested: 120)
 
 ### ➕ Adding Inverters
-5. After initial setup, you'll be guided to add inverter serials one by one
-6. Enter each inverter's Wi-Fi module serial number
+5. After initial setup, you'll be guided to add inverter serials one by one.
+6.  **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
+      - If your system uses a Solax LAN/WiFi dongle, use the dongle serial.
+      - If your inverter has built-in WiFi, use the inverter serial.
+      - For microinverter systems, use the microinverter serial.
 7. Check "Finish Setup" when all inverters are added
 
 ### 🧩 Managing Inverters
@@ -206,7 +206,7 @@ System-wide totals:
 
 **No data appearing?**
 - Verify your API token is correct (it is validated during setup)
-- Check inverter serial numbers are accurate (Wi-Fi module SN, not inverter SN)
+- Check inverter serial numbers are accurate: use LAN/WiFi dongle serial when present, inverter serial for built-in WiFi systems, or microinverter serial for microinverter systems
 - Ensure inverters are connected to Solax Cloud and reporting data
 - Check Home Assistant logs for specific error messages
 
