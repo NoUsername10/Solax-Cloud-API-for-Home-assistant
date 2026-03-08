@@ -63,8 +63,8 @@ Before installation, you need:
 2. **API Token** - Obtain from Solax Cloud under **Service → Third-party Ecosystem**
 3. **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
       - If your system uses a Solax LAN/WiFi dongle, use the dongle serial.
-      - If your inverter has built-in WiFi, use the inverter serial.
-      - For microinverter systems, use the microinverter serial.
+      - If your inverter has built-in WiFi, use the WiFi inverter serial.
+      - For microinverter systems, use the microinverter(s) serial(s).
 
 ## 📦 Installation (HACS - Recommended)
 
@@ -95,8 +95,8 @@ Before installation, you need:
 5. After initial setup, you'll be guided to add inverter serials one by one.
 6.  **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
       - If your system uses a Solax LAN/WiFi dongle, use the dongle serial.
-      - If your inverter has built-in WiFi, use the inverter serial.
-      - For microinverter systems, use the microinverter serial.
+      - If your inverter has built-in WiFi, use the WiFi inverter serial.
+      - For microinverter systems, use the microinverter(s) serial(s).
 7. Check "Finish Setup" when all inverters are added
 
 ### 🧩 Managing Inverters
