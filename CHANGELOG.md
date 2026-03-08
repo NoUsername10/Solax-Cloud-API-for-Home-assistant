@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [v0.1.8.8] - 2026-02-19
+
+### Release Notes
+- Removed duplicated folder from root.
+
 ## [v0.1.8.7] - 2026-02-12
 
 ### Release Notes
