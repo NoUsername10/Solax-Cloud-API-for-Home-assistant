@@ -44,7 +44,7 @@ Contributions, issues, and pull requests are welcome.<br>
 **Single-inverter info:** <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20inverter.png" width=75% height=75%>
 
-**Built in diagnostics:** <br>
+## Built in diagnostics: <br>
 Serial and Token redacted diagnostics for assistance. <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/download-diagnostics.png" width=75% height=75%>
 
