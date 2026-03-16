@@ -14,7 +14,7 @@ Contributions, issues, and pull requests are welcome.<br>
 
 
 Total System information (this system contains 3 micro-inverters): <br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20system.png" width=50% height=50%>
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20system.png">
 
 Single-inverter info: <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20inverter.png" width=50% height=50%>
