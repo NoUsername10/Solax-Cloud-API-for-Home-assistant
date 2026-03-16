@@ -54,13 +54,13 @@ https://www.solaxcloud.com/user_api/SolaxCloud_Monitoring_API_V7.1.pdf
 - **Persistent Notifications + Toggle** - Rate-limit notifications can be enabled/disabled from System Totals
 - **Entity/Device Cleanup** - Removed serials clean up stale entities/devices from the registry
 - **Stable Entity Prefix** - Entity IDs remain stable when system name changes
-- **UI Language Support** - Built-in translations for English (`en`), Swedish (`sv`), and Spanish (`es`)
+- **UI Language Support** - 🇬🇧 English (`en`), 🇩🇪 German (`de`), 🇳🇱 Dutch (`nl`), 🇨🇿 Czech (`cs`), 🇵🇱 Polish (`pl`), 🇵🇹 Portuguese (`pt`), 🇪🇸 Spanish (`es`), 🇮🇹 Italian (`it`), 🇫🇷 French (`fr`), 🇸🇪 Swedish (`sv`), 🇩🇰 Danish (`da`), 🇳🇴 Norwegian Bokmal (`nb`), 🇫🇮 Finnish (`fi`)
 
 ## ✅ Prerequisites
 
 Before installation, you need:
 1. **Solax Cloud Account** - Register at [solaxcloud.com](https://www.solaxcloud.com)
-2. **API Token** - Obtain from Solax Cloud under **Service → Third-party Ecosystem**
+2. **API Token** - In Solax Cloud, open the top-right menu and click **More Services**, select **API** from the dropdown, then on **Third-party Ecosystem** copy the **Token ID** under **API Realtime Data**. Use this `Token ID` during integration setup.
 3. **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
       - If your system uses a Solax LAN/WiFi dongle, use the dongle serial.
       - If your inverter has built-in WiFi, use the WiFi inverter serial.
@@ -87,7 +87,7 @@ Before installation, you need:
 2. Click **+ Add Integration**
 3. Search for **"Solax Cloud API"**
 4. Enter your configuration:
-   - **API Token**: Your Solax Cloud API token
+   - **API Token**: The `Token ID` from Solax Cloud **Third-party Ecosystem** → **API Realtime Data**
    - **System Name**: Name for your solar system (used for system total sensors and entity ID prefix)
    - **Scan Interval**: Polling frequency in seconds (default: 120, minimum suggested: 120)
 

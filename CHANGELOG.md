@@ -7,10 +7,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Planned]
 - Integration device diagnostics download for unsupported inverters.
 - Add System health Notifications switch and messaging (with error message, inverter ino etc)
-- Individual DC string performance over the day comparison graph for all panels.
+- Individual DC string performance over the day comparison (fault finding) for all panels.
+- Implement brand proxy: https://developers.home-assistant.io/blog/2026/02/24/brands-proxy-api/
 
 ## [Unreleased]
+- No changes yet.
+
+## [v0.1.8.9] - 2026-03-16
+
+### Release Notes
+- Translation and i18n consistency release ahead of upload.
+
+### Changed
 - Updated Readme.md instructions regarding what serial number to use during setup.
+- Completed i18n pass for flow acknowledgements and runtime persistent notifications (en/sv/es), and fixed remaining English strings in Swedish translation entries.
+- Added translation files for de, nl, cs, pl, pt, it, fr, da, nb, and fi.
+- Standardized the integration translation title globally to `Solax Cloud API SolaXCloud` across all locale files.
+- Completed a final multilingual translation quality pass for all supported locales.
+- Re-ran and passed translation parity/key validation after translation updates.
 
 ## [v0.1.8.8] - 2026-02-19
 
