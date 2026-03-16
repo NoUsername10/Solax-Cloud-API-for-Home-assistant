@@ -56,6 +56,7 @@ Before installation, you need:
    <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/menu-api.png">
    
    On **Third-party Ecosystem** copy the **Token ID** under **API Realtime Data**. Use this `Token ID` during integration setup:
+   
    <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/menu-api-token.png">
 
 4. **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
