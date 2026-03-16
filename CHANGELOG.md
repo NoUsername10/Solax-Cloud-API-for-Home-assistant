@@ -5,13 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Planned]
-- Integration device diagnostics download for unsupported inverters.
 - Add System health Notifications switch and messaging (with error message, inverter ino etc)
 - Individual DC string performance over the day comparison (fault finding) for all panels.
-- Implement brand proxy: https://developers.home-assistant.io/blog/2026/02/24/brands-proxy-api/
 
 ## [Unreleased]
 - No changes yet.
+
+## [v0.1.9.0] - 2026-03-16
+
+### Release Notes
+- Brand and diagnostics release focused on easier troubleshooting and privacy-safe debug data.
+
+### Added
+- Added local brand assets under `custom_components/solax_cloud_api/brand` for Home Assistant's new Brands Proxy API path.
+- Added Home Assistant diagnostics export with the latest full pre-filter Solax API response per inverter (latest only), including battery field summaries for debugging missing battery entities.
+
+### Changed
+- Brand assets are now resolved by integration domain (`solax_cloud_api`) and served by Home Assistant's local brands API path (`/api/brands/integration/{domain}/{image}`), with no extra integration code required.
+- Diagnostics are available via Home Assistant's built-in integration action: `Download diagnostics` with partial serial and token masking in exported payloads while preserving support-relevant context.
+
+### Privacy
+- Diagnostics intentionally redact sensitive token fields and mask serial data.
+- Home Assistant diagnostics packages may still include platform/environment metadata outside this integration's payload.
 
 ## [v0.1.8.9] - 2026-03-16
 
