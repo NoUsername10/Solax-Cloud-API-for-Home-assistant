@@ -2,6 +2,7 @@ import asyncio
 import async_timeout
 import logging
 from datetime import timedelta
+from copy import deepcopy
 
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
@@ -65,6 +66,8 @@ class SolaxCoordinator(DataUpdateCoordinator):
         self.unauthorized_inverters = []
         self.unauthorized_details = {}
         self.last_rate_limit_at = None
+        # Keep the latest full pre-filter API payload per inverter for diagnostics.
+        self.raw_api_responses = {}
         self._initial_refresh_inverters = (
             {sn.casefold() for sn in initial_refresh_inverters}
             if initial_refresh_inverters is not None
@@ -98,6 +101,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         results = {}
+        raw_results = {}
         self.last_update_attempt = dt_util.utcnow()
         self.rate_limited_inverters = []
         self.rate_limited_details = {}
@@ -114,8 +118,11 @@ class SolaxCoordinator(DataUpdateCoordinator):
                 and sn.casefold() not in self._initial_refresh_inverters
             ):
                 previous = self.data.get(sn)
+                previous_raw = self.raw_api_responses.get(sn)
                 if isinstance(previous, dict):
                     results[sn] = dict(previous)
+                    if isinstance(previous_raw, dict):
+                        raw_results[sn] = deepcopy(previous_raw)
                     previous_error = previous.get("error")
                     if previous_error == "data_unauthorized":
                         self.unauthorized_inverters.append(sn)
@@ -133,6 +140,8 @@ class SolaxCoordinator(DataUpdateCoordinator):
                         self.last_rate_limit_at = dt_util.utcnow()
                 else:
                     results[sn] = {}
+                    if isinstance(previous_raw, dict):
+                        raw_results[sn] = deepcopy(previous_raw)
                 continue
 
             # Add progressive delay based on position
@@ -148,6 +157,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
             if current_time < skip_until:
                 _LOGGER.debug("Skipping %s - recently rate limited (skip until: %.1fs)", sn, skip_until - current_time)
                 previous = self.data.get(sn)
+                previous_raw = self.raw_api_responses.get(sn)
                 if isinstance(previous, dict) and previous.get("error") == "data_unauthorized":
                     # Keep unauthorized state sticky during temporary throttling windows.
                     results[sn] = dict(previous)
@@ -160,6 +170,8 @@ class SolaxCoordinator(DataUpdateCoordinator):
                     results[sn] = dict(previous)
                 else:
                     results[sn] = {"error": "rate_limit_skip", "skip_until": skip_until}
+                if isinstance(previous_raw, dict):
+                    raw_results[sn] = deepcopy(previous_raw)
                 self.rate_limited_inverters.append(sn)
                 self.rate_limited_details[sn] = {
                     "reason": "cooldown_active",
@@ -174,13 +186,16 @@ class SolaxCoordinator(DataUpdateCoordinator):
             if isinstance(resp, Exception):
                 _LOGGER.warning("Fetch exception for %s: %s", sn, resp)
                 results[sn] = None
+                raw_results[sn] = {"error": str(resp)}
                 continue
 
             if not isinstance(resp, dict):
                 _LOGGER.warning("Bad response for %s: %s", sn, resp)
                 results[sn] = None
+                raw_results[sn] = {"error": "bad_response_type", "raw": str(resp)}
                 continue
 
+            raw_results[sn] = deepcopy(resp)
             code = resp.get("code")
             success = resp.get("success", False)
             
@@ -282,4 +297,5 @@ class SolaxCoordinator(DataUpdateCoordinator):
         self._initial_refresh_inverters = None
 
         self.data = results
+        self.raw_api_responses = raw_results
         return self.data
