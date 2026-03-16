@@ -24,6 +24,7 @@ Created using the latest Solax API documentation.
 - **Persistent Notifications + Toggle** - Rate-limit notifications can be enabled/disabled from System Totals
 - **Entity/Device Cleanup** - Removed serials clean up stale entities/devices from the registry
 - **Stable Entity Prefix** - Entity IDs remain stable when system name changes
+- **Built-in Diagnostics Export** - Download diagnostics with API responses with partial masked token and partial serial masking for privacy.
 - **UI Language Support** - 🇬🇧 English (`en`), 🇩🇪 German (`de`), 🇳🇱 Dutch (`nl`), 🇨🇿 Czech (`cs`), 🇵🇱 Polish (`pl`), 🇵🇹 Portuguese (`pt`), 🇪🇸 Spanish (`es`), 🇮🇹 Italian (`it`), 🇫🇷 French (`fr`), 🇸🇪 Swedish (`sv`), 🇩🇰 Danish (`da`), 🇳🇴 Norwegian Bokmal (`nb`), 🇫🇮 Finnish (`fi`)
 
 <br>
@@ -206,6 +207,18 @@ System-wide totals:
 - System total sensors show active/total inverter count
 
 ## 🛠️ Troubleshooting
+
+**How to download diagnostics**
+1. Go to **Settings -> Devices & Services**
+2. Open your **Solax Cloud API** integration
+3. Click the top-right menu (`⋮`)
+4. Click **Download diagnostics**
+5. Share diagnostics when opening an issue (redact anything else you consider sensitive)
+
+**Diagnostics privacy notes**
+- Token values are exported as a masked preview plus token length (not full token).
+- Serial numbers are partially masked in diagnostics output.
+- Home Assistant diagnostics packages may include additional platform/environment metadata outside this integration's own payload.
 
 **No data appearing?**
 - Verify your API token is correct (it is validated during setup)
