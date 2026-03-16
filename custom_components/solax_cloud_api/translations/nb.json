@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfigurer SolaXCloud API-tilkobling",
+        "description": "Skriv inn Solax Cloud API-token, systemnavn og foretrukket skanneintervall. Solax API oppdateres kun 5 min.",
+        "data": {
+          "api_token": "API-token",
+          "system_name": "Systemnavn",
+          "scan_interval": "Skanneintervall (sekunder)"
+        }
+      },
+      "add_inverter": {
+        "title": "Legg til omformere til {system_name}",
+        "description": "Strømomformere ({count}):\n{inverters_list}\n\nLegg til omformerens serienumre ett etter ett. Merk av for \"Fullfør\" når du er ferdig.",
+        "data": {
+          "serial": "Omformerens serienummer",
+          "finish": "Fullfør oppsettet"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Merknad om API-hastighetsgrense",
+        "description": "Før du fullførte oppsettet, returnerte {count} omformer(e) API-hastighetsgrense:\n{inverters_list}\n\nOppsettet kan fortsette. Noen verdier kan bli forsinket til neste oppdatering. Gjeldende skanneintervall: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API-hastighetsgrense oppstod. Berørte omformere: {inverters_list}. Gjeldende skanneintervall: {scan_interval}s. Noen verdier kan bli forsinket til neste oppdatering."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Integrasjon er allerede konfigurert"
+    },
+    "error": {
+      "invalid_token": "Ugyldig API-token",
+      "no_inverters": "Det kreves minst ett serienummer for omformeren",
+      "no_system_name": "Systemnavn er påkrevd",
+      "duplicate_inverter": "Denne omformerserien er allerede lagt til",
+      "acknowledge_rate_limit": "Vennligst bekreft varselet om takstgrense for å fortsette",
+      "notification_rate_limit_title": "SolaX Cloud API - Hastighetsgrense",
+      "notification_rate_limit_body": "SolaX Cloud API-hastighetsgrense er aktiv.\nBerørte omformere: {inverter_list}\n{details_block}\nIntegrasjonen beholder tidligere verdier for berørte omformere til API-anrop gjenopprettes. Vurder å øke skanneintervallet ({scan_interval}s).",
+      "notification_invalid_serial_title": "SolaX Cloud API - Ugyldig serie/tilgang",
+      "notification_invalid_serial_body": "En eller flere inverterserier er uautoriserte.\n{details_block}\nDisse omformerne holdes utilgjengelige inntil seriell/authort-tilgang er korrigert.",
+      "notification_unknown": "Ukjent",
+      "notification_data_unauthorized": "Data uautorisert"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Vennligst bekreft varselet om takstgrense for å fortsette",
+      "acknowledge_invalid_serial": "Vennligst bekreft den ugyldige serie-/tilgangsmeldingen for å fortsette"
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Administrer invertere",
+        "description": "Strømomformere ({count}):\n{inverters_list}\n\nLegg til nye omformere eller fjern eksisterende.",
+        "data": {
+          "api_token": "API-token",
+          "system_name": "Systemnavn",
+          "scan_interval": "Skanneintervall (sekunder)",
+          "serial": "Legg til nytt serienummer",
+          "remove_serial": "Fjern omformeren",
+          "finish": "Lagre endringer"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Ugyldig serie-/tilgangsvarsel",
+        "description": "Endringene dine ble lagret, men {count} inverter(e) returnerte Data Uautorisert (1003):\n{details}\n\nDisse omformerne holdes utilgjengelige inntil seriell/authort-tilgang er korrigert.",
+        "data": {
+          "acknowledge": "Ugyldig serienummer/tilgang oppdaget. Berørte omformere: {details}. Disse omformerne holdes utilgjengelige inntil seriell/authort-tilgang er korrigert."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Merknad om API-hastighetsgrense",
+        "description": "Endringene dine ble lagret, men {count} omformer(e) nådde API-hastighetsgrensen under omlasting:\n{inverters_list}\n\nNoen verdier kan bli forsinket til neste oppdatering. Gjeldende skanneintervall: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API-hastighetsgrense oppstod. Berørte omformere: {inverters_list}. Gjeldende skanneintervall: {scan_interval}s. Noen verdier kan bli forsinket til neste oppdatering."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "Merknad om API-hastighetsgrense",
+        "description": "Endringene dine ble lagret, men {count} omformer(e) nådde API-hastighetsgrensen under omlasting:\n{inverters_list}\n\nNoen verdier kan bli forsinket til neste oppdatering. Gjeldende skanneintervall: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API-hastighetsgrense oppstod. Berørte omformere: {inverters_list}. Gjeldende skanneintervall: {scan_interval}s. Noen verdier kan bli forsinket til neste oppdatering."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "AC utgangseffekt"
+      },
+      "powerdc1": {
+        "name": "DC-strømstreng 1"
+      },
+      "powerdc2": {
+        "name": "DC-strømstreng 2"
+      },
+      "powerdc3": {
+        "name": "DC effekt streng 3"
+      },
+      "powerdc4": {
+        "name": "DC effekt streng 4"
+      },
+      "feedinpower": {
+        "name": "Nettinnmating effekt"
+      },
+      "feedinpower_m2": {
+        "name": "Nettinnmating effekt måler 2"
+      },
+      "bat_power": {
+        "name": "Batteristrøm"
+      },
+      "yieldtoday": {
+        "name": "Yield i dag"
+      },
+      "yieldtotal": {
+        "name": "Avkastning totalt"
+      },
+      "feedinenergy": {
+        "name": "Nettinnmating energi"
+      },
+      "consumeenergy": {
+        "name": "Nettforbruk Energi"
+      },
+      "soc": {
+        "name": "Batteriets ladetilstand"
+      },
+      "peps1": {
+        "name": "EPS Fase 1 Strøm"
+      },
+      "peps2": {
+        "name": "EPS fase 2 strøm"
+      },
+      "peps3": {
+        "name": "EPS fase 3 strøm"
+      },
+      "inverter_sn": {
+        "name": "Inverter seriell"
+      },
+      "sn": {
+        "name": "Inverter seriell Wi-Fi-modul"
+      },
+      "upload_time": {
+        "name": "Inverter-opplastingstid"
+      },
+      "utc_date_time": {
+        "name": "UTC Dato Tid"
+      },
+      "inverter_efficiency": {
+        "name": "Inverter effektivitet"
+      },
+      "dc_total_inverter": {
+        "name": "DC Power Inverter Totalt"
+      },
+      "ac_total": {
+        "name": "System AC effekt"
+      },
+      "dc_total": {
+        "name": "System DC effekt"
+      },
+      "system_efficiency": {
+        "name": "Systemets total effektivitet"
+      },
+      "system_health": {
+        "name": "Systemhelse",
+        "state": {
+          "ok": "God",
+          "degraded": "Degradert",
+          "error": "Feil",
+          "unknown": "Ukjent"
+        }
+      },
+      "rate_limit_status": {
+        "name": "API hastighetsgrensestatus",
+        "state": {
+          "ok": "Ingen grense",
+          "rate_limited": "Sats begrenset",
+          "unknown": "Ukjent"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Siste avstemningsforsøk"
+      },
+      "next_scheduled_poll": {
+        "name": "Neste planlagte avstemning"
+      },
+      "api_access_status": {
+        "name": "API-tilgangsstatus",
+        "state": {
+          "ok": "Tilgang OK",
+          "serial_unauthorized": "Seriell Uautorisert",
+          "rate_limited": "Sats begrenset",
+          "api_error": "API-feil",
+          "unknown": "Ukjent"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Systemutbytte i dag"
+      },
+      "yieldtotal_total": {
+        "name": "System Yield Levetid"
+      },
+      "inverter_status": {
+        "name": "Inverterstatus",
+        "state": {
+          "100": "Venter på operasjon",
+          "101": "Selvtest",
+          "102": "Normal drift",
+          "103": "Gjenopprettelig feil",
+          "104": "Permanent feil",
+          "105": "Firmware oppgradering",
+          "106": "EPS-deteksjon",
+          "107": "Øy-drift",
+          "108": "Selvtestmodus (italienske sikkerhetsforskrifter)",
+          "109": "Hvilemodus",
+          "110": "Standby-modus",
+          "111": "Fotovoltaisk vekkebatterimodus",
+          "112": "Generatordeteksjonsmodus",
+          "113": "Generatormodus",
+          "114": "Rask avslåing standby-modus",
+          "130": "VPP-modus",
+          "131": "TOU - Selvbruk",
+          "132": "TOU - Lading",
+          "133": "TOU - Utladning"
+        }
+      },
+      "bat_status": {
+        "name": "Batteristatus",
+        "state": {
+          "0": "Normalt",
+          "1": "Feil",
+          "2": "Koblet fra"
+        }
+      },
+      "inverter_type": {
+        "name": "Invertertype",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "API hastighetsgrensevarsler"
+      }
+    }
+  }
+}

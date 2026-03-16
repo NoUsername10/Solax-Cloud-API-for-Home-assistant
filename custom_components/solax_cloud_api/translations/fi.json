@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Määritä SolaXCloud API-yhteys",
+        "description": "Anna Solax Cloud API -tunnus, järjestelmän nimi ja haluttu tarkistusväli. Solax API päivittyy vain 5 minuutin välein.",
+        "data": {
+          "api_token": "API-tunnus",
+          "system_name": "Järjestelmän nimi",
+          "scan_interval": "Skannausväli (sekuntia)"
+        }
+      },
+      "add_inverter": {
+        "title": "Lisää invertterit kohteeseen {system_name}",
+        "description": "Nykyiset invertterit ({count}):\n{inverters_list}\n\nLisää invertterin sarjanumerot yksitellen. Valitse Valmis, kun olet valmis.",
+        "data": {
+          "serial": "Invertterin sarjanumero",
+          "finish": "Viimeistele asennus"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "API-nopeusrajoitusilmoitus",
+        "description": "Ennen asennuksen viimeistelyä {count} invertteri(t) palauttivat API-nopeusrajoituksen:\n{inverters_list}\n\nAsennus voi jatkua. Jotkin arvot voivat viivästyä seuraavaan päivitykseen. Nykyinen tarkistusväli: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API Rate Limit tapahtui. Vaikuttavat invertterit: {inverters_list}. Nykyinen tarkistusväli: {scan_interval}s. Jotkin arvot voivat viivästyä seuraavaan päivitykseen."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Integrointi on jo määritetty"
+    },
+    "error": {
+      "invalid_token": "Virheellinen API-tunnus",
+      "no_inverters": "Vähintään yksi invertterin sarjanumero vaaditaan",
+      "no_system_name": "Järjestelmän nimi vaaditaan",
+      "duplicate_inverter": "Tämä invertterisarja on jo lisätty",
+      "acknowledge_rate_limit": "Hyväksy hintarajoitusilmoitus jatkaaksesi",
+      "notification_rate_limit_title": "SolaX Cloud API - Nopeusrajoitus",
+      "notification_rate_limit_body": "SolaX Cloud API nopeusrajoitus on aktiivinen.\nMuutosinvertteri(t): {inverter_list}\n{details_block}\nIntegrointi säilyttää aiemmat arvot vaikuttaville inverttereille, kunnes API-kutsut palautuvat. Harkitse tarkistusvälin ({scan_interval}s) pidentämistä.",
+      "notification_invalid_serial_title": "SolaX Cloud API - Virheellinen sarja/pääsy",
+      "notification_invalid_serial_body": "Yksi tai useampi invertterisarja on luvaton.\n{details_block}\nNämä invertterit pidetään poissa käytöstä, kunnes sarja-/auth-käyttö on korjattu.",
+      "notification_unknown": "Tuntematon",
+      "notification_data_unauthorized": "Tiedot luvaton"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Hyväksy hintarajoitusilmoitus jatkaaksesi",
+      "acknowledge_invalid_serial": "Jatka vahvistamalla virheellinen sarja-/käyttöoikeusilmoitus"
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Hallitse invertteriä",
+        "description": "Nykyiset invertterit ({count}):\n{inverters_list}\n\nLisää uusia invertteriä tai poista olemassa olevia.",
+        "data": {
+          "api_token": "API-tunnus",
+          "system_name": "Järjestelmän nimi",
+          "scan_interval": "Skannausväli (sekuntia)",
+          "serial": "Lisää uusi sarjanumero",
+          "remove_serial": "Irrota invertteri",
+          "finish": "Tallenna muutokset"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Virheellinen sarja-/käyttöilmoitus",
+        "description": "Muutokset tallennettiin, mutta {count} invertteri(t) palauttivat tiedot luvatta (1003):\n{details}\n\nNämä invertterit pidetään poissa käytöstä, kunnes sarja-/auth-käyttö on korjattu.",
+        "data": {
+          "acknowledge": "Virheellinen sarja/pääsy havaittu. Vaikuttavat invertterit: {details}. Nämä invertterit pidetään poissa käytöstä, kunnes sarja-/auth-käyttö on korjattu."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "API-nopeusrajoitusilmoitus",
+        "description": "Muutokset tallennettiin, mutta {count} invertteriä saavutti API-nopeusrajan uudelleenlatauksen aikana:\n{inverters_list}\n\nJotkin arvot saattavat viivästyä seuraavaan päivitykseen. Nykyinen tarkistusväli: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API Rate Limit tapahtui. Vaikuttavat invertterit: {inverters_list}. Nykyinen tarkistusväli: {scan_interval}s. Jotkin arvot voivat viivästyä seuraavaan päivitykseen."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "API-nopeusrajoitusilmoitus",
+        "description": "Muutokset tallennettiin, mutta {count} invertteriä saavutti API-nopeusrajan uudelleenlatauksen aikana:\n{inverters_list}\n\nJotkin arvot saattavat viivästyä seuraavaan päivitykseen. Nykyinen tarkistusväli: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API Rate Limit tapahtui. Vaikuttavat invertterit: {inverters_list}. Nykyinen tarkistusväli: {scan_interval}s. Jotkin arvot voivat viivästyä seuraavaan päivitykseen."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "AC lähtöteho"
+      },
+      "powerdc1": {
+        "name": "DC-virtalähde 1"
+      },
+      "powerdc2": {
+        "name": "DC-virtalähde 2"
+      },
+      "powerdc3": {
+        "name": "DC-virtalähde 3"
+      },
+      "powerdc4": {
+        "name": "DC-virtalähde 4"
+      },
+      "feedinpower": {
+        "name": "Verkkosyöttöteho"
+      },
+      "feedinpower_m2": {
+        "name": "Verkkosyötön tehomittari 2"
+      },
+      "bat_power": {
+        "name": "Akun teho"
+      },
+      "yieldtoday": {
+        "name": "Tuotto tänään"
+      },
+      "yieldtotal": {
+        "name": "Kokonaistuotto"
+      },
+      "feedinenergy": {
+        "name": "Verkkoon syötettävä energia"
+      },
+      "consumeenergy": {
+        "name": "Verkon kulutus Energia"
+      },
+      "soc": {
+        "name": "Akun lataustila"
+      },
+      "peps1": {
+        "name": "EPS vaiheen 1 teho"
+      },
+      "peps2": {
+        "name": "EPS vaiheen 2 teho"
+      },
+      "peps3": {
+        "name": "EPS-vaiheen 3 teho"
+      },
+      "inverter_sn": {
+        "name": "Invertterin sarja"
+      },
+      "sn": {
+        "name": "Invertterin sarja-Wi-Fi-moduuli"
+      },
+      "upload_time": {
+        "name": "Invertterin latausaika"
+      },
+      "utc_date_time": {
+        "name": "UTC päivämäärä Aika"
+      },
+      "inverter_efficiency": {
+        "name": "Invertterin tehokkuus"
+      },
+      "dc_total_inverter": {
+        "name": "DC Power Inverter yhteensä"
+      },
+      "ac_total": {
+        "name": "Järjestelmän vaihtovirta"
+      },
+      "dc_total": {
+        "name": "Järjestelmän tasavirta"
+      },
+      "system_efficiency": {
+        "name": "Järjestelmän kokonaistehokkuus"
+      },
+      "system_health": {
+        "name": "Järjestelmän terveys",
+        "state": {
+          "ok": "Kunnossa",
+          "degraded": "Heikentynyt",
+          "error": "Virhe",
+          "unknown": "Tuntematon"
+        }
+      },
+      "rate_limit_status": {
+        "name": "API nopeusrajoituksen tila",
+        "state": {
+          "ok": "Ei rajoitusta",
+          "rate_limited": "Nopeusrajoitettu",
+          "unknown": "Tuntematon"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Viimeinen äänestysyritys"
+      },
+      "next_scheduled_poll": {
+        "name": "Seuraava ajoitettu äänestys"
+      },
+      "api_access_status": {
+        "name": "API-käyttötila",
+        "state": {
+          "ok": "Käyttö OK",
+          "serial_unauthorized": "Sarja luvaton",
+          "rate_limited": "Nopeusrajoitettu",
+          "api_error": "API-virhe",
+          "unknown": "Tuntematon"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Järjestelmän tuotto tänään"
+      },
+      "yieldtotal_total": {
+        "name": "Järjestelmän käyttöikä"
+      },
+      "inverter_status": {
+        "name": "Invertterin tila",
+        "state": {
+          "100": "Odotetaan operaatiota",
+          "101": "Itsetestaus",
+          "102": "Normaali",
+          "103": "Korjattava vika",
+          "104": "Pysyvä vika",
+          "105": "Laiteohjelmiston päivitys",
+          "106": "EPS-tunnistus",
+          "107": "Ei verkkoon",
+          "108": "Itsetestaustila (Italian turvallisuusmääräykset)",
+          "109": "Lepotila",
+          "110": "Valmiustila",
+          "111": "Aurinkosähköinen herätysakkutila",
+          "112": "Generaattorin tunnistustila",
+          "113": "Generaattoritila",
+          "114": "Nopea sammutus valmiustilassa",
+          "130": "VPP-tila",
+          "131": "TOU – Omakäyttö",
+          "132": "TOU - Lataus",
+          "133": "TOU - Purkaus"
+        }
+      },
+      "bat_status": {
+        "name": "Akun tila",
+        "state": {
+          "0": "Normaali",
+          "1": "Vika",
+          "2": "Yhteys katkaistu"
+        }
+      },
+      "inverter_type": {
+        "name": "Invertterin tyyppi",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "API Rate Limit -ilmoitukset"
+      }
+    }
+  }
+}

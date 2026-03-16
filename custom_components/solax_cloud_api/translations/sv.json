@@ -1,12 +1,12 @@
 {
-  "title": "Solax Cloud API SolaXCloud Konfiguration",
+  "title": "Solax Cloud API SolaXCloud",
   "config": {
     "step": {
       "user": {
         "title": "Konfigurera SolaXCloud API Anslutning",
         "description": "Ange din Solax Cloud API-token, systemnamn och önskat skanningsintervall. Solax API uppdateras bara var 5:e minut.",
         "data": {
-          "api_token": "API Token",
+          "api_token": "API-token",
           "system_name": "Systemnamn",
           "scan_interval": "Skanningsintervall (sekunder)"
         }
@@ -23,7 +23,7 @@
         "title": "API Hastighetsbegränsning",
         "description": "Innan installationen slutförs svarade {count} inverter(e) med API-hastighetsbegränsning:\n{inverters_list}\n\nInstallationen kan fortsätta. Vissa värden kan bli fördröjda till nästa uppdatering. Nuvarande skanningsintervall: {scan_interval}s.",
         "data": {
-          "acknowledge": "API-hastighetsbegränsning upptäcktes och värden kan bli fördröjda till nästa uppdatering."
+          "acknowledge": "API-hastighetsbegränsning inträffade. Berörda inverter(e): {inverters_list}. Nuvarande skanningsintervall: {scan_interval}s. Vissa värden kan bli fördröjda till nästa uppdatering."
         }
       }
     },
@@ -35,7 +35,13 @@
       "no_inverters": "Minst ett inverter serienummer krävs",
       "no_system_name": "Systemnamn krävs",
       "duplicate_inverter": "Detta inverter-serienummer är redan tillagt",
-      "acknowledge_rate_limit": "Bekräfta hastighetsbegränsningen för att fortsätta"
+      "acknowledge_rate_limit": "Bekräfta hastighetsbegränsningen för att fortsätta",
+      "notification_rate_limit_title": "SolaX Cloud API - Hastighetsbegränsning",
+      "notification_rate_limit_body": "SolaX Cloud API-hastighetsbegränsning är aktiv.\nBerörda inverter(e): {inverter_list}\n{details_block}\nIntegrationen behåller tidigare värden för berörda invertere tills API-anropen återhämtar sig. Överväg att öka skanningsintervallet ({scan_interval}s).",
+      "notification_invalid_serial_title": "SolaX Cloud API - Ogiltigt serienummer/åtkomst",
+      "notification_invalid_serial_body": "Ett eller flera inverter-serienummer saknar behörighet.\n{details_block}\nDessa invertere hålls otillgängliga tills serienummer/åtkomst har korrigerats.",
+      "notification_unknown": "Okänd",
+      "notification_data_unauthorized": "Data obehörig"
     }
   },
   "options": {
@@ -48,7 +54,7 @@
         "title": "Hantera Invertere",
         "description": "Nuvarande invertere ({count}):\n{inverters_list}\n\nLägg till nya invertere eller ta bort befintliga.",
         "data": {
-          "api_token": "API Token",
+          "api_token": "API-token",
           "system_name": "Systemnamn",
           "scan_interval": "Skanningsintervall (sekunder)",
           "serial": "Lägg till Nytt Serienummer",
@@ -60,21 +66,21 @@
         "title": "Meddelande om Ogiltigt Serienummer/Åtkomst",
         "description": "Dina ändringar sparades, men {count} inverter(e) returnerade Data Unauthorized (1003):\n{details}\n\nDessa invertere hålls otillgängliga tills serienummer/åtkomst har korrigerats.",
         "data": {
-          "acknowledge": "Ogiltigt serienummer/åtkomst upptäcktes."
+          "acknowledge": "Ogiltigt serienummer/åtkomst upptäcktes. Berörda inverter(e): {details}. Dessa invertere hålls otillgängliga tills serienummer/åtkomst har korrigerats."
         }
       },
       "rate_limit_notice": {
         "title": "API Hastighetsbegränsning",
         "description": "Dina ändringar sparades, men {count} inverter(e) träffade API-hastighetsbegränsning under omladdning:\n{inverters_list}\n\nVissa värden kan bli fördröjda tills nästa uppdatering. Nuvarande skanningsintervall: {scan_interval}s.",
         "data": {
-          "acknowledge": "API-hastighetsbegränsning upptäcktes och värden kan bli fördröjda till nästa uppdatering."
+          "acknowledge": "API-hastighetsbegränsning inträffade. Berörda inverter(e): {inverters_list}. Nuvarande skanningsintervall: {scan_interval}s. Vissa värden kan bli fördröjda till nästa uppdatering."
         }
       },
       "options_rate_limit_notice": {
         "title": "API Hastighetsbegränsning",
         "description": "Dina ändringar sparades, men {count} inverter(e) träffade API-hastighetsbegränsning under omladdning:\n{inverters_list}\n\nVissa värden kan bli fördröjda tills nästa uppdatering. Nuvarande skanningsintervall: {scan_interval}s.",
         "data": {
-          "acknowledge": "API-hastighetsbegränsning upptäcktes och värden kan bli fördröjda till nästa uppdatering."
+          "acknowledge": "API-hastighetsbegränsning inträffade. Berörda inverter(e): {inverters_list}. Nuvarande skanningsintervall: {scan_interval}s. Vissa värden kan bli fördröjda till nästa uppdatering."
         }
       }
     }
@@ -159,7 +165,7 @@
       "system_health": {
         "name": "Systemhälsa",
         "state": {
-          "ok": "OK",
+          "ok": "Bra",
           "degraded": "Försämrad",
           "error": "Fel",
           "unknown": "Okänd"
@@ -168,7 +174,7 @@
       "rate_limit_status": {
         "name": "API Hastighetsbegränsning Status",
         "state": {
-          "ok": "OK",
+          "ok": "Ingen gräns",
           "rate_limited": "Hastighetsbegränsad",
           "unknown": "Okänd"
         }
@@ -180,13 +186,13 @@
         "name": "Nästa Schemalagda Pollning"
       },
       "api_access_status": {
-        "name": "API Access Status",
+        "name": "API Åtkomststatus",
         "state": {
-          "ok": "OK",
-          "serial_unauthorized": "Serial Unauthorized",
-          "rate_limited": "Rate Limited",
-          "api_error": "API Error",
-          "unknown": "Unknown"
+          "ok": "Åtkomst OK",
+          "serial_unauthorized": "Serienummer saknar behörighet",
+          "rate_limited": "Hastighetsbegränsad",
+          "api_error": "API-fel",
+          "unknown": "Okänd"
         }
       },
       "yieldtoday_total": {
@@ -196,11 +202,11 @@
         "name": "System Total Produktion"
       },
       "inverter_status": {
-        "name": "Inverter Status",
+        "name": "Inverterstatus",
         "state": {
           "100": "Väntar på drift",
           "101": "Självtest",
-          "102": "Normal",
+          "102": "Normal drift",
           "103": "Återställningsbart fel",
           "104": "Permanent fel",
           "105": "Firmware uppgradering",
@@ -222,7 +228,7 @@
       "bat_status": {
         "name": "Batteri Status",
         "state": {
-          "0": "Normal",
+          "0": "Normalt",
           "1": "Fel",
           "2": "Frånkopplad"
         }
@@ -285,7 +291,7 @@
     },
     "switch": {
       "rate_limit_notifications": {
-        "name": "API Rate Limit Notifications"
+        "name": "API Hastighetsbegränsningsnotiser"
       }
     }
   }

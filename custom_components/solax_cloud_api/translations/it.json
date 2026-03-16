@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configura la connessione API SolaXCloud",
+        "description": "Inserisci il token API Solax Cloud, il nome del sistema e l'intervallo di scansione preferito. L'API Solax si aggiorna solo ogni 5 minuti.",
+        "data": {
+          "api_token": "Gettone API",
+          "system_name": "Nome del sistema",
+          "scan_interval": "Intervallo di scansione (secondi)"
+        }
+      },
+      "add_inverter": {
+        "title": "Aggiungi inverter a {system_name}",
+        "description": "Convertitori attuali ({count}):\n{inverters_list}\n\nAggiungere i numeri di serie dell'inverter uno per uno. Seleziona \"Fine\" una volta terminato.",
+        "data": {
+          "serial": "Numero di serie dell'inverter",
+          "finish": "Termina l'installazione"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Avviso sui limiti di velocità API",
+        "description": "Prima di terminare la configurazione, gli inverter {count} hanno restituito il limite di velocità API:\n{inverters_list}\n\nL'installazione può continuare. Alcuni valori potrebbero essere ritardati fino al prossimo aggiornamento. Intervallo di scansione corrente: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Si è verificato il limite di velocità API. Inverter interessati: {inverters_list}. Intervallo di scansione corrente: {scan_interval}s. Alcuni valori potrebbero essere ritardati fino al prossimo aggiornamento."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "L'integrazione è già configurata"
+    },
+    "error": {
+      "invalid_token": "Token API non valido",
+      "no_inverters": "È richiesto almeno un numero di serie dell'inverter",
+      "no_system_name": "Il nome del sistema è obbligatorio",
+      "duplicate_inverter": "Questo seriale dell'inverter è già aggiunto",
+      "acknowledge_rate_limit": "Si prega di accettare l'avviso sul limite di tariffa per continuare",
+      "notification_rate_limit_title": "API SolX Cloud - Limite di velocità",
+      "notification_rate_limit_body": "Il limite di velocità dell'API SolX Cloud è attivo.\nInverter interessati: {inverter_list}\n{details_block}\nL'integrazione mantiene i valori precedenti degli inverter interessati fino al ripristino delle chiamate API. Valuta la possibilità di aumentare l'intervallo di scansione ({scan_interval}s).",
+      "notification_invalid_serial_title": "API SolaX Cloud: seriale/accesso non valido",
+      "notification_invalid_serial_body": "Uno o più seriali dell'inverter non sono autorizzati.\n{details_block}\nQuesti inverter vengono mantenuti non disponibili finché l'accesso seriale/di autenticazione non viene corretto.",
+      "notification_unknown": "Sconosciuto",
+      "notification_data_unauthorized": "Dati non autorizzati"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Si prega di accettare l'avviso sul limite di tariffa per continuare",
+      "acknowledge_invalid_serial": "Si prega di confermare l'avviso di accesso/seriale non valido per continuare"
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Gestire gli inverter",
+        "description": "Convertitori attuali ({count}):\n{inverters_list}\n\nAggiungi nuovi inverter o rimuovi quelli esistenti.",
+        "data": {
+          "api_token": "Gettone API",
+          "system_name": "Nome del sistema",
+          "scan_interval": "Intervallo di scansione (secondi)",
+          "serial": "Aggiungi nuovo numero di serie",
+          "remove_serial": "Rimuovere l'invertitore",
+          "finish": "Salva modifiche"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Avviso di accesso/seriale non valido",
+        "description": "Le modifiche sono state salvate, ma gli inverter {count} hanno restituito dati non autorizzati (1003):\n{details}\n\nQuesti inverter vengono mantenuti non disponibili finché l'accesso seriale/di autenticazione non viene corretto.",
+        "data": {
+          "acknowledge": "Rilevato accesso/seriale non valido. Inverter interessati: {details}. Questi inverter vengono mantenuti non disponibili finché l'accesso seriale/di autenticazione non viene corretto."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Avviso sui limiti di velocità API",
+        "description": "Le modifiche sono state salvate, ma gli inverter {count} hanno raggiunto il limite di velocità API durante la ricarica:\n{inverters_list}\n\nAlcuni valori potrebbero essere ritardati fino al prossimo aggiornamento. Intervallo di scansione corrente: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Si è verificato il limite di velocità API. Inverter interessati: {inverters_list}. Intervallo di scansione corrente: {scan_interval}s. Alcuni valori potrebbero essere ritardati fino al prossimo aggiornamento."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "Avviso sui limiti di velocità API",
+        "description": "Le modifiche sono state salvate, ma gli inverter {count} hanno raggiunto il limite di velocità API durante la ricarica:\n{inverters_list}\n\nAlcuni valori potrebbero essere ritardati fino al prossimo aggiornamento. Intervallo di scansione corrente: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Si è verificato il limite di velocità API. Inverter interessati: {inverters_list}. Intervallo di scansione corrente: {scan_interval}s. Alcuni valori potrebbero essere ritardati fino al prossimo aggiornamento."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "Potenza in uscita CA"
+      },
+      "powerdc1": {
+        "name": "Stringa di alimentazione CC 1"
+      },
+      "powerdc2": {
+        "name": "Stringa di alimentazione CC 2"
+      },
+      "powerdc3": {
+        "name": "Stringa di alimentazione CC 3"
+      },
+      "powerdc4": {
+        "name": "Stringa di alimentazione CC 4"
+      },
+      "feedinpower": {
+        "name": "Potenza di immissione in rete"
+      },
+      "feedinpower_m2": {
+        "name": "Misuratore di potenza di immissione in rete 2"
+      },
+      "bat_power": {
+        "name": "Alimentazione a batteria"
+      },
+      "yieldtoday": {
+        "name": "Rendimento oggi"
+      },
+      "yieldtotal": {
+        "name": "Rendimento totale"
+      },
+      "feedinenergy": {
+        "name": "Energia di immissione in rete"
+      },
+      "consumeenergy": {
+        "name": "Consumo energetico della rete"
+      },
+      "soc": {
+        "name": "Stato di carica della batteria"
+      },
+      "peps1": {
+        "name": "Potenza EPS Fase 1"
+      },
+      "peps2": {
+        "name": "Potenza EPS Fase 2"
+      },
+      "peps3": {
+        "name": "Potenza EPS Fase 3"
+      },
+      "inverter_sn": {
+        "name": "Seriale dell'inverter"
+      },
+      "sn": {
+        "name": "Modulo Wi-Fi seriale inverter"
+      },
+      "upload_time": {
+        "name": "Tempo di caricamento dell'inverter"
+      },
+      "utc_date_time": {
+        "name": "Data e ora UTC"
+      },
+      "inverter_efficiency": {
+        "name": "Efficienza dell'inverter"
+      },
+      "dc_total_inverter": {
+        "name": "Totale inverter di potenza CC"
+      },
+      "ac_total": {
+        "name": "Alimentazione CA del sistema"
+      },
+      "dc_total": {
+        "name": "Alimentazione CC del sistema"
+      },
+      "system_efficiency": {
+        "name": "Efficienza totale del sistema"
+      },
+      "system_health": {
+        "name": "Integrità del sistema",
+        "state": {
+          "ok": "Buono",
+          "degraded": "Degradato",
+          "error": "Errore",
+          "unknown": "Sconosciuto"
+        }
+      },
+      "rate_limit_status": {
+        "name": "Stato del limite di velocità API",
+        "state": {
+          "ok": "Nessun limite",
+          "rate_limited": "Tariffa limitata",
+          "unknown": "Sconosciuto"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Ultimo tentativo di sondaggio"
+      },
+      "next_scheduled_poll": {
+        "name": "Prossimo sondaggio programmato"
+      },
+      "api_access_status": {
+        "name": "Stato di accesso all'API",
+        "state": {
+          "ok": "Accesso OK",
+          "serial_unauthorized": "Seriale non autorizzato",
+          "rate_limited": "Tariffa limitata",
+          "api_error": "Errore dell'API",
+          "unknown": "Sconosciuto"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Rendimento del sistema oggi"
+      },
+      "yieldtotal_total": {
+        "name": "Resa del sistema a vita"
+      },
+      "inverter_status": {
+        "name": "Stato dell'inverter",
+        "state": {
+          "100": "In attesa dell'operazione",
+          "101": "Autotest",
+          "102": "Normale",
+          "103": "Guasto reversibile",
+          "104": "Guasto permanente",
+          "105": "Aggiornamento del firmware",
+          "106": "Rilevamento dell'EPS",
+          "107": "Fuori rete",
+          "108": "Modalità autotest (norme di sicurezza italiane)",
+          "109": "Modalità di sospensione",
+          "110": "Modalità di attesa",
+          "111": "Modalità batteria di risveglio fotovoltaico",
+          "112": "Modalità di rilevamento del generatore",
+          "113": "Modalità generatore",
+          "114": "Modalità standby di spegnimento rapido",
+          "130": "Modalità VPP",
+          "131": "TOU - Autouso",
+          "132": "TOU - Ricarica",
+          "133": "TOU - Scarica"
+        }
+      },
+      "bat_status": {
+        "name": "Stato della batteria",
+        "state": {
+          "0": "Normale",
+          "1": "Colpa",
+          "2": "Disconnesso"
+        }
+      },
+      "inverter_type": {
+        "name": "Tipo di inverter",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "Notifiche sui limiti di velocità API"
+      }
+    }
+  }
+}

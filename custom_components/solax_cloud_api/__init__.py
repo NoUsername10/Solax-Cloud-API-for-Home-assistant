@@ -2,6 +2,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.components import persistent_notification
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.translation import async_get_translations
 from .const import (
     DOMAIN,
     PLATFORMS,
@@ -17,6 +18,39 @@ from .coordinator import SolaxCoordinator
 
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+_TRANSLATION_PREFIX = f"component.{DOMAIN}."
+
+
+async def _load_runtime_notification_texts(hass: HomeAssistant) -> dict[str, str]:
+    lang = getattr(hass.config, "language", "en")
+    translations = await async_get_translations(hass, lang, "config", [DOMAIN])
+    defaults = {
+        "rate_limit_title": "SolaX Cloud API - Rate Limit",
+        "rate_limit_body": (
+            "SolaX Cloud API rate limit is active.\n"
+            "Affected inverter(s): {inverter_list}\n"
+            "{details_block}\n"
+            "The integration keeps previous values for affected inverters until API calls recover. "
+            "Consider increasing scan interval ({scan_interval}s)."
+        ),
+        "invalid_serial_title": "SolaX Cloud API - Invalid Serial/Access",
+        "invalid_serial_body": (
+            "One or more inverter serials are unauthorized.\n"
+            "{details_block}\n"
+            "These inverters are kept unavailable until serial/auth access is corrected."
+        ),
+    }
+    return {
+        key: translations.get(f"{_TRANSLATION_PREFIX}config.error.notification_{key}", fallback)
+        for key, fallback in defaults.items()
+    }
+
+
+def _safe_format(template: str, placeholders: dict[str, object]) -> str:
+    try:
+        return template.format(**placeholders)
+    except Exception:
+        return template
 
 
 def _rate_limit_notification_id(entry_id: str) -> str:
@@ -35,7 +69,10 @@ def _rate_limit_notifications_enabled(hass: HomeAssistant, entry_id: str) -> boo
 
 
 def _update_rate_limit_notification(
-    hass: HomeAssistant, entry_id: str, coordinator: SolaxCoordinator
+    hass: HomeAssistant,
+    entry_id: str,
+    coordinator: SolaxCoordinator,
+    i18n_texts: dict[str, str] | None = None,
 ) -> None:
     if not _rate_limit_notifications_enabled(hass, entry_id):
         persistent_notification.async_dismiss(hass, _rate_limit_notification_id(entry_id))
@@ -57,27 +94,39 @@ def _update_rate_limit_notification(
         if code is not None or reason:
             details_lines.append(f"- {serial}: code={code}, reason={reason}")
     details_block = "\n".join(details_lines)
-    body = (
-        "SolaX Cloud API rate limit is active.\n"
-        f"Affected inverter(s): {inverter_list}\n"
-    )
-    if details_block:
-        body += f"{details_block}\n"
-    body += (
-        "The integration keeps previous values for affected inverters until API calls recover. "
-        "Consider increasing scan interval."
+    details_block = details_block or "-"
+    texts = i18n_texts or {}
+    body = _safe_format(
+        texts.get(
+            "rate_limit_body",
+            (
+                "SolaX Cloud API rate limit is active.\n"
+                "Affected inverter(s): {inverter_list}\n"
+                "{details_block}\n"
+                "The integration keeps previous values for affected inverters until API calls recover. "
+                "Consider increasing scan interval ({scan_interval}s)."
+            ),
+        ),
+        {
+            "inverter_list": inverter_list,
+            "details_block": details_block,
+            "scan_interval": int(coordinator.update_interval.total_seconds()),
+        },
     )
 
     persistent_notification.async_create(
         hass,
         body,
-        title="SolaX Cloud API - Rate Limit",
+        title=texts.get("rate_limit_title", "SolaX Cloud API - Rate Limit"),
         notification_id=notification_id,
     )
 
 
 def _update_invalid_serial_notification(
-    hass: HomeAssistant, entry_id: str, coordinator: SolaxCoordinator
+    hass: HomeAssistant,
+    entry_id: str,
+    coordinator: SolaxCoordinator,
+    i18n_texts: dict[str, str] | None = None,
 ) -> None:
     invalid_serials = list(getattr(coordinator, "unauthorized_inverters", []))
     invalid_details = dict(getattr(coordinator, "unauthorized_details", {}))
@@ -94,15 +143,22 @@ def _update_invalid_serial_notification(
         details_lines.append(f"- {serial}: code={code}, reason={reason}")
     details_block = "\n".join(details_lines)
 
-    body = (
-        "One or more inverter serials are unauthorized.\n"
-        f"{details_block}\n"
-        "These inverters are kept unavailable until serial/auth access is corrected."
+    texts = i18n_texts or {}
+    body = _safe_format(
+        texts.get(
+            "invalid_serial_body",
+            (
+                "One or more inverter serials are unauthorized.\n"
+                "{details_block}\n"
+                "These inverters are kept unavailable until serial/auth access is corrected."
+            ),
+        ),
+        {"details_block": details_block or "-"},
     )
     persistent_notification.async_create(
         hass,
         body,
-        title="SolaX Cloud API - Invalid Serial/Access",
+        title=texts.get("invalid_serial_title", "SolaX Cloud API - Invalid Serial/Access"),
         notification_id=notification_id,
     )
 
@@ -202,17 +258,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         initial_refresh_inverters=initial_refresh_inverters,
     )
     await coordinator.async_config_entry_first_refresh()
-    _update_rate_limit_notification(hass, entry.entry_id, coordinator)
-    _update_invalid_serial_notification(hass, entry.entry_id, coordinator)
+    i18n_texts = await _load_runtime_notification_texts(hass)
+    _update_rate_limit_notification(hass, entry.entry_id, coordinator, i18n_texts)
+    _update_invalid_serial_notification(hass, entry.entry_id, coordinator, i18n_texts)
 
     def _handle_coordinator_update():
-        _update_rate_limit_notification(hass, entry.entry_id, coordinator)
-        _update_invalid_serial_notification(hass, entry.entry_id, coordinator)
+        _update_rate_limit_notification(hass, entry.entry_id, coordinator, i18n_texts)
+        _update_invalid_serial_notification(hass, entry.entry_id, coordinator, i18n_texts)
 
     rate_limit_unsub = coordinator.async_add_listener(_handle_coordinator_update)
 
     def _refresh_rate_limit_notification():
-        _update_rate_limit_notification(hass, entry.entry_id, coordinator)
+        _update_rate_limit_notification(hass, entry.entry_id, coordinator, i18n_texts)
 
     hass.data[DOMAIN][entry.entry_id] = {
         "coordinator": coordinator,

@@ -6,6 +6,7 @@ from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.translation import async_get_translations
 import aiohttp
 import async_timeout
 from .const import (
@@ -23,6 +24,8 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+_TRANSLATION_PREFIX = f"component.{DOMAIN}."
 
 def _slugify_name(value: str) -> str:
     return value.lower().replace(" ", "_").replace("-", "_")
@@ -49,33 +52,37 @@ def _dedupe_serials(serials: list[str]) -> list[str]:
     return unique
 
 
-def _rate_limit_acknowledge_label(inverters_list: str, scan_interval: int) -> str:
-    return (
-        "API Rate Limit occurred. "
-        f"Affected inverter(s): {inverters_list}. "
-        f"Current scan interval: {scan_interval}s. "
-        "Some values may be delayed until next refresh."
-    )
-
-
 def _format_invalid_serial_details(
-    inverters: list[str], details: dict[str, dict[str, Any]]
+    inverters: list[str],
+    details: dict[str, dict[str, Any]],
+    unknown_text: str = "Unknown",
+    unauthorized_text: str = "Data Unauthorized",
 ) -> str:
     formatted = []
     for serial in inverters:
         detail = details.get(serial, {})
         code = detail.get("code", 1003)
-        reason = detail.get("exception") or "Data Unauthorized"
+        reason = detail.get("exception") or unauthorized_text
         formatted.append(f"{serial} (code={code}, reason={reason})")
-    return "; ".join(formatted) if formatted else "Unknown"
+    return "; ".join(formatted) if formatted else unknown_text
 
 
-def _invalid_serial_acknowledge_label(details_text: str) -> str:
-    return (
-        "Invalid Serial/Access detected. "
-        f"Affected inverter(s): {details_text}. "
-        "These inverters are kept unavailable until serial/auth access is corrected."
-    )
+async def _translated_text(
+    hass,
+    category: str,
+    key: str,
+    default: str,
+    placeholders: dict[str, Any] | None = None,
+) -> str:
+    lang = getattr(hass.config, "language", "en")
+    translations = await async_get_translations(hass, lang, category, [DOMAIN])
+    value = translations.get(f"{_TRANSLATION_PREFIX}{key}", default)
+    if placeholders:
+        try:
+            return value.format(**placeholders)
+        except Exception:
+            return value
+    return value
 
 
 def _build_initial_setup_match(entry_data: dict[str, Any]) -> dict[str, Any]:
@@ -366,7 +373,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         )
 
         # Show current inverters and option to add more
-        inverters_list = "\n".join([f"• {sn}" for sn in self._inverters]) if self._inverters else "No inverters added yet"
+        inverters_list = "\n".join([f"• {sn}" for sn in self._inverters]) if self._inverters else "-"
         
         data_schema = vol.Schema({
             vol.Optional("serial"): str,
@@ -385,9 +392,20 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_rate_limit_notice(self, user_input: Any = None):
-        inverters_list = ", ".join(self._rate_limit_notice_inverters) or "Unknown"
-        acknowledge_label = _rate_limit_acknowledge_label(
-            inverters_list, self._scan_interval
+        inverters_list = ", ".join(self._rate_limit_notice_inverters) or "-"
+        acknowledge_label = await _translated_text(
+            self.hass,
+            "config",
+            "config.step.rate_limit_notice.data.acknowledge",
+            (
+                "API Rate Limit occurred. Affected inverter(s): {inverters_list}. "
+                "Current scan interval: {scan_interval}s. "
+                "Some values may be delayed until next refresh."
+            ),
+            {
+                "inverters_list": inverters_list,
+                "scan_interval": self._scan_interval,
+            },
         )
         errors = {}
         if user_input is not None:
@@ -640,19 +658,19 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         self._scan_interval = scan_interval
 
         # Create options for remove dropdown
-        remove_options = {sn: sn for sn in self._inverters} if self._inverters else {"": "No inverters to remove"}
-        
-        inverters_list = "\n".join([f"• {sn}" for sn in self._inverters]) if self._inverters else "No inverters configured"
+        inverters_list = "\n".join([f"• {sn}" for sn in self._inverters]) if self._inverters else "-"
 
-        data_schema = vol.Schema({
+        schema_fields = {
             vol.Required(CONF_TOKEN, default=self._token): str,
             vol.Required(CONF_SYSTEM_NAME, default=self._system_name): str,
             vol.Required(CONF_SCAN_INTERVAL, default=self._scan_interval):
                 vol.All(vol.Coerce(int), vol.Range(min=120, max=3600)),
             vol.Optional("serial"): str,
-            vol.Optional("remove_serial"): vol.In(remove_options),
             vol.Required("finish", default=False): cv.boolean,
-        })
+        }
+        if self._inverters:
+            schema_fields[vol.Optional("remove_serial")] = vol.In({sn: sn for sn in self._inverters})
+        data_schema = vol.Schema(schema_fields)
 
         return self.async_show_form(
             step_id="manage_inverters",
@@ -665,10 +683,34 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         )
 
     async def async_step_invalid_serial_notice(self, user_input: Any = None):
-        details_text = _format_invalid_serial_details(
-            self._invalid_serial_notice_inverters, self._invalid_serial_notice_details
+        unknown_text = await _translated_text(
+            self.hass,
+            "config",
+            "config.error.notification_unknown",
+            "Unknown",
         )
-        acknowledge_label = _invalid_serial_acknowledge_label(details_text)
+        unauthorized_text = await _translated_text(
+            self.hass,
+            "config",
+            "config.error.notification_data_unauthorized",
+            "Data Unauthorized",
+        )
+        details_text = _format_invalid_serial_details(
+            self._invalid_serial_notice_inverters,
+            self._invalid_serial_notice_details,
+            unknown_text=unknown_text,
+            unauthorized_text=unauthorized_text,
+        )
+        acknowledge_label = await _translated_text(
+            self.hass,
+            "options",
+            "options.step.invalid_serial_notice.data.acknowledge",
+            (
+                "Invalid Serial/Access detected. Affected inverter(s): {details}. "
+                "These inverters are kept unavailable until serial/auth access is corrected."
+            ),
+            {"details": details_text},
+        )
         errors = {}
         if user_input is not None:
             if user_input.get(acknowledge_label):
@@ -693,9 +735,20 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         )
 
     async def async_step_rate_limit_notice(self, user_input: Any = None):
-        inverters_list = ", ".join(self._rate_limit_notice_inverters) or "Unknown"
-        acknowledge_label = _rate_limit_acknowledge_label(
-            inverters_list, self._scan_interval
+        inverters_list = ", ".join(self._rate_limit_notice_inverters) or "-"
+        acknowledge_label = await _translated_text(
+            self.hass,
+            "options",
+            "options.step.rate_limit_notice.data.acknowledge",
+            (
+                "API Rate Limit occurred. Affected inverter(s): {inverters_list}. "
+                "Current scan interval: {scan_interval}s. "
+                "Some values may be delayed until next refresh."
+            ),
+            {
+                "inverters_list": inverters_list,
+                "scan_interval": self._scan_interval,
+            },
         )
         errors = {}
         if user_input is not None:

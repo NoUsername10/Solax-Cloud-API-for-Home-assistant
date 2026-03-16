@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configurer la connexion API SolaXCloud",
+        "description": "Entrez votre jeton API Solax Cloud, le nom du système et l'intervalle d'analyse préféré. L'API Solax ne se met à jour que toutes les 5 minutes.",
+        "data": {
+          "api_token": "Jeton API",
+          "system_name": "Nom du système",
+          "scan_interval": "Intervalle d'analyse (secondes)"
+        }
+      },
+      "add_inverter": {
+        "title": "Ajouter des onduleurs à {system_name}",
+        "description": "Onduleurs actuels ({count}) :\n{inverters_list}\n\nAjoutez les numéros de série de l'onduleur un par un. Cochez « Terminer » lorsque vous avez terminé.",
+        "data": {
+          "serial": "Numéro de série de l'onduleur",
+          "finish": "Terminer la configuration"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Avis de limite de débit API",
+        "description": "Avant de terminer la configuration, {count} onduleur(s) a renvoyé la limite de débit API :\n{inverters_list}\n\nL'installation peut continuer. Certaines valeurs peuvent être retardées jusqu'à la prochaine actualisation. Intervalle d'analyse actuel : {scan_interval}s.",
+        "data": {
+          "acknowledge": "La limite de débit de l'API s'est produite. Onduleurs concernés : {inverters_list}. Intervalle d'analyse actuel : {scan_interval}s. Certaines valeurs peuvent être retardées jusqu'à la prochaine actualisation."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "L'intégration est déjà configurée"
+    },
+    "error": {
+      "invalid_token": "Jeton API invalide",
+      "no_inverters": "Au moins un numéro de série de l'onduleur est requis",
+      "no_system_name": "Le nom du système est requis",
+      "duplicate_inverter": "Cette série d'onduleur est déjà ajoutée",
+      "acknowledge_rate_limit": "Veuillez accuser réception de l'avis de limite de taux pour continuer",
+      "notification_rate_limit_title": "API SolaX Cloud - Limite de débit",
+      "notification_rate_limit_body": "La limite de débit de l'API SolaX Cloud est active.\nOnduleurs concernés : {inverter_list}\n{details_block}\nL'intégration conserve les valeurs précédentes pour les onduleurs concernés jusqu'à ce que les appels API soient récupérés. Envisagez d'augmenter l'intervalle d'analyse ({scan_interval}s).",
+      "notification_invalid_serial_title": "API SolaX Cloud - Série/accès non valide",
+      "notification_invalid_serial_body": "Une ou plusieurs séries d'onduleurs ne sont pas autorisées.\n{details_block}\nCes onduleurs restent indisponibles jusqu'à ce que l'accès série/authentification soit corrigé.",
+      "notification_unknown": "Inconnu",
+      "notification_data_unauthorized": "Données non autorisées"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Veuillez accuser réception de l'avis de limite de taux pour continuer",
+      "acknowledge_invalid_serial": "Veuillez reconnaître l'avis de numéro de série/d'accès non valide pour continuer."
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Gérer les onduleurs",
+        "description": "Onduleurs actuels ({count}) :\n{inverters_list}\n\nAjoutez de nouveaux onduleurs ou supprimez ceux existants.",
+        "data": {
+          "api_token": "Jeton API",
+          "system_name": "Nom du système",
+          "scan_interval": "Intervalle d'analyse (secondes)",
+          "serial": "Ajouter un nouveau numéro de série",
+          "remove_serial": "Supprimer l'onduleur",
+          "finish": "Enregistrer les modifications"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Avis de série/accès non valide",
+        "description": "Vos modifications ont été enregistrées, mais {count} onduleur(s) a renvoyé des données non autorisées (1003) :\n{details}\n\nCes onduleurs restent indisponibles jusqu'à ce que l'accès série/authentification soit corrigé.",
+        "data": {
+          "acknowledge": "Numéro de série/accès non valide détecté. Onduleurs concernés : {details}. Ces onduleurs restent indisponibles jusqu'à ce que l'accès série/authentification soit corrigé."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Avis de limite de débit API",
+        "description": "Vos modifications ont été enregistrées, mais {count} onduleur(s) a atteint la limite de débit API lors du rechargement :\n{inverters_list}\n\nCertaines valeurs peuvent être retardées jusqu'à la prochaine actualisation. Intervalle d'analyse actuel : {scan_interval}s.",
+        "data": {
+          "acknowledge": "La limite de débit de l'API s'est produite. Onduleurs concernés : {inverters_list}. Intervalle d'analyse actuel : {scan_interval}s. Certaines valeurs peuvent être retardées jusqu'à la prochaine actualisation."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "Avis de limite de débit API",
+        "description": "Vos modifications ont été enregistrées, mais {count} onduleur(s) a atteint la limite de débit API lors du rechargement :\n{inverters_list}\n\nCertaines valeurs peuvent être retardées jusqu'à la prochaine actualisation. Intervalle d'analyse actuel : {scan_interval}s.",
+        "data": {
+          "acknowledge": "La limite de débit de l'API s'est produite. Onduleurs concernés : {inverters_list}. Intervalle d'analyse actuel : {scan_interval}s. Certaines valeurs peuvent être retardées jusqu'à la prochaine actualisation."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "Puissance de sortie CA"
+      },
+      "powerdc1": {
+        "name": "Chaîne d'alimentation CC 1"
+      },
+      "powerdc2": {
+        "name": "Chaîne d'alimentation CC 2"
+      },
+      "powerdc3": {
+        "name": "Chaîne d'alimentation CC 3"
+      },
+      "powerdc4": {
+        "name": "Chaîne d'alimentation CC 4"
+      },
+      "feedinpower": {
+        "name": "Puissance d'injection du réseau"
+      },
+      "feedinpower_m2": {
+        "name": "Compteur d'énergie d'injection de réseau 2"
+      },
+      "bat_power": {
+        "name": "Puissance de la batterie"
+      },
+      "yieldtoday": {
+        "name": "Rendement aujourd'hui"
+      },
+      "yieldtotal": {
+        "name": "Rendement total"
+      },
+      "feedinenergy": {
+        "name": "Énergie d’injection du réseau"
+      },
+      "consumeenergy": {
+        "name": "Consommation d’énergie du réseau"
+      },
+      "soc": {
+        "name": "État de charge de la batterie"
+      },
+      "peps1": {
+        "name": "Puissance EPS Phase 1"
+      },
+      "peps2": {
+        "name": "Alimentation EPS Phase 2"
+      },
+      "peps3": {
+        "name": "Puissance EPS Phase 3"
+      },
+      "inverter_sn": {
+        "name": "Série de l'onduleur"
+      },
+      "sn": {
+        "name": "Module Wi-Fi série onduleur"
+      },
+      "upload_time": {
+        "name": "Temps de téléchargement de l'onduleur"
+      },
+      "utc_date_time": {
+        "name": "UTC Date Heure"
+      },
+      "inverter_efficiency": {
+        "name": "Efficacité de l'onduleur"
+      },
+      "dc_total_inverter": {
+        "name": "Onduleur CC Total"
+      },
+      "ac_total": {
+        "name": "Alimentation CA du système"
+      },
+      "dc_total": {
+        "name": "Alimentation CC du système"
+      },
+      "system_efficiency": {
+        "name": "Efficacité totale du système"
+      },
+      "system_health": {
+        "name": "Santé du système",
+        "state": {
+          "ok": "D'ACCORD",
+          "degraded": "Dégradé",
+          "error": "Erreur",
+          "unknown": "Inconnu"
+        }
+      },
+      "rate_limit_status": {
+        "name": "État de la limite de débit de l'API",
+        "state": {
+          "ok": "D'ACCORD",
+          "rate_limited": "Tarif Limité",
+          "unknown": "Inconnu"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Dernière tentative de sondage"
+      },
+      "next_scheduled_poll": {
+        "name": "Prochain sondage programmé"
+      },
+      "api_access_status": {
+        "name": "Statut d'accès à l'API",
+        "state": {
+          "ok": "D'ACCORD",
+          "serial_unauthorized": "Série non autorisée",
+          "rate_limited": "Tarif Limité",
+          "api_error": "Erreur API",
+          "unknown": "Inconnu"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Rendement du système aujourd'hui"
+      },
+      "yieldtotal_total": {
+        "name": "Rendement du système à vie"
+      },
+      "inverter_status": {
+        "name": "État de l'onduleur",
+        "state": {
+          "100": "En attente d'opération",
+          "101": "Auto-test",
+          "102": "Normale",
+          "103": "Défaut récupérable",
+          "104": "Défaut permanent",
+          "105": "Mise à niveau du micrologiciel",
+          "106": "Détection EPS",
+          "107": "Hors réseau",
+          "108": "Mode autotest (règles de sécurité italiennes)",
+          "109": "Mode veille",
+          "110": "Mode veille",
+          "111": "Mode batterie de réveil photovoltaïque",
+          "112": "Mode de détection du générateur",
+          "113": "Mode générateur",
+          "114": "Mode veille d'arrêt rapide",
+          "130": "Mode PPV",
+          "131": "Conditions d'utilisation – Auto-utilisation",
+          "132": "Conditions d'utilisation - Chargement",
+          "133": "TOU - Décharge"
+        }
+      },
+      "bat_status": {
+        "name": "État de la batterie",
+        "state": {
+          "0": "Normale",
+          "1": "Faute",
+          "2": "Déconnecté"
+        }
+      },
+      "inverter_type": {
+        "name": "Type d'onduleur",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "Notifications de limite de débit API"
+      }
+    }
+  }
+}

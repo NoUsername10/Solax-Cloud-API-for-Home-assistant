@@ -725,16 +725,20 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
         if self._metric == "systemEfficiency":
             total_ac = 0
             total_dc = 0
+            has_valid_data = False
             for sn in self._inverters:
                 inv = self.coordinator.data.get(sn)
                 if not inv or not isinstance(inv, dict) or inv.get("error"):
                     continue
+                has_valid_data = True
                 total_ac += inv.get("acpower", 0) or 0
                 for i in range(1, 5):
                     total_dc += inv.get(f"powerdc{i}", 0) or 0
 
             if total_dc > 0:
                 return round((total_ac / total_dc) * 100, 1)
+            if has_valid_data:
+                return 0
             return None
 
         total = 0

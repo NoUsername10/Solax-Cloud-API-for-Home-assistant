@@ -1,44 +1,36 @@
 # Solax Cloud API for Single and Multi Inverter Systems
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/icon.png" width=20% height=20%>
 
+
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration) [![coffee_badge](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-orange.svg)](https://www.buymeacoffee.com/DefaultLogin)
+
+
 Home Assistant custom integration to monitor Solax inverters using the official Solax Cloud API V2.0. <br>
 Supports both single and multi-inverter systems, dynamic sensors, system totals, and reliability-focused error handling.
 
-This integration was developed with AI-assisted collaboration and practical testing in real Home Assistant setups.<br>
+This integration was developed with AI-assisted collaboration and practical testing in real Home Assistant setups. <br>
 It has been iteratively improved with a focus on reliability, maintainability, and Home Assistant best practices.<br>
 Contributions, issues, and pull requests are welcome.<br>
 
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
-
-
-[![coffee_badge](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-orange.svg)](https://www.buymeacoffee.com/DefaultLogin)
-
-
-
 Total System information (this system contains 3 micro-inverters): <br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20system.png" width=50% height=50%>
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20system.png">
 
 Single-inverter info: <br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20inverter.png" width=50% height=50%>
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20inverter.png">
 
 Example of displaying useful information: <br>
-Total DC (sun) input, Total AC output from the system, and efficiency of DC/AC conversion. <br>
-As the system has micro inverters, we can also see individual panel performance. <br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20solar%20panels.png" width=50% height=50%>
+As the system has micro inverters, we can see individual panel performance. <br>
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20solar%20panels.png" width=75% height=75%>
 
 Individual DC string performance over the day.<br>
 One of the panels is in some shade during the winter months.<br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20DC%20strings.png" width=50% height=50%>
-
-
-
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20DC%20strings.png" width=75% height=75%>
 
 
 ## ✨ Features
 
-Created using the latest Solax API documentation:
-https://www.solaxcloud.com/user_api/SolaxCloud_Monitoring_API_V7.1.pdf
+Created using the latest Solax API documentation.
 
 - **Single Integration Instance** - One config entry for a full site (single- or multi-inverter)
 - **Single API Token** - One token for all configured inverter serials
@@ -49,19 +41,25 @@ https://www.solaxcloud.com/user_api/SolaxCloud_Monitoring_API_V7.1.pdf
 - **Per-Inverter API Access Status** - `OK`, `Rate Limited`, `Serial Unauthorized`, `API Error`
 - **Resilient API Handling** - Rate-limit cooldown and clear status reporting
 - **Smart Reload on Config Changes** - New inverter(s) are queried first; unchanged inverters keep cached values
-- **Invalid Serial Handling (1003)** - Unauthorized serials are marked unavailable and clearly surfaced
+- **Invalid Serial Handling** - Unauthorized serials are marked unavailable and clearly surfaced
 - **Options Flow Safety Popups** - Acknowledgment dialogs for rate limits and invalid serial/access
 - **Persistent Notifications + Toggle** - Rate-limit notifications can be enabled/disabled from System Totals
 - **Entity/Device Cleanup** - Removed serials clean up stale entities/devices from the registry
 - **Stable Entity Prefix** - Entity IDs remain stable when system name changes
-- **UI Language Support** - Built-in translations for English (`en`), Swedish (`sv`), and Spanish (`es`)
+- **UI Language Support** - 🇬🇧 English (`en`), 🇩🇪 German (`de`), 🇳🇱 Dutch (`nl`), 🇨🇿 Czech (`cs`), 🇵🇱 Polish (`pl`), 🇵🇹 Portuguese (`pt`), 🇪🇸 Spanish (`es`), 🇮🇹 Italian (`it`), 🇫🇷 French (`fr`), 🇸🇪 Swedish (`sv`), 🇩🇰 Danish (`da`), 🇳🇴 Norwegian Bokmal (`nb`), 🇫🇮 Finnish (`fi`)
 
 ## ✅ Prerequisites
 
 Before installation, you need:
 1. **Solax Cloud Account** - Register at [solaxcloud.com](https://www.solaxcloud.com)
-2. **API Token** - Obtain from Solax Cloud under **Service → Third-party Ecosystem**
-3. **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
+2. **API Token** - In Solax Cloud, in the top-right menu and click **More Services**, select **API** from the dropdown:
+   <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/menu-api.png">
+   
+   On **Third-party Ecosystem** copy the **Token ID** under **API Realtime Data**. Use this `Token ID` during integration setup:
+   
+   <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/menu-api-token.png">
+
+4. **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
       - If your system uses a Solax LAN/WiFi dongle, use the dongle serial.
       - If your inverter has built-in WiFi, use the WiFi inverter serial.
       - For microinverter systems, use the microinverter(s) serial(s).
@@ -87,7 +85,7 @@ Before installation, you need:
 2. Click **+ Add Integration**
 3. Search for **"Solax Cloud API"**
 4. Enter your configuration:
-   - **API Token**: Your Solax Cloud API token
+   - **API Token**: The `Token ID` from Solax Cloud **Third-party Ecosystem** → **API Realtime Data**
    - **System Name**: Name for your solar system (used for system total sensors and entity ID prefix)
    - **Scan Interval**: Polling frequency in seconds (default: 120, minimum suggested: 120)
 
@@ -248,6 +246,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 This integration is not officially affiliated with Solax Power.
 
----
+----
 
 **Note**: This integration is designed to be robust and user-friendly, with proper error handling and rate limit protection to ensure reliable operation with the Solax Cloud API.

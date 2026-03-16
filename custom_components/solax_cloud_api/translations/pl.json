@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Skonfiguruj połączenie API SolaXCloud",
+        "description": "Wprowadź swój token API Solax Cloud, nazwę systemu i preferowany interwał skanowania. Solax API aktualizuje się tylko co 5 minut.",
+        "data": {
+          "api_token": "Token API",
+          "system_name": "Nazwa systemu",
+          "scan_interval": "Interwał skanowania (sekundy)"
+        }
+      },
+      "add_inverter": {
+        "title": "Dodaj falowniki do {system_name}",
+        "description": "Przetwornice prądu ({count}):\n{inverters_list}\n\nDodaj numery seryjne falownika jeden po drugim. Po zakończeniu zaznacz opcję „Zakończ”.",
+        "data": {
+          "serial": "Numer seryjny falownika",
+          "finish": "Zakończ konfigurację"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Powiadomienie o limicie stawek API",
+        "description": "Przed zakończeniem konfiguracji falowniki {count} zwróciły limit szybkości API:\n{inverters_list}\n\nKonfiguracja może być kontynuowana. Niektóre wartości mogą zostać opóźnione do następnego odświeżenia. Bieżący interwał skanowania: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Wystąpił limit szybkości interfejsu API. Dotknięte falowniki: {inverters_list}. Bieżący interwał skanowania: {scan_interval}s. Niektóre wartości mogą zostać opóźnione do następnego odświeżenia."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Integracja jest już skonfigurowana"
+    },
+    "error": {
+      "invalid_token": "Nieprawidłowy token API",
+      "no_inverters": "Wymagany jest co najmniej jeden numer seryjny falownika",
+      "no_system_name": "Nazwa systemu jest wymagana",
+      "duplicate_inverter": "Ten numer seryjny falownika został już dodany",
+      "acknowledge_rate_limit": "Aby kontynuować, potwierdź powiadomienie o limicie stawek",
+      "notification_rate_limit_title": "SolaX Cloud API - Limit szybkości",
+      "notification_rate_limit_body": "Limit szybkości SolaX Cloud API jest aktywny.\nDotknięte falowniki: {inverter_list}\n{details_block}\nIntegracja zachowuje poprzednie wartości dla dotkniętych falowników do czasu przywrócenia wywołań API. Rozważ zwiększenie interwału skanowania ({scan_interval}s).",
+      "notification_invalid_serial_title": "SolaX Cloud API — nieprawidłowy numer seryjny/dostęp",
+      "notification_invalid_serial_body": "Jeden lub więcej numerów seryjnych falownika jest nieautoryzowanych.\n{details_block}\nFalowniki te pozostają niedostępne do czasu skorygowania dostępu szeregowego/autoryzacji.",
+      "notification_unknown": "Nieznany",
+      "notification_data_unauthorized": "Dane nieautoryzowane"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Aby kontynuować, potwierdź powiadomienie o limicie stawek",
+      "acknowledge_invalid_serial": "Aby kontynuować, potwierdź nieprawidłową informację o numerze seryjnym/dostępie"
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Zarządzaj falownikami",
+        "description": "Przetwornice prądu ({count}):\n{inverters_list}\n\nDodaj nowe falowniki lub usuń istniejące.",
+        "data": {
+          "api_token": "Token API",
+          "system_name": "Nazwa systemu",
+          "scan_interval": "Interwał skanowania (sekundy)",
+          "serial": "Dodaj nowy numer seryjny",
+          "remove_serial": "Usuń falownik",
+          "finish": "Zapisz zmiany"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Nieprawidłowe powiadomienie o numerze seryjnym/dostępie",
+        "description": "Twoje zmiany zostały zapisane, ale {count} falowników zwróciło dane Nieautoryzowane (1003):\n{details}\n\nFalowniki te pozostają niedostępne do czasu skorygowania dostępu szeregowego/autoryzacji.",
+        "data": {
+          "acknowledge": "Wykryto nieprawidłowy numer seryjny/dostęp. Dotknięte falowniki: {details}. Falowniki te pozostają niedostępne do czasu skorygowania dostępu szeregowego/autoryzacji."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Powiadomienie o limicie stawek API",
+        "description": "Twoje zmiany zostały zapisane, ale {count} falowniki osiągnęły limit szybkości API podczas ponownego ładowania:\n{inverters_list}\n\nNiektóre wartości mogą zostać opóźnione do następnego odświeżenia. Bieżący interwał skanowania: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Wystąpił limit szybkości interfejsu API. Dotknięte falowniki: {inverters_list}. Bieżący interwał skanowania: {scan_interval}s. Niektóre wartości mogą zostać opóźnione do następnego odświeżenia."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "Powiadomienie o limicie stawek API",
+        "description": "Twoje zmiany zostały zapisane, ale {count} falowniki osiągnęły limit szybkości API podczas ponownego ładowania:\n{inverters_list}\n\nNiektóre wartości mogą zostać opóźnione do następnego odświeżenia. Bieżący interwał skanowania: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Wystąpił limit szybkości interfejsu API. Dotknięte falowniki: {inverters_list}. Bieżący interwał skanowania: {scan_interval}s. Niektóre wartości mogą zostać opóźnione do następnego odświeżenia."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "Moc wyjściowa prądu przemiennego"
+      },
+      "powerdc1": {
+        "name": "Ciąg zasilania prądem stałym 1"
+      },
+      "powerdc2": {
+        "name": "Ciąg zasilania prądem stałym 2"
+      },
+      "powerdc3": {
+        "name": "Ciąg zasilania prądem stałym 3"
+      },
+      "powerdc4": {
+        "name": "Ciąg zasilania prądem stałym 4"
+      },
+      "feedinpower": {
+        "name": "Moc zasilania sieci"
+      },
+      "feedinpower_m2": {
+        "name": "Miernik mocy zasilającej sieć 2"
+      },
+      "bat_power": {
+        "name": "Moc baterii"
+      },
+      "yieldtoday": {
+        "name": "Wydajność dzisiaj"
+      },
+      "yieldtotal": {
+        "name": "Wydajność całkowita"
+      },
+      "feedinenergy": {
+        "name": "Energia dostarczana do sieci"
+      },
+      "consumeenergy": {
+        "name": "Energia zużywana przez sieć"
+      },
+      "soc": {
+        "name": "Stan naładowania akumulatora"
+      },
+      "peps1": {
+        "name": "Moc fazy 1 EPS"
+      },
+      "peps2": {
+        "name": "Moc fazy 2 EPS"
+      },
+      "peps3": {
+        "name": "Moc fazy 3 EPS"
+      },
+      "inverter_sn": {
+        "name": "Numer seryjny falownika"
+      },
+      "sn": {
+        "name": "Szeregowy moduł Wi-Fi falownika"
+      },
+      "upload_time": {
+        "name": "Czas ładowania falownika"
+      },
+      "utc_date_time": {
+        "name": "Data i godzina UTC"
+      },
+      "inverter_efficiency": {
+        "name": "Wydajność falownika"
+      },
+      "dc_total_inverter": {
+        "name": "Łącznie falownik prądu stałego"
+      },
+      "ac_total": {
+        "name": "Zasilanie sieciowe systemu"
+      },
+      "dc_total": {
+        "name": "Zasilanie systemu DC"
+      },
+      "system_efficiency": {
+        "name": "Całkowita wydajność systemu"
+      },
+      "system_health": {
+        "name": "Stan systemu",
+        "state": {
+          "ok": "Dobry",
+          "degraded": "Zdegradowany",
+          "error": "Błąd",
+          "unknown": "Nieznany"
+        }
+      },
+      "rate_limit_status": {
+        "name": "Stan limitu szybkości interfejsu API",
+        "state": {
+          "ok": "Brak limitu",
+          "rate_limited": "Ograniczona stawka",
+          "unknown": "Nieznany"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Ostatnia próba ankiety"
+      },
+      "next_scheduled_poll": {
+        "name": "Następna zaplanowana ankieta"
+      },
+      "api_access_status": {
+        "name": "Stan dostępu do API",
+        "state": {
+          "ok": "Dostep OK",
+          "serial_unauthorized": "Numer seryjny nieautoryzowany",
+          "rate_limited": "Ograniczona stawka",
+          "api_error": "Błąd interfejsu API",
+          "unknown": "Nieznany"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Wydajność systemu dzisiaj"
+      },
+      "yieldtotal_total": {
+        "name": "Żywotność systemu"
+      },
+      "inverter_status": {
+        "name": "Stan falownika",
+        "state": {
+          "100": "Oczekiwanie na operację",
+          "101": "Autotest",
+          "102": "Normalna",
+          "103": "Usterka możliwa do naprawienia",
+          "104": "Trwała usterka",
+          "105": "Aktualizacja oprogramowania",
+          "106": "Wykrywanie EPS",
+          "107": "Poza siecią",
+          "108": "Tryb autotestu (włoskie przepisy bezpieczeństwa)",
+          "109": "Tryb uśpienia",
+          "110": "Tryb gotowości",
+          "111": "Tryb budzenia fotowoltaicznego",
+          "112": "Tryb wykrywania generatora",
+          "113": "Tryb generatora",
+          "114": "Szybkie wyłączanie w trybie gotowości",
+          "130": "Tryb VPP",
+          "131": "TOU – do użytku własnego",
+          "132": "TOU – ładowanie",
+          "133": "TOU – Rozładowanie"
+        }
+      },
+      "bat_status": {
+        "name": "Stan baterii",
+        "state": {
+          "0": "Normalna",
+          "1": "Wada",
+          "2": "Bezładny"
+        }
+      },
+      "inverter_type": {
+        "name": "Typ falownika",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "Powiadomienia o limitach stawek API"
+      }
+    }
+  }
+}
