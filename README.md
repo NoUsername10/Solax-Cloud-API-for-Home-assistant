@@ -53,10 +53,10 @@ Created using the latest Solax API documentation.
 Before installation, you need:
 1. **Solax Cloud Account** - Register at [solaxcloud.com](https://www.solaxcloud.com)
 2. **API Token** - In Solax Cloud, in the top-right menu and click **More Services**, select **API** from the dropdown:
-   <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/menu-api.png" width=50% height=50%>
+   <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/menu-api.png">
    
    On **Third-party Ecosystem** copy the **Token ID** under **API Realtime Data**. Use this `Token ID` during integration setup:
-   <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/menu-api-token.png" width=50% height=50%>
+   <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/menu-api-token.png">
 
 4. **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
       - If your system uses a Solax LAN/WiFi dongle, use the dongle serial.
