@@ -245,6 +245,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 This integration is not officially affiliated with Solax Power.
 
----
+----
 
 **Note**: This integration is designed to be robust and user-friendly, with proper error handling and rate limit protection to ensure reliable operation with the Solax Cloud API.
