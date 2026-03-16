@@ -58,7 +58,7 @@ Before installation, you need:
    On **Third-party Ecosystem** copy the **Token ID** under **API Realtime Data**. Use this `Token ID` during integration setup:
    <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/menu-api-token.png" width=50% height=50%>
 
-4. **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
+3. **Inverter Serial Numbers** - Use the serial shown under **Devices** in Solax Cloud.
       - If your system uses a Solax LAN/WiFi dongle, use the dongle serial.
       - If your inverter has built-in WiFi, use the WiFi inverter serial.
       - For microinverter systems, use the microinverter(s) serial(s).
