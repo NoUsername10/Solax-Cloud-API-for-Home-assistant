@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfigurer SolaXCloud API-forbindelse",
+        "description": "Indtast dit Solax Cloud API-token, systemnavn og foretrukne scanningsinterval. Solax API opdateres kun 5 min.",
+        "data": {
+          "api_token": "API-token",
+          "system_name": "Systemnavn",
+          "scan_interval": "Scanningsinterval (sekunder)"
+        }
+      },
+      "add_inverter": {
+        "title": "Føj invertere til {system_name}",
+        "description": "Aktuelle invertere ({count}):\n{inverters_list}\n\nTilføj inverterens serienumre et efter et. Marker 'Udfør', når du er færdig.",
+        "data": {
+          "serial": "Inverterens serienummer",
+          "finish": "Afslut opsætning"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Meddelelse om API-hastighedsgrænse",
+        "description": "Før opsætningen blev afsluttet, returnerede {count} inverter(e) API-hastighedsgrænse:\n{inverters_list}\n\nOpsætningen kan fortsætte. Nogle værdier kan blive forsinket indtil næste opdatering. Aktuelt scanningsinterval: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API-hastighedsgrænse opstod. Berørte inverter(e): {inverters_list}. Aktuelt scanningsinterval: {scan_interval}s. Nogle værdier kan blive forsinket indtil næste opdatering."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Integration er allerede konfigureret"
+    },
+    "error": {
+      "invalid_token": "Ugyldigt API-token",
+      "no_inverters": "Der kræves mindst ét ​​inverterserienummer",
+      "no_system_name": "Systemnavn er påkrævet",
+      "duplicate_inverter": "Denne inverterserie er allerede tilføjet",
+      "acknowledge_rate_limit": "Anerkend venligst meddelelsen om satsgrænsen for at fortsætte",
+      "notification_rate_limit_title": "SolaX Cloud API - Hastighedsgrænse",
+      "notification_rate_limit_body": "SolaX Cloud API-hastighedsgrænsen er aktiv.\nBerørte inverter(e): {inverter_list}\n{details_block}\nIntegrationen beholder tidligere værdier for berørte invertere, indtil API-kald genoprettes. Overvej at øge scanningsintervallet ({scan_interval}s).",
+      "notification_invalid_serial_title": "SolaX Cloud API - Ugyldig seriel/adgang",
+      "notification_invalid_serial_body": "En eller flere inverterserier er uautoriserede.\n{details_block}\nDisse invertere holdes utilgængelige, indtil seriel/godkendelsesadgang er rettet.",
+      "notification_unknown": "Ukendt",
+      "notification_data_unauthorized": "Data uautoriseret"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Anerkend venligst meddelelsen om satsgrænsen for at fortsætte",
+      "acknowledge_invalid_serial": "Anerkend venligst den ugyldige seriel/adgangsmeddelelse for at fortsætte"
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Administrer invertere",
+        "description": "Aktuelle invertere ({count}):\n{inverters_list}\n\nTilføj nye invertere eller fjern eksisterende.",
+        "data": {
+          "api_token": "API-token",
+          "system_name": "Systemnavn",
+          "scan_interval": "Scanningsinterval (sekunder)",
+          "serial": "Tilføj nyt serienummer",
+          "remove_serial": "Fjern inverteren",
+          "finish": "Gem ændringer"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Ugyldig seriel/adgangsmeddelelse",
+        "description": "Dine ændringer blev gemt, men {count} inverter(e) returnerede Data Uautoriseret (1003):\n{details}\n\nDisse invertere holdes utilgængelige, indtil seriel/godkendelsesadgang er rettet.",
+        "data": {
+          "acknowledge": "Ugyldig seriel/adgang fundet. Berørte inverter(e): {details}. Disse invertere holdes utilgængelige, indtil seriel/godkendelsesadgang er rettet."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Meddelelse om API-hastighedsgrænse",
+        "description": "Dine ændringer blev gemt, men {count} inverter(e) ramte API-hastighedsgrænsen under genindlæsning:\n{inverters_list}\n\nNogle værdier kan blive forsinket indtil næste opdatering. Aktuelt scanningsinterval: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API-hastighedsgrænse opstod. Berørte inverter(e): {inverters_list}. Aktuelt scanningsinterval: {scan_interval}s. Nogle værdier kan blive forsinket indtil næste opdatering."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "Meddelelse om API-hastighedsgrænse",
+        "description": "Dine ændringer blev gemt, men {count} inverter(e) ramte API-hastighedsgrænsen under genindlæsning:\n{inverters_list}\n\nNogle værdier kan blive forsinket indtil næste opdatering. Aktuelt scanningsinterval: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API-hastighedsgrænse opstod. Berørte inverter(e): {inverters_list}. Aktuelt scanningsinterval: {scan_interval}s. Nogle værdier kan blive forsinket indtil næste opdatering."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "AC udgangseffekt"
+      },
+      "powerdc1": {
+        "name": "DC effekt streng 1"
+      },
+      "powerdc2": {
+        "name": "DC effekt streng 2"
+      },
+      "powerdc3": {
+        "name": "DC effekt streng 3"
+      },
+      "powerdc4": {
+        "name": "DC effekt streng 4"
+      },
+      "feedinpower": {
+        "name": "Netindfødningseffekt"
+      },
+      "feedinpower_m2": {
+        "name": "Netindfødningseffekt måler 2"
+      },
+      "bat_power": {
+        "name": "Batteristrøm"
+      },
+      "yieldtoday": {
+        "name": "Udbytte i dag"
+      },
+      "yieldtotal": {
+        "name": "Udbytte i alt"
+      },
+      "feedinenergy": {
+        "name": "Nettilførselsenergi"
+      },
+      "consumeenergy": {
+        "name": "Netforbrug Energi"
+      },
+      "soc": {
+        "name": "Batteriets ladetilstand"
+      },
+      "peps1": {
+        "name": "EPS fase 1 strøm"
+      },
+      "peps2": {
+        "name": "EPS fase 2 strøm"
+      },
+      "peps3": {
+        "name": "EPS fase 3 strøm"
+      },
+      "inverter_sn": {
+        "name": "Inverter seriel"
+      },
+      "sn": {
+        "name": "Inverter seriel Wi-Fi-modul"
+      },
+      "upload_time": {
+        "name": "Inverter upload tid"
+      },
+      "utc_date_time": {
+        "name": "UTC Dato Tid"
+      },
+      "inverter_efficiency": {
+        "name": "Inverter effektivitet"
+      },
+      "dc_total_inverter": {
+        "name": "DC Power Inverter i alt"
+      },
+      "ac_total": {
+        "name": "System AC effekt"
+      },
+      "dc_total": {
+        "name": "System DC effekt"
+      },
+      "system_efficiency": {
+        "name": "Systemets samlede effektivitet"
+      },
+      "system_health": {
+        "name": "Systemsundhed",
+        "state": {
+          "ok": "God",
+          "degraded": "Nedbrudt",
+          "error": "Fejl",
+          "unknown": "Ukendt"
+        }
+      },
+      "rate_limit_status": {
+        "name": "API-hastighedsgrænsestatus",
+        "state": {
+          "ok": "Ingen grænse",
+          "rate_limited": "Sats begrænset",
+          "unknown": "Ukendt"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Sidste afstemningsforsøg"
+      },
+      "next_scheduled_poll": {
+        "name": "Næste planlagte afstemning"
+      },
+      "api_access_status": {
+        "name": "API-adgangsstatus",
+        "state": {
+          "ok": "Adgang OK",
+          "serial_unauthorized": "Seriel Uautoriseret",
+          "rate_limited": "Sats begrænset",
+          "api_error": "API-fejl",
+          "unknown": "Ukendt"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Systemudbytte i dag"
+      },
+      "yieldtotal_total": {
+        "name": "System Yield Levetid"
+      },
+      "inverter_status": {
+        "name": "Inverter status",
+        "state": {
+          "100": "Venter på operation",
+          "101": "Selvtest",
+          "102": "Normal drift",
+          "103": "Genoprettelig fejl",
+          "104": "Permanent fejl",
+          "105": "Firmware opgradering",
+          "106": "EPS-detektion",
+          "107": "Ø-drift",
+          "108": "Selvtesttilstand (italienske sikkerhedsforskrifter)",
+          "109": "Dvaletilstand",
+          "110": "Standby-tilstand",
+          "111": "Fotovoltaisk opvågningsbatteritilstand",
+          "112": "Generatordetektionstilstand",
+          "113": "Generatortilstand",
+          "114": "Hurtig nedlukning standby-tilstand",
+          "130": "VPP-tilstand",
+          "131": "TOU - Selvbrug",
+          "132": "TOU - Opladning",
+          "133": "TOU - Afladning"
+        }
+      },
+      "bat_status": {
+        "name": "Batteristatus",
+        "state": {
+          "0": "Normalt",
+          "1": "Fejl",
+          "2": "Afbrudt"
+        }
+      },
+      "inverter_type": {
+        "name": "Inverter type",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "API hastighedsgrænse notifikationer"
+      }
+    }
+  }
+}

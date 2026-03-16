@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Richten Sie die SolaXCloud-API-Verbindung ein",
+        "description": "Geben Sie Ihr Solax Cloud API-Token, den Systemnamen und das bevorzugte Scanintervall ein. Die Solax-API wird nur alle 5 Minuten aktualisiert.",
+        "data": {
+          "api_token": "API-Token",
+          "system_name": "Systemname",
+          "scan_interval": "Scanintervall (Sekunden)"
+        }
+      },
+      "add_inverter": {
+        "title": "Wechselrichter zu {system_name} hinzufügen",
+        "description": "Aktuelle Wechselrichter ({count}):\n{inverters_list}\n\nFügen Sie die Seriennummern der Wechselrichter nacheinander hinzu. Markieren Sie „Fertig stellen“, wenn Sie fertig sind.",
+        "data": {
+          "serial": "Seriennummer des Wechselrichters",
+          "finish": "Beenden Sie die Einrichtung"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Hinweis zur API-Ratenbegrenzung",
+        "description": "Vor Abschluss der Einrichtung haben {count} Wechselrichter das API-Ratenlimit zurückgegeben:\n{inverters_list}\n\nDie Einrichtung kann fortgesetzt werden. Einige Werte können bis zur nächsten Aktualisierung verzögert werden. Aktuelles Scanintervall: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Es ist eine API-Ratenbegrenzung aufgetreten. Betroffene Wechselrichter: {inverters_list}. Aktuelles Scanintervall: {scan_interval}s. Einige Werte können bis zur nächsten Aktualisierung verzögert werden."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Die Integration ist bereits konfiguriert"
+    },
+    "error": {
+      "invalid_token": "Ungültiges API-Token",
+      "no_inverters": "Es ist mindestens eine Seriennummer des Wechselrichters erforderlich",
+      "no_system_name": "Systemname ist erforderlich",
+      "duplicate_inverter": "Diese Wechselrichter-Seriennummer ist bereits hinzugefügt",
+      "acknowledge_rate_limit": "Bitte bestätigen Sie den Hinweis zur Ratenbegrenzung, um fortzufahren",
+      "notification_rate_limit_title": "SolaX Cloud API – Ratenbegrenzung",
+      "notification_rate_limit_body": "Das Ratenlimit für die SolaX Cloud API ist aktiv.\nBetroffene Wechselrichter: {inverter_list}\n{details_block}\nDie Integration behält die vorherigen Werte für betroffene Wechselrichter bei, bis die API-Aufrufe wiederhergestellt sind. Erwägen Sie eine Verlängerung des Scanintervalls ({scan_interval}s).",
+      "notification_invalid_serial_title": "SolaX Cloud API – Ungültige Seriennummer/Zugriff",
+      "notification_invalid_serial_body": "Eine oder mehrere Wechselrichterserien sind nicht autorisiert.\n{details_block}\nDiese Wechselrichter bleiben solange nicht verfügbar, bis der serielle/Auth-Zugriff korrigiert ist.",
+      "notification_unknown": "Unbekannt",
+      "notification_data_unauthorized": "Daten nicht autorisiert"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Bitte bestätigen Sie den Hinweis zur Ratenbegrenzung, um fortzufahren",
+      "acknowledge_invalid_serial": "Bitte bestätigen Sie den ungültigen Serien-/Zugriffshinweis, um fortzufahren"
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Wechselrichter verwalten",
+        "description": "Aktuelle Wechselrichter ({count}):\n{inverters_list}\n\nFügen Sie neue Wechselrichter hinzu oder entfernen Sie vorhandene.",
+        "data": {
+          "api_token": "API-Token",
+          "system_name": "Systemname",
+          "scan_interval": "Scanintervall (Sekunden)",
+          "serial": "Neue Seriennummer hinzufügen",
+          "remove_serial": "Wechselrichter entfernen",
+          "finish": "Änderungen speichern"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Ungültiger Serien-/Zugriffshinweis",
+        "description": "Ihre Änderungen wurden gespeichert, aber {count} Wechselrichter haben nicht autorisierte Daten (1003) zurückgegeben:\n{details}\n\nDiese Wechselrichter bleiben solange nicht verfügbar, bis der serielle/Auth-Zugriff korrigiert ist.",
+        "data": {
+          "acknowledge": "Ungültige Seriennummer/Zugriff erkannt. Betroffene Wechselrichter: {details}. Diese Wechselrichter bleiben solange nicht verfügbar, bis der serielle/Auth-Zugriff korrigiert ist."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Hinweis zur API-Ratenbegrenzung",
+        "description": "Ihre Änderungen wurden gespeichert, aber {count} Wechselrichter haben beim Neuladen das API-Ratenlimit erreicht:\n{inverters_list}\n\nEinige Werte können bis zur nächsten Aktualisierung verzögert werden. Aktuelles Scanintervall: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Es ist eine API-Ratenbegrenzung aufgetreten. Betroffene Wechselrichter: {inverters_list}. Aktuelles Scanintervall: {scan_interval}s. Einige Werte können bis zur nächsten Aktualisierung verzögert werden."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "Hinweis zur API-Ratenbegrenzung",
+        "description": "Ihre Änderungen wurden gespeichert, aber {count} Wechselrichter haben beim Neuladen das API-Ratenlimit erreicht:\n{inverters_list}\n\nEinige Werte können bis zur nächsten Aktualisierung verzögert werden. Aktuelles Scanintervall: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Es ist eine API-Ratenbegrenzung aufgetreten. Betroffene Wechselrichter: {inverters_list}. Aktuelles Scanintervall: {scan_interval}s. Einige Werte können bis zur nächsten Aktualisierung verzögert werden."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "AC-Ausgangsleistung"
+      },
+      "powerdc1": {
+        "name": "Gleichstromstrang 1"
+      },
+      "powerdc2": {
+        "name": "Gleichstromstrang 2"
+      },
+      "powerdc3": {
+        "name": "Gleichstromstrang 3"
+      },
+      "powerdc4": {
+        "name": "Gleichstromstrang 4"
+      },
+      "feedinpower": {
+        "name": "Netzeinspeiseleistung"
+      },
+      "feedinpower_m2": {
+        "name": "Netzeinspeisestromzähler 2"
+      },
+      "bat_power": {
+        "name": "Batterieleistung"
+      },
+      "yieldtoday": {
+        "name": "Rendite heute"
+      },
+      "yieldtotal": {
+        "name": "Gesamtertrag"
+      },
+      "feedinenergy": {
+        "name": "Netzeinspeiseenergie"
+      },
+      "consumeenergy": {
+        "name": "Netzverbrauchsenergie"
+      },
+      "soc": {
+        "name": "Ladezustand der Batterie"
+      },
+      "peps1": {
+        "name": "EPS-Phase-1-Strom"
+      },
+      "peps2": {
+        "name": "EPS-Phase-2-Strom"
+      },
+      "peps3": {
+        "name": "EPS-Phase-3-Strom"
+      },
+      "inverter_sn": {
+        "name": "Wechselrichter seriell"
+      },
+      "sn": {
+        "name": "Serielles WLAN-Modul des Wechselrichters"
+      },
+      "upload_time": {
+        "name": "Wechselrichter-Upload-Zeit"
+      },
+      "utc_date_time": {
+        "name": "UTC-Datum und Uhrzeit"
+      },
+      "inverter_efficiency": {
+        "name": "Wechselrichtereffizienz"
+      },
+      "dc_total_inverter": {
+        "name": "Gleichstrom-Wechselrichter insgesamt"
+      },
+      "ac_total": {
+        "name": "Systemwechselstrom"
+      },
+      "dc_total": {
+        "name": "System-Gleichstrom"
+      },
+      "system_efficiency": {
+        "name": "Gesamteffizienz des Systems"
+      },
+      "system_health": {
+        "name": "Systemgesundheit",
+        "state": {
+          "ok": "In Ordnung",
+          "degraded": "Degradiert",
+          "error": "Fehler",
+          "unknown": "Unbekannt"
+        }
+      },
+      "rate_limit_status": {
+        "name": "Status der API-Ratenbegrenzung",
+        "state": {
+          "ok": "Keine Begrenzung",
+          "rate_limited": "Begrenzter Preis",
+          "unknown": "Unbekannt"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Letzter Umfrageversuch"
+      },
+      "next_scheduled_poll": {
+        "name": "Nächste geplante Umfrage"
+      },
+      "api_access_status": {
+        "name": "API-Zugriffsstatus",
+        "state": {
+          "ok": "Zugriff OK",
+          "serial_unauthorized": "Seriennummer nicht autorisiert",
+          "rate_limited": "Begrenzter Preis",
+          "api_error": "API-Fehler",
+          "unknown": "Unbekannt"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Anlagenertrag heute"
+      },
+      "yieldtotal_total": {
+        "name": "Lebensdauer des Systems"
+      },
+      "inverter_status": {
+        "name": "Wechselrichterstatus",
+        "state": {
+          "100": "Warten auf Operation",
+          "101": "Selbsttest",
+          "102": "Normalbetrieb",
+          "103": "Behebbarer Fehler",
+          "104": "Permanenter Fehler",
+          "105": "Firmware-Upgrade",
+          "106": "EPS-Erkennung",
+          "107": "Netzunabhängig",
+          "108": "Selbsttestmodus (italienische Sicherheitsvorschriften)",
+          "109": "Schlafmodus",
+          "110": "Standby-Modus",
+          "111": "Photovoltaik-Weckbatteriemodus",
+          "112": "Generatorerkennungsmodus",
+          "113": "Generatormodus",
+          "114": "Schnelles Herunterfahren im Standby-Modus",
+          "130": "VPP-Modus",
+          "131": "TOU - Eigennutzung",
+          "132": "TOU – Aufladen",
+          "133": "TOU – Entladen"
+        }
+      },
+      "bat_status": {
+        "name": "Batteriestatus",
+        "state": {
+          "0": "Normalbetrieb",
+          "1": "Fehler",
+          "2": "Getrennt"
+        }
+      },
+      "inverter_type": {
+        "name": "Wechselrichtertyp",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "Benachrichtigungen zur API-Ratenbegrenzung"
+      }
+    }
+  }
+}

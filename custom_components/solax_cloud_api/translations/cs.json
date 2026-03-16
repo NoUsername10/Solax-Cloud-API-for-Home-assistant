@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Nastavte připojení SolaXCloud API",
+        "description": "Zadejte svůj token Solax Cloud API, název systému a preferovaný interval skenování. Solax API se aktualizuje pouze každých 5 minut.",
+        "data": {
+          "api_token": "API token",
+          "system_name": "Název systému",
+          "scan_interval": "Interval skenování (sekundy)"
+        }
+      },
+      "add_inverter": {
+        "title": "Přidat měniče do {system_name}",
+        "description": "Aktuální měniče ({count}):\n{inverters_list}\n\nPřidejte sériová čísla měniče jedno po druhém. Po dokončení zaškrtněte 'Dokončit'.",
+        "data": {
+          "serial": "Sériové číslo měniče",
+          "finish": "Dokončete nastavení"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Upozornění na limit rychlosti API",
+        "description": "Před dokončením nastavení vrátilo {count} střídač(y) limit rychlosti API:\n{inverters_list}\n\nNastavení může pokračovat. Některé hodnoty mohou být zpožděny do příští aktualizace. Aktuální interval kontroly: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Došlo k limitu rychlosti API. Dotčené měniče: {inverters_list}. Aktuální interval kontroly: {scan_interval}s. Některé hodnoty mohou být zpožděny do příští aktualizace."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Integrace je již nakonfigurována"
+    },
+    "error": {
+      "invalid_token": "Neplatný token API",
+      "no_inverters": "Je vyžadováno alespoň jedno sériové číslo měniče",
+      "no_system_name": "Název systému je povinný",
+      "duplicate_inverter": "Tento sériový měnič je již přidán",
+      "acknowledge_rate_limit": "Chcete-li pokračovat, potvrďte upozornění na omezení sazby",
+      "notification_rate_limit_title": "SolaX Cloud API - Omezení rychlosti",
+      "notification_rate_limit_body": "Limit rychlosti rozhraní SolaX Cloud API je aktivní.\nDotčené měniče: {inverter_list}\n{details_block}\nIntegrace uchovává předchozí hodnoty pro ovlivněné měniče, dokud se neobnoví volání API. Zvažte prodloužení intervalu kontroly ({scan_interval}s).",
+      "notification_invalid_serial_title": "SolaX Cloud API – neplatný sériový/přístup",
+      "notification_invalid_serial_body": "Jeden nebo více sériových měničů jsou neautorizované.\n{details_block}\nTyto měniče jsou nedostupné, dokud nebude opraven sériový/auth přístup.",
+      "notification_unknown": "Neznámý",
+      "notification_data_unauthorized": "Data neoprávněná"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Chcete-li pokračovat, potvrďte upozornění na omezení sazby",
+      "acknowledge_invalid_serial": "Potvrďte prosím neplatné upozornění na seriál/přístup, abyste mohli pokračovat"
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Správa měničů",
+        "description": "Aktuální měniče ({count}):\n{inverters_list}\n\nPřidejte nové měniče nebo odstraňte stávající.",
+        "data": {
+          "api_token": "API token",
+          "system_name": "Název systému",
+          "scan_interval": "Interval skenování (sekundy)",
+          "serial": "Přidat nové sériové číslo",
+          "remove_serial": "Odstraňte střídač",
+          "finish": "Uložit změny"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Neplatné sériové/přístupové oznámení",
+        "description": "Vaše změny byly uloženy, ale {count} střídač(ů) vrátilo neoprávněná data (1003):\n{details}\n\nTyto měniče jsou nedostupné, dokud nebude opraven sériový/auth přístup.",
+        "data": {
+          "acknowledge": "Zjištěn neplatný Serial/Access. Dotčené měniče: {details}. Tyto měniče jsou nedostupné, dokud nebude opraven sériový/auth přístup."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Upozornění na limit rychlosti API",
+        "description": "Vaše změny byly uloženy, ale {count} měniče dosáhly limitu rychlosti API během opětovného načítání:\n{inverters_list}\n\nNěkteré hodnoty mohou být zpožděny do příští aktualizace. Aktuální interval kontroly: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Došlo k limitu rychlosti API. Dotčené měniče: {inverters_list}. Aktuální interval kontroly: {scan_interval}s. Některé hodnoty mohou být zpožděny do příští aktualizace."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "Upozornění na limit rychlosti API",
+        "description": "Vaše změny byly uloženy, ale {count} měniče dosáhly limitu rychlosti API během opětovného načítání:\n{inverters_list}\n\nNěkteré hodnoty mohou být zpožděny do příští aktualizace. Aktuální interval kontroly: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Došlo k limitu rychlosti API. Dotčené měniče: {inverters_list}. Aktuální interval kontroly: {scan_interval}s. Některé hodnoty mohou být zpožděny do příští aktualizace."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "AC výstupní výkon"
+      },
+      "powerdc1": {
+        "name": "DC napájecí řetězec 1"
+      },
+      "powerdc2": {
+        "name": "DC napájecí řetězec 2"
+      },
+      "powerdc3": {
+        "name": "DC napájecí řetězec 3"
+      },
+      "powerdc4": {
+        "name": "DC napájecí řetězec 4"
+      },
+      "feedinpower": {
+        "name": "Napájení sítě"
+      },
+      "feedinpower_m2": {
+        "name": "Měřič napájení sítě 2"
+      },
+      "bat_power": {
+        "name": "Napájení z baterie"
+      },
+      "yieldtoday": {
+        "name": "Výnos dnes"
+      },
+      "yieldtotal": {
+        "name": "Výnos celkem"
+      },
+      "feedinenergy": {
+        "name": "Energie dodávaná do sítě"
+      },
+      "consumeenergy": {
+        "name": "Spotřeba energie sítě"
+      },
+      "soc": {
+        "name": "Stav nabití baterie"
+      },
+      "peps1": {
+        "name": "EPS Fáze 1 Napájení"
+      },
+      "peps2": {
+        "name": "Výkon EPS fáze 2"
+      },
+      "peps3": {
+        "name": "Výkon EPS fáze 3"
+      },
+      "inverter_sn": {
+        "name": "Sériový měnič"
+      },
+      "sn": {
+        "name": "Invertorový sériový Wi-Fi modul"
+      },
+      "upload_time": {
+        "name": "Doba nahrání měniče"
+      },
+      "utc_date_time": {
+        "name": "Datum UTC Čas"
+      },
+      "inverter_efficiency": {
+        "name": "Účinnost měniče"
+      },
+      "dc_total_inverter": {
+        "name": "DC Power Inverter celkem"
+      },
+      "ac_total": {
+        "name": "Napájení systému AC"
+      },
+      "dc_total": {
+        "name": "Systém DC napájení"
+      },
+      "system_efficiency": {
+        "name": "Celková efektivita systému"
+      },
+      "system_health": {
+        "name": "Stav systému",
+        "state": {
+          "ok": "V pořádku",
+          "degraded": "Degradovaný",
+          "error": "Chyba",
+          "unknown": "Neznámý"
+        }
+      },
+      "rate_limit_status": {
+        "name": "Stav limitu rychlosti API",
+        "state": {
+          "ok": "Bez omezení",
+          "rate_limited": "Sazba omezená",
+          "unknown": "Neznámý"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Poslední pokus o hlasování"
+      },
+      "next_scheduled_poll": {
+        "name": "Další plánovaná anketa"
+      },
+      "api_access_status": {
+        "name": "Stav přístupu k API",
+        "state": {
+          "ok": "Přístup OK",
+          "serial_unauthorized": "Sériové neoprávněné",
+          "rate_limited": "Sazba omezená",
+          "api_error": "Chyba API",
+          "unknown": "Neznámý"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Výnos systému dnes"
+      },
+      "yieldtotal_total": {
+        "name": "Životnost systému"
+      },
+      "inverter_status": {
+        "name": "Stav měniče",
+        "state": {
+          "100": "Čekání na operaci",
+          "101": "Autotest",
+          "102": "Normální",
+          "103": "Odstranitelná závada",
+          "104": "Trvalá chyba",
+          "105": "Upgrade firmwaru",
+          "106": "Detekce EPS",
+          "107": "Mimo mřížku",
+          "108": "Režim autotestu (italské bezpečnostní předpisy)",
+          "109": "Režim spánku",
+          "110": "Pohotovostní režim",
+          "111": "Režim fotovoltaické probouzecí baterie",
+          "112": "Režim detekce generátoru",
+          "113": "Režim generátoru",
+          "114": "Rychlé vypnutí v pohotovostním režimu",
+          "130": "režim VPP",
+          "131": "TOU - Vlastní použití",
+          "132": "TOU - Nabíjení",
+          "133": "TOU - Vybíjení"
+        }
+      },
+      "bat_status": {
+        "name": "Stav baterie",
+        "state": {
+          "0": "Normální",
+          "1": "Chyba",
+          "2": "Odpojeno"
+        }
+      },
+      "inverter_type": {
+        "name": "Typ měniče",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "Upozornění na limit rychlosti API"
+      }
+    }
+  }
+}

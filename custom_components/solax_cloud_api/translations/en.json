@@ -1,5 +1,5 @@
 {
-  "title": "Solax Cloud API SolaXCloud Config.",
+  "title": "Solax Cloud API SolaXCloud",
   "config": {
     "step": {
       "user": {
@@ -23,7 +23,7 @@
         "title": "API Rate Limit Notice",
         "description": "Before finishing setup, {count} inverter(s) returned API rate limit:\n{inverters_list}\n\nSetup can continue. Some values may be delayed until next refresh. Current scan interval: {scan_interval}s.",
         "data": {
-          "acknowledge": "API Rate Limit was detected, and values may be delayed until next refresh."
+          "acknowledge": "API Rate Limit occurred. Affected inverter(s): {inverters_list}. Current scan interval: {scan_interval}s. Some values may be delayed until next refresh."
         }
       }
     },
@@ -35,7 +35,13 @@
       "no_inverters": "At least one inverter serial number is required",
       "no_system_name": "System name is required",
       "duplicate_inverter": "This inverter serial is already added",
-      "acknowledge_rate_limit": "Please acknowledge the rate limit notice to continue"
+      "acknowledge_rate_limit": "Please acknowledge the rate limit notice to continue",
+      "notification_rate_limit_title": "SolaX Cloud API - Rate Limit",
+      "notification_rate_limit_body": "SolaX Cloud API rate limit is active.\nAffected inverter(s): {inverter_list}\n{details_block}\nThe integration keeps previous values for affected inverters until API calls recover. Consider increasing scan interval ({scan_interval}s).",
+      "notification_invalid_serial_title": "SolaX Cloud API - Invalid Serial/Access",
+      "notification_invalid_serial_body": "One or more inverter serials are unauthorized.\n{details_block}\nThese inverters are kept unavailable until serial/auth access is corrected.",
+      "notification_unknown": "Unknown",
+      "notification_data_unauthorized": "Data Unauthorized"
     }
   },
   "options": {
@@ -60,21 +66,21 @@
         "title": "Invalid Serial/Access Notice",
         "description": "Your changes were saved, but {count} inverter(s) returned Data Unauthorized (1003):\n{details}\n\nThese inverters are kept unavailable until serial/auth access is corrected.",
         "data": {
-          "acknowledge": "Invalid Serial/Access detected."
+          "acknowledge": "Invalid Serial/Access detected. Affected inverter(s): {details}. These inverters are kept unavailable until serial/auth access is corrected."
         }
       },
       "rate_limit_notice": {
         "title": "API Rate Limit Notice",
         "description": "Your changes were saved, but {count} inverter(s) hit API rate limit during reload:\n{inverters_list}\n\nSome values may be delayed until the next refresh. Current scan interval: {scan_interval}s.",
         "data": {
-          "acknowledge": "API Rate Limit was detected, and values may be delayed until next refresh."
+          "acknowledge": "API Rate Limit occurred. Affected inverter(s): {inverters_list}. Current scan interval: {scan_interval}s. Some values may be delayed until next refresh."
         }
       },
       "options_rate_limit_notice": {
         "title": "API Rate Limit Notice",
         "description": "Your changes were saved, but {count} inverter(s) hit API rate limit during reload:\n{inverters_list}\n\nSome values may be delayed until the next refresh. Current scan interval: {scan_interval}s.",
         "data": {
-          "acknowledge": "API Rate Limit was detected, and values may be delayed until next refresh."
+          "acknowledge": "API Rate Limit occurred. Affected inverter(s): {inverters_list}. Current scan interval: {scan_interval}s. Some values may be delayed until next refresh."
         }
       }
     }

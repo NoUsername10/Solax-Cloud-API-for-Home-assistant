@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Stel de SolaXCloud API-verbinding in",
+        "description": "Voer uw Solax Cloud API-token, systeemnaam en gewenste scaninterval in. Solax API wordt slechts elke 5 minuten bijgewerkt.",
+        "data": {
+          "api_token": "API-token",
+          "system_name": "Systeemnaam",
+          "scan_interval": "Scaninterval (seconden)"
+        }
+      },
+      "add_inverter": {
+        "title": "Omvormers toevoegen aan {system_name}",
+        "description": "Stroomomvormers ({count}):\n{inverters_list}\n\nVoeg de serienummers van de omvormer één voor één toe. Vink 'Voltooien' aan als u klaar bent.",
+        "data": {
+          "serial": "Serienummer van de omvormer",
+          "finish": "Voltooi de installatie"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Kennisgeving API-snelheidslimiet",
+        "description": "Voordat de installatie werd voltooid, hebben {count} omvormer(s) de API-snelheidslimiet geretourneerd:\n{inverters_list}\n\nHet instellen kan doorgaan. Sommige waarden kunnen worden uitgesteld tot de volgende vernieuwing. Huidig ​​scaninterval: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API-snelheidslimiet is opgetreden. Betrokken omvormer(s): {inverters_list}. Huidig ​​scaninterval: {scan_interval}s. Sommige waarden kunnen worden uitgesteld tot de volgende vernieuwing."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Integratie is al geconfigureerd"
+    },
+    "error": {
+      "invalid_token": "Ongeldig API-token",
+      "no_inverters": "Er is minimaal één serienummer van de omvormer vereist",
+      "no_system_name": "Systeemnaam is vereist",
+      "duplicate_inverter": "Dit serienummer van de omvormer is al toegevoegd",
+      "acknowledge_rate_limit": "Bevestig de kennisgeving van de tarieflimiet om door te gaan",
+      "notification_rate_limit_title": "SolaX Cloud API - Tarieflimiet",
+      "notification_rate_limit_body": "SolaX Cloud API-snelheidslimiet is actief.\nBetrokken omvormer(s): {inverter_list}\n{details_block}\nDe integratie behoudt eerdere waarden voor de betrokken omvormers totdat de API-aanroepen zijn hersteld. Overweeg om het scaninterval te vergroten ({scan_interval}s).",
+      "notification_invalid_serial_title": "SolaX Cloud API - Ongeldige serieel/toegang",
+      "notification_invalid_serial_body": "Een of meer serienummers van de omvormer zijn niet geautoriseerd.\n{details_block}\nDeze omvormers blijven onbeschikbaar totdat de seriële/authenticatietoegang is gecorrigeerd.",
+      "notification_unknown": "Onbekend",
+      "notification_data_unauthorized": "Gegevens niet geautoriseerd"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Bevestig de kennisgeving van de tarieflimiet om door te gaan",
+      "acknowledge_invalid_serial": "Bevestig de ongeldige seriële/toegangsmelding om door te gaan"
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Beheer omvormers",
+        "description": "Stroomomvormers ({count}):\n{inverters_list}\n\nVoeg nieuwe omvormers toe of verwijder bestaande.",
+        "data": {
+          "api_token": "API-token",
+          "system_name": "Systeemnaam",
+          "scan_interval": "Scaninterval (seconden)",
+          "serial": "Nieuw serienummer toevoegen",
+          "remove_serial": "Omvormer verwijderen",
+          "finish": "Wijzigingen opslaan"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Ongeldige serieel-/toegangsmelding",
+        "description": "Uw wijzigingen zijn opgeslagen, maar {count} omvormer(s) hebben Data Unauthorized (1003) geretourneerd:\n{details}\n\nDeze omvormers blijven onbeschikbaar totdat de seriële/authenticatietoegang is gecorrigeerd.",
+        "data": {
+          "acknowledge": "Ongeldig serieel/toegang gedetecteerd. Betrokken omvormer(s): {details}. Deze omvormers blijven onbeschikbaar totdat de seriële/authenticatietoegang is gecorrigeerd."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Kennisgeving API-snelheidslimiet",
+        "description": "Uw wijzigingen zijn opgeslagen, maar {count} omvormer(s) bereikten de API-limiet tijdens het opnieuw laden:\n{inverters_list}\n\nSommige waarden kunnen worden uitgesteld tot de volgende vernieuwing. Huidig ​​scaninterval: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API-snelheidslimiet is opgetreden. Betrokken omvormer(s): {inverters_list}. Huidig ​​scaninterval: {scan_interval}s. Sommige waarden kunnen worden uitgesteld tot de volgende vernieuwing."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "Kennisgeving API-snelheidslimiet",
+        "description": "Uw wijzigingen zijn opgeslagen, maar {count} omvormer(s) bereikten de API-limiet tijdens het opnieuw laden:\n{inverters_list}\n\nSommige waarden kunnen worden uitgesteld tot de volgende vernieuwing. Huidig ​​scaninterval: {scan_interval}s.",
+        "data": {
+          "acknowledge": "API-snelheidslimiet is opgetreden. Betrokken omvormer(s): {inverters_list}. Huidig ​​scaninterval: {scan_interval}s. Sommige waarden kunnen worden uitgesteld tot de volgende vernieuwing."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "AC-uitgangsvermogen"
+      },
+      "powerdc1": {
+        "name": "Gelijkstroomvoedingsreeks 1"
+      },
+      "powerdc2": {
+        "name": "Gelijkstroomvoedingsreeks 2"
+      },
+      "powerdc3": {
+        "name": "Gelijkstroomvoedingsreeks 3"
+      },
+      "powerdc4": {
+        "name": "Gelijkstroomvoedingsreeks 4"
+      },
+      "feedinpower": {
+        "name": "Netvoedingsvermogen"
+      },
+      "feedinpower_m2": {
+        "name": "Netvoedingsvermogensmeter 2"
+      },
+      "bat_power": {
+        "name": "Batterijvermogen"
+      },
+      "yieldtoday": {
+        "name": "Opbrengst vandaag"
+      },
+      "yieldtotal": {
+        "name": "Opbrengst totaal"
+      },
+      "feedinenergy": {
+        "name": "Netfeed-in-energie"
+      },
+      "consumeenergy": {
+        "name": "Netverbruik Energie"
+      },
+      "soc": {
+        "name": "Laadstatus van de batterij"
+      },
+      "peps1": {
+        "name": "EPS Fase 1 Vermogen"
+      },
+      "peps2": {
+        "name": "EPS Fase 2-voeding"
+      },
+      "peps3": {
+        "name": "EPS Fase 3-kracht"
+      },
+      "inverter_sn": {
+        "name": "Omvormer serieel"
+      },
+      "sn": {
+        "name": "Omvormer seriële Wi-Fi-module"
+      },
+      "upload_time": {
+        "name": "Omvormer uploadtijd"
+      },
+      "utc_date_time": {
+        "name": "UTC-datum Tijd"
+      },
+      "inverter_efficiency": {
+        "name": "Omvormerefficiëntie"
+      },
+      "dc_total_inverter": {
+        "name": "DC-omvormer Totaal"
+      },
+      "ac_total": {
+        "name": "Systeem Wisselstroom"
+      },
+      "dc_total": {
+        "name": "Systeem gelijkstroom"
+      },
+      "system_efficiency": {
+        "name": "Systeem totale efficiëntie"
+      },
+      "system_health": {
+        "name": "Systeemgezondheid",
+        "state": {
+          "ok": "Goed",
+          "degraded": "Gedegradeerd",
+          "error": "Fout",
+          "unknown": "Onbekend"
+        }
+      },
+      "rate_limit_status": {
+        "name": "Status API-snelheidslimiet",
+        "state": {
+          "ok": "Geen limiet",
+          "rate_limited": "Tarief beperkt",
+          "unknown": "Onbekend"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Laatste peilingpoging"
+      },
+      "next_scheduled_poll": {
+        "name": "Volgende geplande peiling"
+      },
+      "api_access_status": {
+        "name": "API-toegangsstatus",
+        "state": {
+          "ok": "Toegang OK",
+          "serial_unauthorized": "Serieel niet geautoriseerd",
+          "rate_limited": "Tarief beperkt",
+          "api_error": "API-fout",
+          "unknown": "Onbekend"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Systeemrendement vandaag"
+      },
+      "yieldtotal_total": {
+        "name": "Systeemopbrengst Levensduur"
+      },
+      "inverter_status": {
+        "name": "Omvormerstatus",
+        "state": {
+          "100": "Wachten op operatie",
+          "101": "Zelftest",
+          "102": "Normaal",
+          "103": "Herstelbare fout",
+          "104": "Permanente fout",
+          "105": "Firmware-upgrade",
+          "106": "EPS-detectie",
+          "107": "Buiten het elektriciteitsnet",
+          "108": "Zelftestmodus (Italiaanse veiligheidsvoorschriften)",
+          "109": "Slaapmodus",
+          "110": "Stand-bymodus",
+          "111": "Fotovoltaïsche wekbatterijmodus",
+          "112": "Generatordetectiemodus",
+          "113": "Generatormodus",
+          "114": "Snelle uitschakeling in standby-modus",
+          "130": "VPP-modus",
+          "131": "TOU - Eigen gebruik",
+          "132": "TOU - Opladen",
+          "133": "TOU - Ontladen"
+        }
+      },
+      "bat_status": {
+        "name": "Batterijstatus",
+        "state": {
+          "0": "Normaal",
+          "1": "Schuld",
+          "2": "Verbinding verbroken"
+        }
+      },
+      "inverter_type": {
+        "name": "Omvormertype",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "Meldingen over API-snelheidslimieten"
+      }
+    }
+  }
+}

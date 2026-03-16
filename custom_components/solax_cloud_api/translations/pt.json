@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configurar conexão API SolaXCloud",
+        "description": "Insira seu token da API Solax Cloud, nome do sistema e intervalo de verificação preferencial. A API Solax é atualizada apenas a cada 5 minutos.",
+        "data": {
+          "api_token": "Token de API",
+          "system_name": "Nome do sistema",
+          "scan_interval": "Intervalo de varredura (segundos)"
+        }
+      },
+      "add_inverter": {
+        "title": "Adicionar inversores a {system_name}",
+        "description": "Inversores atuais ({count}):\n{inverters_list}\n\nAdicione os números de série do inversor um por um. Marque 'Concluir' quando terminar.",
+        "data": {
+          "serial": "Número de série do inversor",
+          "finish": "Concluir configuração"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Aviso de limite de taxa de API",
+        "description": "Antes de terminar a configuração, o(s) inversor(es) {count} retornaram o limite de taxa API:\n{inverters_list}\n\nA configuração pode continuar. Alguns valores podem ser adiados até a próxima atualização. Intervalo de verificação atual: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Ocorreu limite de taxa de API. Inversor(es) afetado(s): {inverters_list}. Intervalo de verificação atual: {scan_interval}s. Alguns valores podem ser adiados até a próxima atualização."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "A integração já está configurada"
+    },
+    "error": {
+      "invalid_token": "Token de API inválido",
+      "no_inverters": "É necessário pelo menos um número de série do inversor",
+      "no_system_name": "O nome do sistema é obrigatório",
+      "duplicate_inverter": "Este serial do inversor já está adicionado",
+      "acknowledge_rate_limit": "Por favor, confirme o aviso de limite de taxa para continuar",
+      "notification_rate_limit_title": "API SolaX Cloud - Limite de taxa",
+      "notification_rate_limit_body": "O limite de taxa da API SolaX Cloud está ativo.\nInversor(es) afetado(s): {inverter_list}\n{details_block}\nA integração mantém os valores anteriores dos inversores afetados até que as chamadas API sejam recuperadas. Considere aumentar o intervalo de verificação ({scan_interval}s).",
+      "notification_invalid_serial_title": "API SolaX Cloud - Serial/Acesso inválido",
+      "notification_invalid_serial_body": "Uma ou mais séries do inversor não são autorizadas.\n{details_block}\nEsses inversores são mantidos indisponíveis até que o acesso serial/autenticação seja corrigido.",
+      "notification_unknown": "Desconhecido",
+      "notification_data_unauthorized": "Dados não autorizados"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Por favor, confirme o aviso de limite de taxa para continuar",
+      "acknowledge_invalid_serial": "Por favor, reconheça o aviso de serial/acesso inválido para continuar"
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Gerenciar inversores",
+        "description": "Inversores atuais ({count}):\n{inverters_list}\n\nAdicione novos inversores ou remova os existentes.",
+        "data": {
+          "api_token": "Token de API",
+          "system_name": "Nome do sistema",
+          "scan_interval": "Intervalo de varredura (segundos)",
+          "serial": "Adicionar novo número de série",
+          "remove_serial": "Remover inversor",
+          "finish": "Salvar alterações"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Aviso de série/acesso inválido",
+        "description": "Suas alterações foram salvas, mas {count} inversor(es) retornaram Dados Não Autorizados (1003):\n{details}\n\nEsses inversores são mantidos indisponíveis até que o acesso serial/autenticação seja corrigido.",
+        "data": {
+          "acknowledge": "Serial/acesso inválido detectado. Inversor(es) afetado(s): {details}. Esses inversores são mantidos indisponíveis até que o acesso serial/autenticação seja corrigido."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "Aviso de limite de taxa de API",
+        "description": "Suas alterações foram salvas, mas {count} inversor(es) atingiram o limite de taxa API durante a recarga:\n{inverters_list}\n\nAlguns valores podem ser adiados até a próxima atualização. Intervalo de verificação atual: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Ocorreu limite de taxa de API. Inversor(es) afetado(s): {inverters_list}. Intervalo de verificação atual: {scan_interval}s. Alguns valores podem ser adiados até a próxima atualização."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "Aviso de limite de taxa de API",
+        "description": "Suas alterações foram salvas, mas {count} inversor(es) atingiram o limite de taxa API durante a recarga:\n{inverters_list}\n\nAlguns valores podem ser adiados até a próxima atualização. Intervalo de verificação atual: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Ocorreu limite de taxa de API. Inversor(es) afetado(s): {inverters_list}. Intervalo de verificação atual: {scan_interval}s. Alguns valores podem ser adiados até a próxima atualização."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "Potência de saída CA"
+      },
+      "powerdc1": {
+        "name": "Sequência de alimentação CC 1"
+      },
+      "powerdc2": {
+        "name": "Sequência de alimentação CC 2"
+      },
+      "powerdc3": {
+        "name": "Sequência de alimentação CC 3"
+      },
+      "powerdc4": {
+        "name": "Sequência de alimentação CC 4"
+      },
+      "feedinpower": {
+        "name": "Potência de alimentação da rede"
+      },
+      "feedinpower_m2": {
+        "name": "Medidor de energia de alimentação da rede 2"
+      },
+      "bat_power": {
+        "name": "Energia da bateria"
+      },
+      "yieldtoday": {
+        "name": "Rendimento hoje"
+      },
+      "yieldtotal": {
+        "name": "Rendimento total"
+      },
+      "feedinenergy": {
+        "name": "Energia de alimentação da rede"
+      },
+      "consumeenergy": {
+        "name": "Energia de consumo da rede"
+      },
+      "soc": {
+        "name": "Estado de carga da bateria"
+      },
+      "peps1": {
+        "name": "Potência EPS Fase 1"
+      },
+      "peps2": {
+        "name": "Potência EPS Fase 2"
+      },
+      "peps3": {
+        "name": "Energia EPS Fase 3"
+      },
+      "inverter_sn": {
+        "name": "Série do inversor"
+      },
+      "sn": {
+        "name": "Módulo Wi-Fi Serial Inversor"
+      },
+      "upload_time": {
+        "name": "Tempo de upload do inversor"
+      },
+      "utc_date_time": {
+        "name": "Data Hora UTC"
+      },
+      "inverter_efficiency": {
+        "name": "Eficiência do inversor"
+      },
+      "dc_total_inverter": {
+        "name": "Total do inversor de energia DC"
+      },
+      "ac_total": {
+        "name": "Alimentação CA do sistema"
+      },
+      "dc_total": {
+        "name": "Alimentação CC do sistema"
+      },
+      "system_efficiency": {
+        "name": "Eficiência Total do Sistema"
+      },
+      "system_health": {
+        "name": "Saúde do sistema",
+        "state": {
+          "ok": "Saudavel",
+          "degraded": "Degradado",
+          "error": "Erro",
+          "unknown": "Desconhecido"
+        }
+      },
+      "rate_limit_status": {
+        "name": "Status do limite de taxa de API",
+        "state": {
+          "ok": "Sem limite",
+          "rate_limited": "Taxa limitada",
+          "unknown": "Desconhecido"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Última tentativa de pesquisa"
+      },
+      "next_scheduled_poll": {
+        "name": "Próxima pesquisa agendada"
+      },
+      "api_access_status": {
+        "name": "Status de acesso à API",
+        "state": {
+          "ok": "Acesso OK",
+          "serial_unauthorized": "Série não autorizada",
+          "rate_limited": "Taxa limitada",
+          "api_error": "Erro de API",
+          "unknown": "Desconhecido"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Rendimento do sistema hoje"
+      },
+      "yieldtotal_total": {
+        "name": "Vida útil do rendimento do sistema"
+      },
+      "inverter_status": {
+        "name": "Status do inversor",
+        "state": {
+          "100": "Aguardando operação",
+          "101": "Autoteste",
+          "102": "Operacao normal",
+          "103": "Falha recuperável",
+          "104": "Falha permanente",
+          "105": "Atualização de firmware",
+          "106": "Detecção de EPS",
+          "107": "Fora da rede",
+          "108": "Modo de autoteste (regulamentos de segurança italianos)",
+          "109": "Modo de suspensão",
+          "110": "Modo de espera",
+          "111": "Modo de bateria de despertar fotovoltaico",
+          "112": "Modo de detecção do gerador",
+          "113": "Modo gerador",
+          "114": "Modo de espera de desligamento rápido",
+          "130": "Modo VPP",
+          "131": "TOU - Auto uso",
+          "132": "TOU - Carregamento",
+          "133": "TOU - Descarga"
+        }
+      },
+      "bat_status": {
+        "name": "Status da bateria",
+        "state": {
+          "0": "Estado normal",
+          "1": "Falta",
+          "2": "Desconectado"
+        }
+      },
+      "inverter_type": {
+        "name": "Tipo de inversor",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "Notificações de limite de taxa de API"
+      }
+    }
+  }
+}

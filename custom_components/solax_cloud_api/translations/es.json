@@ -1,5 +1,5 @@
 {
-  "title": "Configuración de Solax Cloud API SolaXCloud.",
+  "title": "Solax Cloud API SolaXCloud",
   "config": {
     "step": {
       "user": {
@@ -23,7 +23,7 @@
         "title": "Aviso de límite de tasa de API",
         "description": "Antes de finalizar la configuración, {count} inversor(es) devolvieron límite de tasa de API:\n{inverters_list}\n\nLa configuración puede continuar. Algunos valores pueden retrasarse hasta la siguiente actualización. Intervalo actual de sondeo: {scan_interval}s.",
         "data": {
-          "acknowledge": "Se detectó límite de tasa de API y algunos valores pueden retrasarse hasta la siguiente actualización."
+          "acknowledge": "Se produjo un límite de tasa de API. Inversor(es) afectados: {inverters_list}. Intervalo actual de sondeo: {scan_interval}s. Algunos valores pueden retrasarse hasta la siguiente actualización."
         }
       }
     },
@@ -35,7 +35,13 @@
       "no_inverters": "Se requiere al menos un número de serie de inversor",
       "no_system_name": "El nombre del sistema es obligatorio",
       "duplicate_inverter": "Este número de serie ya está agregado",
-      "acknowledge_rate_limit": "Confirma el aviso de límite de tasa para continuar"
+      "acknowledge_rate_limit": "Confirma el aviso de límite de tasa para continuar",
+      "notification_rate_limit_title": "SolaX Cloud API - Límite de tasa",
+      "notification_rate_limit_body": "El límite de tasa de SolaX Cloud API está activo.\nInversor(es) afectados: {inverter_list}\n{details_block}\nLa integración mantiene los valores anteriores para los inversores afectados hasta que se recuperen las llamadas API. Considera aumentar el intervalo de sondeo ({scan_interval}s).",
+      "notification_invalid_serial_title": "SolaX Cloud API - Serie/Acceso no válido",
+      "notification_invalid_serial_body": "Uno o más números de serie de inversor no tienen autorización.\n{details_block}\nEstos inversores se mantienen no disponibles hasta corregir la serie/acceso de autenticación.",
+      "notification_unknown": "Desconocido",
+      "notification_data_unauthorized": "Datos no autorizados"
     }
   },
   "options": {
@@ -60,21 +66,21 @@
         "title": "Aviso de serie/acceso no válido",
         "description": "Tus cambios se guardaron, pero {count} inversor(es) devolvieron Data Unauthorized (1003):\n{details}\n\nEstos inversores se mantienen no disponibles hasta corregir la serie/acceso de autenticación.",
         "data": {
-          "acknowledge": "Se detectó serie/acceso no válido."
+          "acknowledge": "Se detectó serie/acceso no válido. Inversor(es) afectados: {details}. Estos inversores se mantienen no disponibles hasta corregir la serie/acceso de autenticación."
         }
       },
       "rate_limit_notice": {
         "title": "Aviso de límite de tasa de API",
         "description": "Tus cambios se guardaron, pero {count} inversor(es) alcanzaron el límite de tasa de API durante la recarga:\n{inverters_list}\n\nAlgunos valores pueden retrasarse hasta la próxima actualización. Intervalo actual de sondeo: {scan_interval}s.",
         "data": {
-          "acknowledge": "Se detectó límite de tasa de API y algunos valores pueden retrasarse hasta la siguiente actualización."
+          "acknowledge": "Se produjo un límite de tasa de API. Inversor(es) afectados: {inverters_list}. Intervalo actual de sondeo: {scan_interval}s. Algunos valores pueden retrasarse hasta la siguiente actualización."
         }
       },
       "options_rate_limit_notice": {
         "title": "Aviso de límite de tasa de API",
         "description": "Tus cambios se guardaron, pero {count} inversor(es) alcanzaron el límite de tasa de API durante la recarga:\n{inverters_list}\n\nAlgunos valores pueden retrasarse hasta la próxima actualización. Intervalo actual de sondeo: {scan_interval}s.",
         "data": {
-          "acknowledge": "Se detectó límite de tasa de API y algunos valores pueden retrasarse hasta la siguiente actualización."
+          "acknowledge": "Se produjo un límite de tasa de API. Inversor(es) afectados: {inverters_list}. Intervalo actual de sondeo: {scan_interval}s. Algunos valores pueden retrasarse hasta la siguiente actualización."
         }
       }
     }
@@ -159,16 +165,16 @@
       "system_health": {
         "name": "Salud del sistema",
         "state": {
-          "ok": "OK",
+          "ok": "Saludable",
           "degraded": "Degradado",
-          "error": "Error",
+          "error": "Fallo",
           "unknown": "Desconocido"
         }
       },
       "rate_limit_status": {
         "name": "Estado de límite de tasa de API",
         "state": {
-          "ok": "OK",
+          "ok": "Sin límite",
           "rate_limited": "Limitado por tasa",
           "unknown": "Desconocido"
         }
@@ -182,7 +188,7 @@
       "api_access_status": {
         "name": "Estado de acceso a API",
         "state": {
-          "ok": "OK",
+          "ok": "Acceso OK",
           "serial_unauthorized": "Serie no autorizada",
           "rate_limited": "Limitado por tasa",
           "api_error": "Error de API",
@@ -200,7 +206,7 @@
         "state": {
           "100": "Esperando operación",
           "101": "Autoprueba",
-          "102": "Normal",
+          "102": "Funcionamiento normal",
           "103": "Fallo recuperable",
           "104": "Fallo permanente",
           "105": "Actualización de firmware",
@@ -222,7 +228,7 @@
       "bat_status": {
         "name": "Estado de batería",
         "state": {
-          "0": "Normal",
+          "0": "Estado normal",
           "1": "Fallo",
           "2": "Desconectada"
         }
