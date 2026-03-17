@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Planned]
 - Add System health Notifications switch and messaging (with error message, inverter ino etc)
 - Individual DC string performance over the day comparison (fault finding) for all panels.
+- Energy Charge and Discharge sensors kWh calculated from battery W data.
 
 ## [Unreleased]
 - No changes yet.
