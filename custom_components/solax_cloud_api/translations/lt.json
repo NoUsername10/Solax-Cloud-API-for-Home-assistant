@@ -1,0 +1,298 @@
+{
+  "title": "Solax Cloud API SolaXCloud",
+  "config": {
+    "step": {
+      "user": {
+        "title": "SolaXCloud API ryšio nustatymas",
+        "description": "Įveskite savo Solax Cloud API tokeną, sistemos pavadinimą ir pageidaujamą skenavimo intervalą. Solax API atnaujinama tik kas 5 min.",
+        "data": {
+          "api_token": "API tokenas",
+          "system_name": "Sistemos pavadinimas",
+          "scan_interval": "Skenavimo intervalas (sekundėmis)"
+        }
+      },
+      "add_inverter": {
+        "title": "Pridėti inverterius į {system_name}",
+        "description": "Dabartiniai inverteriai ({count}):\n{inverters_list}\n\nPridėkite inverterių serijinius numerius po vieną. Pažymėkite 'Baigti' kai baigsite.",
+        "data": {
+          "serial": "Inverterio serijinis numeris",
+          "finish": "Baigti nustatymą"
+        }
+      },
+      "rate_limit_notice": {
+        "title": "API greičio apribojimo pranešimas",
+        "description": "Prieš baigiant nustatymą, {count} inverteris(-iai) grąžino API greičio apribojimą:\n{inverters_list}\n\nNustatymas gali tęstis. Kai kurios reikšmės gali būti atidėtos iki kito atnaujinimo. Dabartinis skenavimo intervalas: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Įvyko API greičio apribojimas. Paveikti inverteriai: {inverters_list}. Dabartinis skenavimo intervalas: {scan_interval}s. Kai kurios reikšmės gali būti atidėtos iki kito atnaujinimo."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Integracija jau sukonfigūruota"
+    },
+    "error": {
+      "invalid_token": "Neteisingas API tokenas",
+      "no_inverters": "Reikalingas bent vienas inverterio serijinis numeris",
+      "no_system_name": "Reikalingas sistemos pavadinimas",
+      "duplicate_inverter": "Šis inverterio serijinis numeris jau pridėtas",
+      "acknowledge_rate_limit": "Prašome patvirtinti greičio apribojimo pranešimą, kad tęstumėte",
+      "notification_rate_limit_title": "SolaX Cloud API - Greičio apribojimas",
+      "notification_rate_limit_body": "SolaX Cloud API greičio apribojimas aktyvus.\nPaveikti inverteriai: {inverter_list}\n{details_block}\nIntegracija išlaiko ankstesnes reikšmes paveiktiems inverteriams, kol API iškvietimai atsistatys. Apsvarstykite padidinti skenavimo intervalą ({scan_interval}s).",
+      "notification_invalid_serial_title": "SolaX Cloud API - Neteisingas serijinis numeris/Prieiga",
+      "notification_invalid_serial_body": "Vienas ar daugiau inverterių serijinių numerių yra neleistini.\n{details_block}\nŠie inverteriai išlieka neprieinami, kol serijinis numeris/prieiga bus ištaisyta.",
+      "notification_unknown": "Nežinoma",
+      "notification_data_unauthorized": "Duomenys neleistini"
+    }
+  },
+  "options": {
+    "error": {
+      "acknowledge_rate_limit": "Prašome patvirtinti greičio apribojimo pranešimą, kad tęstumėte",
+      "acknowledge_invalid_serial": "Prašome patvirtinti neteisingo serijinio numerio/prieigos pranešimą, kad tęstumėte"
+    },
+    "step": {
+      "manage_inverters": {
+        "title": "Tvarkyti inverterius",
+        "description": "Dabartiniai inverteriai ({count}):\n{inverters_list}\n\nPridėkite naujus inverterius arba pašalinkite esamus.",
+        "data": {
+          "api_token": "API tokenas",
+          "system_name": "Sistemos pavadinimas",
+          "scan_interval": "Skenavimo intervalas (sekundėmis)",
+          "serial": "Pridėti naują serijinį numerį",
+          "remove_serial": "Pašalinti inverterį",
+          "finish": "Išsaugoti pakeitimus"
+        }
+      },
+      "invalid_serial_notice": {
+        "title": "Neteisingo serijinio numerio/Prieigos pranešimas",
+        "description": "Jūsų pakeitimai buvo išsaugoti, bet {count} inverteris(-iai) grąžino Duomenys neleistini (1003):\n{details}\n\nŠie inverteriai išlieka neprieinami, kol serijinis numeris/prieiga bus ištaisyta.",
+        "data": {
+          "acknowledge": "Aptiktas neteisingas serijinis numeris/Prieiga. Paveikti inverteriai: {details}. Šie inverteriai išlieka neprieinami, kol serijinis numeris/prieiga bus ištaisyta."
+        }
+      },
+      "rate_limit_notice": {
+        "title": "API greičio apribojimo pranešimas",
+        "description": "Jūsų pakeitimai buvo išsaugoti, bet {count} inverteris(-iai) pasiekė API greičio apribojimą per perkrovimą:\n{inverters_list}\n\nKai kurios reikšmės gali būti atidėtos iki kito atnaujinimo. Dabartinis skenavimo intervalas: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Įvyko API greičio apribojimas. Paveikti inverteriai: {inverters_list}. Dabartinis skenavimo intervalas: {scan_interval}s. Kai kurios reikšmės gali būti atidėtos iki kito atnaujinimo."
+        }
+      },
+      "options_rate_limit_notice": {
+        "title": "API greičio apribojimo pranešimas",
+        "description": "Jūsų pakeitimai buvo išsaugoti, bet {count} inverteris(-iai) pasiekė API greičio apribojimą per perkrovimą:\n{inverters_list}\n\nKai kurios reikšmės gali būti atidėtos iki kito atnaujinimo. Dabartinis skenavimo intervalas: {scan_interval}s.",
+        "data": {
+          "acknowledge": "Įvyko API greičio apribojimas. Paveikti inverteriai: {inverters_list}. Dabartinis skenavimo intervalas: {scan_interval}s. Kai kurios reikšmės gali būti atidėtos iki kito atnaujinimo."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "acpower": {
+        "name": "AC išėjimo galia"
+      },
+      "powerdc1": {
+        "name": "DC galia grandinė 1"
+      },
+      "powerdc2": {
+        "name": "DC galia grandinė 2"
+      },
+      "powerdc3": {
+        "name": "DC galia grandinė 3"
+      },
+      "powerdc4": {
+        "name": "DC galia grandinė 4"
+      },
+      "feedinpower": {
+        "name": "Tinklo įleidimo galia"
+      },
+      "feedinpower_m2": {
+        "name": "Tinklo įleidimo galia skaitiklis 2"
+      },
+      "bat_power": {
+        "name": "Baterijos galia"
+      },
+      "yieldtoday": {
+        "name": "Šiandienos generacija"
+      },
+      "yieldtotal": {
+        "name": "Viso generacija"
+      },
+      "feedinenergy": {
+        "name": "Tinklo įleidimo energija"
+      },
+      "consumeenergy": {
+        "name": "Tinklo suvartojimo energija"
+      },
+      "soc": {
+        "name": "Baterijos įkrovos lygis"
+      },
+      "peps1": {
+        "name": "EPS fazė 1 galia"
+      },
+      "peps2": {
+        "name": "EPS fazė 2 galia"
+      },
+      "peps3": {
+        "name": "EPS fazė 3 galia"
+      },
+      "inverter_sn": {
+        "name": "Inverterio serijinis numeris"
+      },
+      "sn": {
+        "name": "Inverterio serijinis numeris Wi-Fi modulis"
+      },
+      "upload_time": {
+        "name": "Inverterio įkėlimo laikas"
+      },
+      "utc_date_time": {
+        "name": "UTC data ir laikas"
+      },
+      "inverter_efficiency": {
+        "name": "Inverterio efektyvumas"
+      },
+      "dc_total_inverter": {
+        "name": "DC galia inverteris iš viso"
+      },
+      "ac_total": {
+        "name": "Sistemos AC galia"
+      },
+      "dc_total": {
+        "name": "Sistemos DC galia"
+      },
+      "system_efficiency": {
+        "name": "Sistemos bendras efektyvumas"
+      },
+      "system_health": {
+        "name": "Sistemos sveikata",
+        "state": {
+          "ok": "Gerai",
+          "degraded": "Susilpnėjęs",
+          "error": "Klaida",
+          "unknown": "Nežinoma"
+        }
+      },
+      "rate_limit_status": {
+        "name": "API greičio apribojimo būsena",
+        "state": {
+          "ok": "Gerai",
+          "rate_limited": "Greičio apribota",
+          "unknown": "Nežinoma"
+        }
+      },
+      "last_poll_attempt": {
+        "name": "Paskutinis apklausos bandymas"
+      },
+      "next_scheduled_poll": {
+        "name": "Kitas suplanuotas apklausa"
+      },
+      "api_access_status": {
+        "name": "API prieigos būsena",
+        "state": {
+          "ok": "Gerai",
+          "serial_unauthorized": "Serijinis neleistinas",
+          "rate_limited": "Greičio apribota",
+          "api_error": "API klaida",
+          "unknown": "Nežinoma"
+        }
+      },
+      "yieldtoday_total": {
+        "name": "Sistemos šiandienos derlius"
+      },
+      "yieldtotal_total": {
+        "name": "Sistemos viso gyvenimo derlius"
+      },
+      "inverter_status": {
+        "name": "Inverterio būsena",
+        "state": {
+          "100": "Laukiama veikimo",
+          "101": "Savi-testas",
+          "102": "Normalus",
+          "103": "Atkuriama klaida",
+          "104": "Nuolatinė klaida",
+          "105": "Programinės įrangos atnaujinimas",
+          "106": "EPS aptikimas",
+          "107": "Ne tinkle",
+          "108": "Savi-testo režimas (Italijos saugumo reglamentai)",
+          "109": "Miego režimas",
+          "110": "Budėjimo režimas",
+          "111": "Fotovoltaikos pabudimo baterijos režimas",
+          "112": "Generatoriaus aptikimo režimas",
+          "113": "Generatoriaus režimas",
+          "114": "Greito išjungimo budėjimo režimas",
+          "130": "VPP režimas",
+          "131": "TOU - Savasis naudojimas",
+          "132": "TOU - Įkrovimas",
+          "133": "TOU - Išleidimas"
+        }
+      },
+      "bat_status": {
+        "name": "Baterijos būsena",
+        "state": {
+          "0": "Normalus",
+          "1": "Klaida",
+          "2": "Atjungta"
+        }
+      },
+      "inverter_type": {
+        "name": "Inverterio tipas",
+        "state": {
+          "1": "X1-LX",
+          "2": "X-Hybrid",
+          "3": "X1-Hybiyd/Fit",
+          "4": "X1-Boost/Air/Mini",
+          "5": "X3‑Hybrid‑G1/G2",
+          "6": "X3‑20K/30K",
+          "7": "X3‑MIC/PRO",
+          "8": "X1‑Smart",
+          "9": "X1‑AC",
+          "10": "A1‑Hybrid",
+          "11": "A1‑FIT",
+          "12": "A1",
+          "13": "J1‑ESS",
+          "14": "X3‑Hybrid‑G4",
+          "15": "X1‑Hybrid‑G4",
+          "16": "X3‑MIC/PRO‑G2",
+          "17": "X1‑SPT",
+          "18": "X1‑Boost‑G4",
+          "19": "A1‑HYB‑G2",
+          "20": "A1‑AC‑G2",
+          "21": "A1‑SMT‑G2",
+          "22": "X1‑Mini‑G4",
+          "23": "X1‑IES",
+          "24": "X3‑IES",
+          "25": "X3‑ULT",
+          "26": "X1‑SMART‑G2",
+          "27": "A1‑Micro 1 in 1",
+          "28": "X1‑Micro 2 in 1",
+          "29": "X1‑Micro 4 in 1",
+          "31": "X3‑AELIO",
+          "32": "X3‑HYB‑G4 PRO",
+          "33": "X3‑NEO‑LV",
+          "34": "X1‑VAST",
+          "35": "X3‑IES‑P",
+          "36": "J3‑ULT‑LV‑16.5K",
+          "37": "J3‑ULT‑30K",
+          "38": "J1‑ESS‑HB‑2",
+          "39": "C3‑IES",
+          "40": "X3‑IES‑A",
+          "41": "X1‑IES‑A",
+          "43": "X3‑ULT‑GLV",
+          "44": "X1‑MINI‑G4 PLUS",
+          "46": "X1‑Reno‑LV",
+          "47": "A1‑HYB‑G3",
+          "100": "X3‑FTH",
+          "101": "X3‑MGA‑G2",
+          "102": "X1‑Hybrid‑LV",
+          "103": "X1‑Lite‑LV",
+          "104": "X3‑GRAND‑HV",
+          "105": "X3‑FORTH‑PLUS"
+        }
+      }
+    },
+    "switch": {
+      "rate_limit_notifications": {
+        "name": "API greičio apribojimo pranešimai"
+      }
+    }
+  }
+}
