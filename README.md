@@ -15,6 +15,7 @@ Created using the latest Solax API documentation.
 - **Dynamic Sensor Creation** - Creates only sensors with real API data
 - **Per-Inverter Metrics** - Power, yield, battery, EPS, status/type, and upload timestamps
 - **Computed Per-Inverter Sensors** - DC total and inverter efficiency
+- **Estimated Battery Energy Sensors (Opt-in)** - Estimated daily and total charge/discharge energy from `batPower` sample integration
 - **System Totals Device** - AC/DC totals, yield today/lifetime, system efficiency, system health, and API rate-limit status
 - **Per-Inverter API Access Status** - `OK`, `Rate Limited`, `Serial Unauthorized`, `API Error`
 - **Resilient API Handling** - Rate-limit cooldown and clear status reporting
@@ -25,7 +26,7 @@ Created using the latest Solax API documentation.
 - **Entity/Device Cleanup** - Removed serials clean up stale entities/devices from the registry
 - **Stable Entity Prefix** - Entity IDs remain stable when system name changes
 - **Built-in Diagnostics Export** - Download diagnostics with API responses with partial masked token and partial serial masking for privacy.
-- **UI Language Support** - 🇬🇧 English (`en`), 🇩🇪 German (`de`), 🇳🇱 Dutch (`nl`), 🇨🇿 Czech (`cs`), 🇵🇱 Polish (`pl`), 🇵🇹 Portuguese (`pt`), 🇪🇸 Spanish (`es`), 🇮🇹 Italian (`it`), 🇫🇷 French (`fr`), 🇸🇪 Swedish (`sv`), 🇩🇰 Danish (`da`), 🇳🇴 Norwegian Bokmal (`nb`), 🇫🇮 Finnish (`fi`)
+- **UI Language Support** - 🇬🇧 English (`en`), 🇩🇪 German (`de`), 🇳🇱 Dutch (`nl`), 🇨🇿 Czech (`cs`), 🇵🇱 Polish (`pl`), 🇵🇹 Portuguese (`pt`), 🇪🇸 Spanish (`es`), 🇮🇹 Italian (`it`), 🇫🇷 French (`fr`), 🇸🇪 Swedish (`sv`), 🇩🇰 Danish (`da`), 🇳🇴 Norwegian Bokmal (`nb`), 🇫🇮 Finnish (`fi`), 🇱🇹 Lithuanian (`lt`)
 
 <br>
 
@@ -44,7 +45,7 @@ Contributions, issues, and pull requests are welcome.<br>
 **Single-inverter info:** <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20inverter.png" width=75% height=75%>
 
-## Built in diagnostics: <br>
+**Built in diagnostics:** <br>
 Serial and Token redacted diagnostics for assistance. <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/download-diagnostics.png" width=75% height=75%>
 
@@ -188,6 +189,10 @@ Each inverter gets its own set of sensors with entity IDs like:
 - `[System Name] AC Output Power [Serial]`
 - `[System Name] Battery State of Charge [Serial]`
 - `[System Name] DC Power Inverter Total [Serial]`
+- `Estimated Battery Charge Energy Today [Serial]` (diagnostic, disabled by default)
+- `Estimated Battery Charge Energy Total [Serial]` (diagnostic, disabled by default)
+- `Estimated Battery Discharge Energy Today [Serial]` (diagnostic, disabled by default)
+- `Estimated Battery Discharge Energy Total [Serial]` (diagnostic, disabled by default)
 
 ### System Total Sensors
 System-wide totals:
@@ -196,6 +201,10 @@ System-wide totals:
 - `System Yield Today`
 - `System Yield Lifetime`
 - `System Total Efficiency`
+- `Estimated System Battery Charge Energy Today` (diagnostic, disabled by default)
+- `Estimated System Battery Charge Energy Total` (diagnostic, disabled by default)
+- `Estimated System Battery Discharge Energy Today` (diagnostic, disabled by default)
+- `Estimated System Battery Discharge Energy Total` (diagnostic, disabled by default)
 
 ### Diagnostic / Control Entities
 - `API Access Status [Serial]` (diagnostic): API access health for each inverter
@@ -243,6 +252,7 @@ System-wide totals:
 **Missing sensors?**
 - Some sensors only appear if your inverter supports that feature
 - Battery sensors only appear if you have battery storage
+- Estimated battery energy sensors are created only when `batPower` data exists and are disabled by default
 - PV channel sensors depend on your inverter's configuration
 - EPS sensors only appear if you have backup power capability
 
