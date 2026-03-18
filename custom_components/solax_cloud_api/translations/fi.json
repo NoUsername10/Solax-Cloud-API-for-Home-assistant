@@ -287,6 +287,30 @@
           "104": "X3‑GRAND‑HV",
           "105": "X3‑FORTH‑PLUS"
         }
+      },
+      "estimated_battery_charge_energy_today": {
+        "name": "Arvioitu akun latausenergia tanaan"
+      },
+      "estimated_battery_charge_energy_total": {
+        "name": "Arvioitu akun latausenergia yhteensa"
+      },
+      "estimated_battery_discharge_energy_today": {
+        "name": "Arvioitu akun purkausenergia tanaan"
+      },
+      "estimated_battery_discharge_energy_total": {
+        "name": "Arvioitu akun purkausenergia yhteensa"
+      },
+      "estimated_system_battery_charge_energy_today": {
+        "name": "Arvioitu jarjestelman akun latausenergia tanaan"
+      },
+      "estimated_system_battery_charge_energy_total": {
+        "name": "Arvioitu jarjestelman akun latausenergia yhteensa"
+      },
+      "estimated_system_battery_discharge_energy_today": {
+        "name": "Arvioitu jarjestelman akun purkausenergia tanaan"
+      },
+      "estimated_system_battery_discharge_energy_total": {
+        "name": "Arvioitu jarjestelman akun purkausenergia yhteensa"
       }
     },
     "switch": {

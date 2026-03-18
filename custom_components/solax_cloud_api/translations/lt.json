@@ -287,6 +287,30 @@
           "104": "X3‑GRAND‑HV",
           "105": "X3‑FORTH‑PLUS"
         }
+      },
+      "estimated_battery_charge_energy_today": {
+        "name": "Numatoma baterijos ikrovimo energija siandien"
+      },
+      "estimated_battery_charge_energy_total": {
+        "name": "Numatoma baterijos ikrovimo energija is viso"
+      },
+      "estimated_battery_discharge_energy_today": {
+        "name": "Numatoma baterijos iskrovimo energija siandien"
+      },
+      "estimated_battery_discharge_energy_total": {
+        "name": "Numatoma baterijos iskrovimo energija is viso"
+      },
+      "estimated_system_battery_charge_energy_today": {
+        "name": "Numatoma sistemos baterijos ikrovimo energija siandien"
+      },
+      "estimated_system_battery_charge_energy_total": {
+        "name": "Numatoma sistemos baterijos ikrovimo energija is viso"
+      },
+      "estimated_system_battery_discharge_energy_today": {
+        "name": "Numatoma sistemos baterijos iskrovimo energija siandien"
+      },
+      "estimated_system_battery_discharge_energy_total": {
+        "name": "Numatoma sistemos baterijos iskrovimo energija is viso"
       }
     },
     "switch": {

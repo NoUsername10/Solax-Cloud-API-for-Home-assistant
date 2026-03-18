@@ -1,9 +1,10 @@
 import re
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity import EntityCategory
+from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.translation import async_get_translations
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util, slugify
@@ -12,6 +13,7 @@ from .const import (
     CONF_ENTITY_PREFIX,
     CONF_INVERTERS,
     CONF_SYSTEM_NAME,
+    DEFAULT_ENTITY_PREFIX,
     DOMAIN,
     HIDDEN_SENSORS,
     MAPPED_FIELDS,
@@ -22,6 +24,81 @@ from .const import (
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     return
+
+
+def _parse_timestamp(value):
+    if value in (None, ""):
+        return None
+    raw = str(value).strip()
+    if not raw:
+        return None
+
+    dt_obj = dt_util.parse_datetime(raw)
+    if dt_obj is None:
+        for fmt in ("%Y-%m-%d %H:%M:%S", "%Y/%m/%d %H:%M:%S"):
+            try:
+                dt_obj = datetime.strptime(raw, fmt)
+                break
+            except ValueError:
+                continue
+
+    if dt_obj is None:
+        return None
+
+    if dt_obj.tzinfo is None:
+        dt_obj = dt_obj.replace(tzinfo=timezone.utc)
+    return dt_obj
+
+
+def _sample_key_and_dt(inverter_data):
+    upload_time = inverter_data.get("uploadTime")
+    utc_date_time = inverter_data.get("utcDateTime")
+    key_source = upload_time if upload_time not in (None, "") else utc_date_time
+    if key_source in (None, ""):
+        return None, None
+
+    sample_key = str(key_source).strip()
+    if not sample_key:
+        return None, None
+
+    sample_dt = _parse_timestamp(utc_date_time) or _parse_timestamp(upload_time)
+    return sample_key, sample_dt
+
+
+def _battery_power_for_direction(inverter_data, direction):
+    raw = inverter_data.get("batPower")
+    if raw is None:
+        return None
+    try:
+        power = float(raw)
+    except (TypeError, ValueError):
+        return None
+
+    if direction == "charge":
+        return power if power > 0 else 0.0
+    return -power if power < 0 else 0.0
+
+
+def _sample_local_date(sample_dt):
+    if sample_dt is None:
+        return dt_util.as_local(dt_util.utcnow()).date()
+    return dt_util.as_local(sample_dt).date()
+
+
+def _coerce_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _parse_iso_date(value):
+    if value in (None, ""):
+        return None
+    try:
+        return datetime.fromisoformat(str(value)).date()
+    except ValueError:
+        return None
 
 
 def get_translation_name(translations, domain, sensor_key, state_value=None, default=None):
@@ -130,10 +207,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     if not system_name:
         raise ValueError("System name must be provided in integration setup")
 
-    system_slug = entry.data.get(
-        CONF_ENTITY_PREFIX,
-        system_name.lower().replace(" ", "_").replace("-", "_"),
-    )
+    system_slug = entry.data.get(CONF_ENTITY_PREFIX) or slugify(system_name) or DEFAULT_ENTITY_PREFIX
     _cleanup_removed_inverter_artifacts(hass, entry, system_slug, inverters)
     lang = getattr(hass.config, "language", "en")
     translations = await async_get_translations(hass, lang, "entity", [DOMAIN])
@@ -153,6 +227,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
     created_field_entities = set()
     created_dc_total_entities = set()
     created_efficiency_entities = set()
+    created_estimated_battery_entities = set()
+    created_system_estimated_battery_entities = set()
 
     # Always expose inverter API access status so invalid serials are visible in UI.
     for sn in inverters:
@@ -214,6 +290,118 @@ async def async_setup_entry(hass, entry, async_add_entities):
                         coordinator, sn, "dc_total", human_name, system_slug, type_map
                     )
                 )
+
+            if inverter_data.get("batPower") is not None:
+                estimated_metrics = (
+                    (
+                        "charge",
+                        "today",
+                        "estimatedBatteryChargeEnergyToday",
+                        "Estimated Battery Charge Energy Today",
+                    ),
+                    (
+                        "charge",
+                        "total",
+                        "estimatedBatteryChargeEnergyTotal",
+                        "Estimated Battery Charge Energy Total",
+                    ),
+                    (
+                        "discharge",
+                        "today",
+                        "estimatedBatteryDischargeEnergyToday",
+                        "Estimated Battery Discharge Energy Today",
+                    ),
+                    (
+                        "discharge",
+                        "total",
+                        "estimatedBatteryDischargeEnergyTotal",
+                        "Estimated Battery Discharge Energy Total",
+                    ),
+                )
+                for direction, period, translation_key, default_name in estimated_metrics:
+                    est_key = (serial_key, direction, period)
+                    if est_key in created_estimated_battery_entities:
+                        continue
+                    created_estimated_battery_entities.add(est_key)
+                    human_name = (
+                        get_translation_name(translations, DOMAIN, translation_key)
+                        or default_name
+                    )
+                    new_entities.append(
+                        SolaxEstimatedBatteryEnergySensor(
+                            coordinator=coordinator,
+                            serial=sn,
+                            direction=direction,
+                            period=period,
+                            human_name=human_name,
+                            system_slug=system_slug,
+                            type_map=type_map,
+                        )
+                    )
+        return new_entities
+
+    def _build_new_system_estimated_entities():
+        has_battery_data = False
+        for sn in inverters:
+            inverter_data = coordinator.data.get(sn)
+            if not isinstance(inverter_data, dict) or inverter_data.get("error"):
+                continue
+            if inverter_data.get("batPower") is not None:
+                has_battery_data = True
+                break
+
+        if not has_battery_data:
+            return []
+
+        new_entities = []
+        estimated_metrics = (
+            (
+                "charge",
+                "today",
+                "estimatedSystemBatteryChargeEnergyToday",
+                "Estimated System Battery Charge Energy Today",
+            ),
+            (
+                "charge",
+                "total",
+                "estimatedSystemBatteryChargeEnergyTotal",
+                "Estimated System Battery Charge Energy Total",
+            ),
+            (
+                "discharge",
+                "today",
+                "estimatedSystemBatteryDischargeEnergyToday",
+                "Estimated System Battery Discharge Energy Today",
+            ),
+            (
+                "discharge",
+                "total",
+                "estimatedSystemBatteryDischargeEnergyTotal",
+                "Estimated System Battery Discharge Energy Total",
+            ),
+        )
+        for direction, period, translation_key, default_name in estimated_metrics:
+            metric_key = f"{direction}_{period}"
+            if metric_key in created_system_estimated_battery_entities:
+                continue
+            created_system_estimated_battery_entities.add(metric_key)
+            human_name = (
+                get_translation_name(translations, DOMAIN, translation_key)
+                or default_name
+            )
+            legacy_entity_name = f"{system_name} {human_name}"
+            new_entities.append(
+                SolaxSystemEstimatedBatteryEnergySensor(
+                    coordinator=coordinator,
+                    inverters=inverters,
+                    direction=direction,
+                    period=period,
+                    human_name=human_name,
+                    system_name=system_name,
+                    system_slug=system_slug,
+                    legacy_entity_name=legacy_entity_name,
+                )
+            )
         return new_entities
 
     # Create field/DC sensors that are available right now.
@@ -247,12 +435,14 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 legacy_entity_name,
             )
         )
+    entities.extend(_build_new_system_estimated_entities())
 
     async_add_entities(entities, update_before_add=True)
 
     def _handle_coordinator_update():
         # Add newly available field/DC sensors without requiring an integration reload.
         new_entities = _build_new_field_entities()
+        new_entities.extend(_build_new_system_estimated_entities())
         if new_entities:
             async_add_entities(new_entities, update_before_add=True)
 
@@ -546,6 +736,389 @@ class SolaxComputedSensor(CoordinatorEntity, SensorEntity):
         if inv.get("error"):
             return None
         return sum(inv.get(f"powerdc{i}") or 0 for i in range(1, 5))
+
+
+class SolaxEstimatedBatteryEnergySensor(CoordinatorEntity, SensorEntity, RestoreEntity):
+    _attr_has_entity_name = False
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_native_unit_of_measurement = "kWh"
+
+    def __init__(
+        self, coordinator, serial, direction, period, human_name, system_slug, type_map
+    ):
+        super().__init__(coordinator)
+        self._serial = serial
+        self._direction = direction
+        self._period = period
+        self._type_map = type_map
+        self._attr_name = human_name
+        self._attr_unique_id = (
+            f"{system_slug}_estimated_battery_{direction}_energy_{period}_{serial}"
+            .lower()
+            .replace(" ", "_")
+        )
+        self.entity_id = (
+            f"sensor.{system_slug}_estimated_battery_{direction}_energy_{period}_{serial}"
+            .lower()
+        )
+        self._attr_entity_registry_enabled_default = False
+        if self._period == "total":
+            self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+        else:
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+
+        self._total_kwh = 0.0
+        self._today_baseline_kwh = 0.0
+        self._today_date = None
+        self._last_sample_key = None
+        self._last_sample_dt = None
+        self._last_bat_power = None
+
+    async def async_added_to_hass(self):
+        await super().async_added_to_hass()
+        last_state = await self.async_get_last_state()
+        if last_state is None:
+            return
+
+        attrs = dict(last_state.attributes or {})
+
+        restored_total = _coerce_float(attrs.get("total_kwh"))
+        if restored_total is None and self._period == "total":
+            restored_total = _coerce_float(last_state.state)
+        if restored_total is not None:
+            self._total_kwh = max(restored_total, 0.0)
+
+        restored_baseline = _coerce_float(attrs.get("today_baseline_kwh"))
+        if restored_baseline is None and self._period == "today":
+            restored_today = _coerce_float(last_state.state)
+            if restored_today is not None:
+                restored_baseline = max(self._total_kwh - restored_today, 0.0)
+        if restored_baseline is not None:
+            self._today_baseline_kwh = max(restored_baseline, 0.0)
+
+        restored_today_date = _parse_iso_date(attrs.get("today_date"))
+        if restored_today_date is not None:
+            self._today_date = restored_today_date
+
+        restored_sample_key = attrs.get("last_sample_key")
+        if restored_sample_key not in (None, ""):
+            self._last_sample_key = str(restored_sample_key)
+
+        restored_sample_dt = _parse_timestamp(attrs.get("last_sample_dt"))
+        if restored_sample_dt is not None:
+            self._last_sample_dt = restored_sample_dt
+
+        if "last_bat_power_w" in attrs:
+            self._last_bat_power = attrs.get("last_bat_power_w")
+
+    def _update_estimate(self, inverter_data):
+        sample_key, sample_dt = _sample_key_and_dt(inverter_data)
+        if sample_key is None:
+            return
+
+        current_local_date = _sample_local_date(sample_dt)
+        if self._today_date is None:
+            self._today_date = current_local_date
+            self._today_baseline_kwh = self._total_kwh
+        elif current_local_date != self._today_date:
+            self._today_date = current_local_date
+            self._today_baseline_kwh = self._total_kwh
+
+        if self._last_sample_key is None:
+            self._last_sample_key = sample_key
+            self._last_sample_dt = sample_dt
+            self._last_bat_power = inverter_data.get("batPower")
+            return
+
+        if sample_key == self._last_sample_key:
+            self._last_bat_power = inverter_data.get("batPower")
+            return
+
+        direction_power = _battery_power_for_direction(inverter_data, self._direction)
+        if (
+            direction_power is not None
+            and sample_dt is not None
+            and self._last_sample_dt is not None
+            and sample_dt > self._last_sample_dt
+        ):
+            delta_seconds = (sample_dt - self._last_sample_dt).total_seconds()
+            self._total_kwh += (direction_power * delta_seconds) / 3_600_000
+
+        self._last_sample_key = sample_key
+        self._last_sample_dt = sample_dt
+        self._last_bat_power = inverter_data.get("batPower")
+
+    @property
+    def native_value(self):
+        inverter_data = self.coordinator.data.get(self._serial)
+        if not inverter_data or not isinstance(inverter_data, dict):
+            return None
+        if inverter_data.get("error"):
+            return None
+        if inverter_data.get("batPower") is None:
+            return None
+
+        self._update_estimate(inverter_data)
+        if self._period == "total":
+            return round(max(self._total_kwh, 0.0), 5)
+        return round(max(self._total_kwh - self._today_baseline_kwh, 0.0), 5)
+
+    @property
+    def available(self):
+        inverter_data = self.coordinator.data.get(self._serial)
+        if not inverter_data or not isinstance(inverter_data, dict):
+            return False
+        if inverter_data.get("error"):
+            return False
+        return inverter_data.get("batPower") is not None
+
+    @property
+    def device_info(self):
+        inverter_data = self.coordinator.data.get(self._serial)
+        inverter_sn = inverter_data.get("inverterSN") if isinstance(inverter_data, dict) else None
+        inverter_type_val = (
+            inverter_data.get("inverterType") if isinstance(inverter_data, dict) else None
+        )
+
+        model = "Unknown"
+        if inverter_type_val is not None:
+            model = self._type_map.get(str(inverter_type_val), str(inverter_type_val))
+
+        return {
+            "identifiers": {(DOMAIN, self._serial)},
+            "name": f"Solax Inverter {self._serial}",
+            "manufacturer": "Solax",
+            "model": model,
+            "serial_number": inverter_sn or self._serial,
+        }
+
+    @property
+    def extra_state_attributes(self):
+        return {
+            "is_estimated": True,
+            "calculation_source": "batPower",
+            "calculation_note": (
+                "Estimated from batPower and inverter upload interval; values are approximate."
+            ),
+            "direction": self._direction,
+            "period": self._period,
+            "total_kwh": round(self._total_kwh, 5),
+            "last_sample_key": self._last_sample_key,
+            "last_sample_dt": self._last_sample_dt.isoformat() if self._last_sample_dt else None,
+            "today_baseline_kwh": round(self._today_baseline_kwh, 5),
+            "today_date": self._today_date.isoformat() if self._today_date else None,
+            "last_bat_power_w": self._last_bat_power,
+        }
+
+
+class SolaxSystemEstimatedBatteryEnergySensor(
+    CoordinatorEntity, SensorEntity, RestoreEntity
+):
+    _attr_has_entity_name = False
+    _attr_device_class = SensorDeviceClass.ENERGY
+    _attr_native_unit_of_measurement = "kWh"
+
+    def __init__(
+        self,
+        coordinator,
+        inverters,
+        direction,
+        period,
+        human_name,
+        system_name,
+        system_slug,
+        legacy_entity_name,
+    ):
+        super().__init__(coordinator)
+        self._inverters = inverters
+        self._direction = direction
+        self._period = period
+        self._system_name = system_name
+        self._system_slug = system_slug
+        self._attr_name = human_name
+        self.entity_id = f"sensor.{slugify(legacy_entity_name)}"
+        self._attr_unique_id = (
+            f"{self._system_slug}_estimated_system_battery_{direction}_energy_{period}_solax"
+        )
+        self._attr_entity_registry_enabled_default = False
+        if self._period == "total":
+            self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+        else:
+            self._attr_state_class = SensorStateClass.MEASUREMENT
+
+        self._serial_state = {}
+        self._total_kwh = 0.0
+        self._today_baseline_kwh = 0.0
+        self._today_date = None
+
+    async def async_added_to_hass(self):
+        await super().async_added_to_hass()
+        last_state = await self.async_get_last_state()
+        if last_state is None:
+            return
+
+        attrs = dict(last_state.attributes or {})
+
+        restored_total = _coerce_float(attrs.get("total_kwh"))
+        if restored_total is None:
+            restored_state = _coerce_float(last_state.state)
+            if self._period == "total":
+                restored_total = restored_state
+            elif restored_state is not None:
+                restored_baseline = _coerce_float(attrs.get("today_baseline_kwh")) or 0.0
+                restored_total = restored_baseline + restored_state
+        if restored_total is not None:
+            self._total_kwh = max(restored_total, 0.0)
+
+        restored_baseline = _coerce_float(attrs.get("today_baseline_kwh"))
+        if restored_baseline is None and self._period == "today":
+            restored_today = _coerce_float(last_state.state)
+            if restored_today is not None:
+                restored_baseline = max(self._total_kwh - restored_today, 0.0)
+        if restored_baseline is not None:
+            self._today_baseline_kwh = max(restored_baseline, 0.0)
+
+        restored_today_date = _parse_iso_date(attrs.get("today_date"))
+        if restored_today_date is not None:
+            self._today_date = restored_today_date
+
+        restored_serial_state = attrs.get("serial_sample_state")
+        if isinstance(restored_serial_state, dict):
+            parsed_state = {}
+            for serial, snapshot in restored_serial_state.items():
+                if not isinstance(snapshot, dict):
+                    continue
+                parsed_state[str(serial).casefold()] = {
+                    "sample_key": snapshot.get("sample_key"),
+                    "sample_dt": _parse_timestamp(snapshot.get("sample_dt")),
+                }
+            if parsed_state:
+                self._serial_state = parsed_state
+
+    @property
+    def device_info(self):
+        total_inverters = len(self._inverters)
+        if total_inverters == 1:
+            system_model = "Single Inverter System"
+        else:
+            system_model = "Multi-Inverter System"
+        return {
+            "identifiers": {(DOMAIN, f"system_totals_{self._system_slug}")},
+            "name": f"{self._system_name} System Totals",
+            "manufacturer": "Solax",
+            "model": system_model,
+        }
+
+    def _update_estimate(self):
+        newest_local_date = None
+
+        for serial in self._inverters:
+            inverter_data = self.coordinator.data.get(serial)
+            if (
+                not inverter_data
+                or not isinstance(inverter_data, dict)
+                or inverter_data.get("error")
+                or inverter_data.get("batPower") is None
+            ):
+                continue
+
+            sample_key, sample_dt = _sample_key_and_dt(inverter_data)
+            if sample_key is None:
+                continue
+
+            if sample_dt is not None:
+                newest_local_date = _sample_local_date(sample_dt)
+
+            serial_state = self._serial_state.setdefault(
+                serial.casefold(), {"sample_key": None, "sample_dt": None}
+            )
+            if serial_state["sample_key"] is None:
+                serial_state["sample_key"] = sample_key
+                serial_state["sample_dt"] = sample_dt
+                continue
+
+            if sample_key == serial_state["sample_key"]:
+                continue
+
+            direction_power = _battery_power_for_direction(inverter_data, self._direction)
+            last_dt = serial_state.get("sample_dt")
+            if (
+                direction_power is not None
+                and sample_dt is not None
+                and last_dt is not None
+                and sample_dt > last_dt
+            ):
+                delta_seconds = (sample_dt - last_dt).total_seconds()
+                self._total_kwh += (direction_power * delta_seconds) / 3_600_000
+
+            serial_state["sample_key"] = sample_key
+            serial_state["sample_dt"] = sample_dt
+
+        current_local_date = newest_local_date or dt_util.as_local(dt_util.utcnow()).date()
+        if self._today_date is None:
+            self._today_date = current_local_date
+            self._today_baseline_kwh = self._total_kwh
+        elif current_local_date != self._today_date:
+            self._today_date = current_local_date
+            self._today_baseline_kwh = self._total_kwh
+
+    @property
+    def available(self):
+        for serial in self._inverters:
+            inverter_data = self.coordinator.data.get(serial)
+            if (
+                isinstance(inverter_data, dict)
+                and not inverter_data.get("error")
+                and inverter_data.get("batPower") is not None
+            ):
+                return True
+        return False
+
+    @property
+    def native_value(self):
+        if not self.available:
+            return None
+
+        self._update_estimate()
+        if self._period == "total":
+            return round(max(self._total_kwh, 0.0), 5)
+        return round(max(self._total_kwh - self._today_baseline_kwh, 0.0), 5)
+
+    @property
+    def extra_state_attributes(self):
+        battery_inverters = 0
+        for serial in self._inverters:
+            inverter_data = self.coordinator.data.get(serial)
+            if (
+                isinstance(inverter_data, dict)
+                and not inverter_data.get("error")
+                and inverter_data.get("batPower") is not None
+            ):
+                battery_inverters += 1
+        serial_snapshot = {}
+        for serial, snapshot in self._serial_state.items():
+            if not isinstance(snapshot, dict):
+                continue
+            serial_snapshot[serial] = {
+                "sample_key": snapshot.get("sample_key"),
+                "sample_dt": snapshot.get("sample_dt").isoformat()
+                if snapshot.get("sample_dt")
+                else None,
+            }
+        return {
+            "is_estimated": True,
+            "calculation_source": "batPower",
+            "calculation_note": (
+                "Estimated from batPower and inverter upload interval; values are approximate."
+            ),
+            "direction": self._direction,
+            "period": self._period,
+            "total_kwh": round(self._total_kwh, 5),
+            "battery_inverters_count": battery_inverters,
+            "serial_sample_state": serial_snapshot,
+            "today_baseline_kwh": round(self._today_baseline_kwh, 5),
+            "today_date": self._today_date.isoformat() if self._today_date else None,
+        }
 
 
 class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):

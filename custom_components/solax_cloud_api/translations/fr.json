@@ -287,6 +287,30 @@
           "104": "X3‑GRAND‑HV",
           "105": "X3‑FORTH‑PLUS"
         }
+      },
+      "estimated_battery_charge_energy_today": {
+        "name": "Energie estimee de charge de la batterie aujourd'hui"
+      },
+      "estimated_battery_charge_energy_total": {
+        "name": "Energie totale estimee de charge de la batterie"
+      },
+      "estimated_battery_discharge_energy_today": {
+        "name": "Energie estimee de decharge de la batterie aujourd'hui"
+      },
+      "estimated_battery_discharge_energy_total": {
+        "name": "Energie totale estimee de decharge de la batterie"
+      },
+      "estimated_system_battery_charge_energy_today": {
+        "name": "Energie estimee de charge de la batterie du systeme aujourd'hui"
+      },
+      "estimated_system_battery_charge_energy_total": {
+        "name": "Energie totale estimee de charge de la batterie du systeme"
+      },
+      "estimated_system_battery_discharge_energy_today": {
+        "name": "Energie estimee de decharge de la batterie du systeme aujourd'hui"
+      },
+      "estimated_system_battery_discharge_energy_total": {
+        "name": "Energie totale estimee de decharge de la batterie du systeme"
       }
     },
     "switch": {

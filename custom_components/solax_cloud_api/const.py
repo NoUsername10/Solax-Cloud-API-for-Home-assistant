@@ -6,6 +6,7 @@ CONF_SCAN_INTERVAL = "scan_interval"
 CONF_SYSTEM_NAME = "system_name"
 CONF_ENTITY_PREFIX = "entity_prefix"
 CONF_RATE_LIMIT_NOTIFICATIONS = "rate_limit_notifications"
+DEFAULT_ENTITY_PREFIX = "solax_cloud_api"
 DEFAULT_SCAN_INTERVAL = 120
 API_URL = "https://global.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get"
 SERVICE_MANUAL_REFRESH = "manual_refresh"

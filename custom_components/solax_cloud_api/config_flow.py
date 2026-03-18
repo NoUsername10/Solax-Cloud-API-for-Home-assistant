@@ -5,9 +5,10 @@ import logging
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.translation import async_get_translations
-import aiohttp
+from homeassistant.util import slugify
 import async_timeout
 from .const import (
     DOMAIN,
@@ -17,6 +18,7 @@ from .const import (
     CONF_SYSTEM_NAME,
     CONF_ENTITY_PREFIX,
     CONF_RATE_LIMIT_NOTIFICATIONS,
+    DEFAULT_ENTITY_PREFIX,
     DEFAULT_SCAN_INTERVAL,
     API_URL,
     RUNTIME_INITIAL_SETUP_STATE,
@@ -26,9 +28,10 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 _TRANSLATION_PREFIX = f"component.{DOMAIN}."
+_ACKNOWLEDGE_FIELD = "acknowledge"
 
 def _slugify_name(value: str) -> str:
-    return value.lower().replace(" ", "_").replace("-", "_")
+    return slugify(value) or DEFAULT_ENTITY_PREFIX
 
 def _normalize_serial(value: str) -> str:
     return value.strip()
@@ -94,32 +97,32 @@ def _build_initial_setup_match(entry_data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-async def _test_api_connection(token: str, serial: str = "TEST123") -> bool:
+async def _test_api_connection(hass, token: str, serial: str = "TEST123") -> bool:
     """Test if the API token is valid."""
     try:
         headers = {"Content-Type": "application/json", "tokenId": token}
         payload = {"wifiSn": serial}
+        session = async_get_clientsession(hass)
         
         async with async_timeout.timeout(10):
-            async with aiohttp.ClientSession() as session:
-                async with session.post(API_URL, json=payload, headers=headers) as resp:
-                    if resp.status != 200:
-                        return False
+            async with session.post(API_URL, json=payload, headers=headers) as resp:
+                if resp.status != 200:
+                    return False
 
-                    data = await resp.json()
-                    code = data.get("code")
-                    exception = str(data.get("exception", "")).lower()
+                data = await resp.json()
+                code = data.get("code")
+                exception = str(data.get("exception", "")).lower()
 
-                    # Known invalid-auth/invalid-request responses from Solax API.
-                    # 1001 = Interface Unauthorized, 1002 = Parameter validation failed.
-                    if code in (1001, 1002):
-                        return False
-                    if "token" in exception and "invalid" in exception:
-                        return False
+                # Known invalid-auth/invalid-request responses from Solax API.
+                # 1001 = Interface Unauthorized, 1002 = Parameter validation failed.
+                if code in (1001, 1002):
+                    return False
+                if "token" in exception and "invalid" in exception:
+                    return False
 
-                    # Any other well-formed API response means token reached Solax correctly.
-                    # (e.g. 1003 Data Unauthorized can happen with wrong/placeholder serial)
-                    return True
+                # Any other well-formed API response means token reached Solax correctly.
+                # (e.g. 1003 Data Unauthorized can happen with wrong/placeholder serial)
+                return True
     except Exception:
         return False
 
@@ -144,7 +147,7 @@ def _is_rate_limited_payload(data: dict) -> bool:
 
 
 async def _classify_preflight_inverters(
-    token: str, inverters: list[str], scan_interval: int
+    hass, token: str, inverters: list[str], scan_interval: int
 ) -> dict[str, Any] | None:
     """Single-pass setup preflight for all serials.
 
@@ -159,90 +162,90 @@ async def _classify_preflight_inverters(
     headers = {"Content-Type": "application/json", "tokenId": token}
     now_monotonic = asyncio.get_running_loop().time()
     cooldown_seconds = scan_interval * 0.55
+    session = async_get_clientsession(hass)
 
     try:
         async with async_timeout.timeout(20):
-            async with aiohttp.ClientSession() as session:
-                for idx, serial in enumerate(inverters):
-                    if idx > 0:
-                        await asyncio.sleep(0.2)
-                    payload = {"wifiSn": serial}
-                    try:
-                        async with session.post(API_URL, json=payload, headers=headers) as resp:
-                            text = await resp.text()
-                            if resp.status != 200:
-                                results[serial] = {"error": f"HTTP {resp.status}", "raw": text}
-                                continue
-                            try:
-                                data = await resp.json()
-                            except Exception as json_err:
-                                results[serial] = {
-                                    "error": f"JSON Error: {json_err}",
-                                    "raw": text,
-                                }
-                                continue
-                    except asyncio.TimeoutError:
-                        results[serial] = {"error": "Timeout"}
-                        continue
-                    except Exception as request_err:
-                        results[serial] = {"error": str(request_err)}
-                        continue
+            for idx, serial in enumerate(inverters):
+                if idx > 0:
+                    await asyncio.sleep(0.2)
+                payload = {"wifiSn": serial}
+                try:
+                    async with session.post(API_URL, json=payload, headers=headers) as resp:
+                        text = await resp.text()
+                        if resp.status != 200:
+                            results[serial] = {"error": f"HTTP {resp.status}", "raw": text}
+                            continue
+                        try:
+                            data = await resp.json()
+                        except Exception as json_err:
+                            results[serial] = {
+                                "error": f"JSON Error: {json_err}",
+                                "raw": text,
+                            }
+                            continue
+                except asyncio.TimeoutError:
+                    results[serial] = {"error": "Timeout"}
+                    continue
+                except Exception as request_err:
+                    results[serial] = {"error": str(request_err)}
+                    continue
 
-                    code = data.get("code")
-                    success = data.get("success", False)
-                    exception = str(data.get("exception", "")).lower()
+                code = data.get("code")
+                success = data.get("success", False)
+                exception = str(data.get("exception", "")).lower()
 
-                    if code in (1001, 1002):
-                        return {"token_invalid": True}
-                    if "token" in exception and "invalid" in exception:
-                        return {"token_invalid": True}
+                if code in (1001, 1002):
+                    return {"token_invalid": True}
+                if "token" in exception and "invalid" in exception:
+                    return {"token_invalid": True}
 
-                    if _is_rate_limited_payload(data):
-                        rate_limited.append(serial)
-                        rate_limited_details[serial] = {
-                            "reason": "api_rate_limit",
-                            "code": code,
-                            "exception": data.get("exception"),
-                            "retry_in_seconds": round(cooldown_seconds, 1),
-                        }
-                        results[serial] = {
-                            "error": "rate_limit",
-                            "code": code,
-                            "exception": data.get("exception"),
-                            "skip_until": now_monotonic + cooldown_seconds,
-                        }
-                        continue
+                if _is_rate_limited_payload(data):
+                    rate_limited.append(serial)
+                    rate_limited_details[serial] = {
+                        "reason": "api_rate_limit",
+                        "code": code,
+                        "exception": data.get("exception"),
+                        "retry_in_seconds": round(cooldown_seconds, 1),
+                    }
+                    results[serial] = {
+                        "error": "rate_limit",
+                        "code": code,
+                        "exception": data.get("exception"),
+                        "skip_until": now_monotonic + cooldown_seconds,
+                    }
+                    continue
 
-                    if code == 1003:
-                        unauthorized.append(serial)
-                        unauthorized_details[serial] = {
-                            "code": code,
-                            "exception": data.get("exception"),
-                        }
-                        results[serial] = {
-                            "error": "data_unauthorized",
-                            "code": code,
-                            "exception": data.get("exception"),
-                            "raw": data,
-                        }
-                        continue
+                if code == 1003:
+                    unauthorized.append(serial)
+                    unauthorized_details[serial] = {
+                        "code": code,
+                        "exception": data.get("exception"),
+                    }
+                    results[serial] = {
+                        "error": "data_unauthorized",
+                        "code": code,
+                        "exception": data.get("exception"),
+                        "raw": data,
+                    }
+                    continue
 
-                    if not success or (code is not None and code != 0):
-                        results[serial] = {
-                            "error": True,
-                            "code": code,
-                            "exception": data.get("exception"),
-                            "raw": data,
-                        }
-                        continue
+                if not success or (code is not None and code != 0):
+                    results[serial] = {
+                        "error": True,
+                        "code": code,
+                        "exception": data.get("exception"),
+                        "raw": data,
+                    }
+                    continue
 
-                    result_data = data.get("result", {})
-                    if result_data:
-                        results[serial] = {
-                            key: value for key, value in result_data.items() if value is not None
-                        }
-                    else:
-                        results[serial] = {}
+                result_data = data.get("result", {})
+                if result_data:
+                    results[serial] = {
+                        key: value for key, value in result_data.items() if value is not None
+                    }
+                else:
+                    results[serial] = {}
     except Exception:
         # Setup should never fail only because preflight classification failed.
         return None
@@ -292,7 +295,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             
             # Only test API if token is provided
             if token and not errors:
-                if not await _test_api_connection(token):
+                if not await _test_api_connection(self.hass, token):
                     errors["base"] = "invalid_token"
             
             self._system_name = user_input.get(CONF_SYSTEM_NAME, "Solax System").strip()
@@ -345,7 +348,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_ENTITY_PREFIX: _slugify_name(self._system_name),
                     }
                     self._initial_setup_state = await _classify_preflight_inverters(
-                        self._token, self._inverters, self._scan_interval
+                        self.hass, self._token, self._inverters, self._scan_interval
                     )
                     if (
                         isinstance(self._initial_setup_state, dict)
@@ -393,23 +396,9 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_rate_limit_notice(self, user_input: Any = None):
         inverters_list = ", ".join(self._rate_limit_notice_inverters) or "-"
-        acknowledge_label = await _translated_text(
-            self.hass,
-            "config",
-            "config.step.rate_limit_notice.data.acknowledge",
-            (
-                "API Rate Limit occurred. Affected inverter(s): {inverters_list}. "
-                "Current scan interval: {scan_interval}s. "
-                "Some values may be delayed until next refresh."
-            ),
-            {
-                "inverters_list": inverters_list,
-                "scan_interval": self._scan_interval,
-            },
-        )
         errors = {}
         if user_input is not None:
-            if user_input.get(acknowledge_label):
+            if user_input.get(_ACKNOWLEDGE_FIELD):
                 data = self._pending_entry_data or {
                     CONF_TOKEN: self._token,
                     CONF_INVERTERS: self._inverters,
@@ -426,7 +415,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="rate_limit_notice",
             data_schema=vol.Schema(
-                {vol.Required(acknowledge_label, default=False): cv.boolean}
+                {vol.Required(_ACKNOWLEDGE_FIELD, default=False): cv.boolean}
             ),
             errors=errors,
             description_placeholders={
@@ -442,7 +431,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="already_configured")
 
         # Add this method for YAML import support
-        _LOGGER.debug("Importing Solax configuration from YAML: %s", import_config)
+        _LOGGER.debug("Importing Solax configuration from YAML")
         
         # Validate imported config
         token = import_config.get(CONF_TOKEN)
@@ -467,7 +456,9 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_INVERTERS: self._inverters,
                 CONF_SCAN_INTERVAL: self._scan_interval,
                 CONF_SYSTEM_NAME: self._system_name,
-                CONF_ENTITY_PREFIX: import_config.get(CONF_ENTITY_PREFIX, _slugify_name(self._system_name)),
+                CONF_ENTITY_PREFIX: _slugify_name(
+                    import_config.get(CONF_ENTITY_PREFIX, self._system_name)
+                ),
             }
         )
 
@@ -533,7 +524,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                 # Validate token when saving options, especially if changed
                 if not errors and token != self._token:
                     test_serial = self._inverters[0] if self._inverters else "TEST123"
-                    if not await _test_api_connection(token, test_serial):
+                    if not await _test_api_connection(self.hass, token, test_serial):
                         errors["base"] = "invalid_token"
 
                 if not errors:
@@ -666,10 +657,11 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
             vol.Required(CONF_SCAN_INTERVAL, default=self._scan_interval):
                 vol.All(vol.Coerce(int), vol.Range(min=120, max=3600)),
             vol.Optional("serial"): str,
-            vol.Required("finish", default=False): cv.boolean,
         }
         if self._inverters:
             schema_fields[vol.Optional("remove_serial")] = vol.In({sn: sn for sn in self._inverters})
+        # Keep "Save Changes" at the bottom of the form for better UX.
+        schema_fields[vol.Required("finish", default=False)] = cv.boolean
         data_schema = vol.Schema(schema_fields)
 
         return self.async_show_form(
@@ -701,19 +693,9 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
             unknown_text=unknown_text,
             unauthorized_text=unauthorized_text,
         )
-        acknowledge_label = await _translated_text(
-            self.hass,
-            "options",
-            "options.step.invalid_serial_notice.data.acknowledge",
-            (
-                "Invalid Serial/Access detected. Affected inverter(s): {details}. "
-                "These inverters are kept unavailable until serial/auth access is corrected."
-            ),
-            {"details": details_text},
-        )
         errors = {}
         if user_input is not None:
-            if user_input.get(acknowledge_label):
+            if user_input.get(_ACKNOWLEDGE_FIELD):
                 self._invalid_serial_notice_inverters = []
                 self._invalid_serial_notice_details = {}
                 if self._show_rate_limit_after_invalid:
@@ -725,7 +707,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="invalid_serial_notice",
             data_schema=vol.Schema(
-                {vol.Required(acknowledge_label, default=False): cv.boolean}
+                {vol.Required(_ACKNOWLEDGE_FIELD, default=False): cv.boolean}
             ),
             errors=errors,
             description_placeholders={
@@ -736,23 +718,9 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
 
     async def async_step_rate_limit_notice(self, user_input: Any = None):
         inverters_list = ", ".join(self._rate_limit_notice_inverters) or "-"
-        acknowledge_label = await _translated_text(
-            self.hass,
-            "options",
-            "options.step.rate_limit_notice.data.acknowledge",
-            (
-                "API Rate Limit occurred. Affected inverter(s): {inverters_list}. "
-                "Current scan interval: {scan_interval}s. "
-                "Some values may be delayed until next refresh."
-            ),
-            {
-                "inverters_list": inverters_list,
-                "scan_interval": self._scan_interval,
-            },
-        )
         errors = {}
         if user_input is not None:
-            if user_input.get(acknowledge_label):
+            if user_input.get(_ACKNOWLEDGE_FIELD):
                 self._rate_limit_notice_inverters = []
                 return self.async_create_entry(title="", data={})
             errors["base"] = "acknowledge_rate_limit"
@@ -760,7 +728,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         return self.async_show_form(
             step_id="rate_limit_notice",
             data_schema=vol.Schema(
-                {vol.Required(acknowledge_label, default=False): cv.boolean}
+                {vol.Required(_ACKNOWLEDGE_FIELD, default=False): cv.boolean}
             ),
             errors=errors,
             description_placeholders={

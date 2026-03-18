@@ -1,11 +1,13 @@
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.helpers.translation import async_get_translations
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util import slugify
 
 from .const import (
     CONF_ENTITY_PREFIX,
     CONF_RATE_LIMIT_NOTIFICATIONS,
     CONF_SYSTEM_NAME,
+    DEFAULT_ENTITY_PREFIX,
     DOMAIN,
 )
 
@@ -18,10 +20,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
     if not system_name:
         raise ValueError("System name must be provided in integration setup")
 
-    system_slug = entry.data.get(
-        CONF_ENTITY_PREFIX,
-        system_name.lower().replace(" ", "_").replace("-", "_"),
-    )
+    system_slug = entry.data.get(CONF_ENTITY_PREFIX) or slugify(system_name) or DEFAULT_ENTITY_PREFIX
 
     lang = getattr(hass.config, "language", "en")
     translations = await async_get_translations(hass, lang, "entity", [DOMAIN])

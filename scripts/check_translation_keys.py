@@ -31,6 +31,14 @@ EXTRA_SENSOR_KEYS = (
     "apiAccessStatus",
     "yieldtoday_total",
     "yieldtotal_total",
+    "estimatedBatteryChargeEnergyToday",
+    "estimatedBatteryChargeEnergyTotal",
+    "estimatedBatteryDischargeEnergyToday",
+    "estimatedBatteryDischargeEnergyTotal",
+    "estimatedSystemBatteryChargeEnergyToday",
+    "estimatedSystemBatteryChargeEnergyTotal",
+    "estimatedSystemBatteryDischargeEnergyToday",
+    "estimatedSystemBatteryDischargeEnergyTotal",
 )
 
 

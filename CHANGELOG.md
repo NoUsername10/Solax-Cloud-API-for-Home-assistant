@@ -5,12 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Planned]
-- Add System health Notifications switch and messaging (with error message, inverter ino etc)
+- Add System health Notifications switch and messaging (with error message, inverter info etc)
 - Individual DC string performance over the day comparison (fault finding) for all panels.
-- Energy Charge and Discharge sensors kWh calculated from battery W data.
+- Refactor sensor.py into smaller modules (field, system totals, estimated battery, shared helpers) 
+- Improve the rate limited messages for clarity.
 
 ## [Unreleased]
 - No changes yet.
+
+## [v0.1.9.1] - 2026-03-18
+
+### Release Notes
+- Estimated battery energy sensors for battery charge and discharge, calculated from the Power (W) sensor `batPower`.
+- Estimated battery sensors are created only when at least one inverter has battery data (`batPower`).
+- Estimated battery sensors are disabled by default to keep the UI Solax API data only, as these sensors are calculated from API data, and is not actual API data.
+- Lithuanian (`lt`) translation file (thank you @basas!).
+
+
+### Added (Caluculated sensors ONLY, not available from Solax API)
+- Added estimated battery energy sensors per inverter:
+  - `Estimated Battery Charge Energy Today`
+  - `Estimated Battery Charge Energy Total`
+  - `Estimated Battery Discharge Energy Today`
+  - `Estimated Battery Discharge Energy Total`
+- Added estimated system battery energy sensors (system totals):
+  - `Estimated System Battery Charge Energy Today`
+  - `Estimated System Battery Charge Energy Total`
+  - `Estimated System Battery Discharge Energy Today`
+  - `Estimated System Battery Discharge Energy Total`
+
+
+### Changed
+- Config and options flow notice checkboxes now use a stable internal key (`acknowledge`) while keeping the translated UI text unchanged.
+- Config-flow API checks now use Home Assistant's shared HTTP session helper (`async_get_clientsession`) instead of ad-hoc client sessions.
+- Removed explicit `aiohttp` requirement from `manifest.json` (HA-core managed dependency path).
+
+
+### Fixed
+- Removed raw YAML import payload logging to avoid accidental token exposure in debug logs.
+- Rate-limit cooldown logic now uses a fresh monotonic timestamp per inverter iteration (no stale-time drift in cooldown calculations).
+- Hardened entity-prefix slug generation by switching to Home Assistant `slugify(...)` with a safe fallback of `solax_cloud_api` when slug output is empty.
+- Applied the same safe slug fallback path in config flow, sensor setup, and switch setup to prevent invalid entity-prefix values from special characters.
+
 
 ## [v0.1.9.0] - 2026-03-16
 
