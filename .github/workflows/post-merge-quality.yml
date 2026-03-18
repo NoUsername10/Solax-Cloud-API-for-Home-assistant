@@ -1,0 +1,42 @@
+name: Post-Merge Quality Checks
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Syntax checks (py_compile)
+        run: |
+          python3 -m py_compile custom_components/solax_cloud_api/*.py
+          python3 -m py_compile scripts/check_translation_keys.py
+
+      - name: Translation guard (all languages)
+        run: python3 scripts/check_translation_keys.py
+
+      - name: Static sanity lint (critical Ruff rules)
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install ruff
+          ruff check custom_components/solax_cloud_api scripts --select E9,F63,F7,F82
+
+      - name: Home Assistant pytest suite (if present)
+        run: |
+          if [ -d tests ]; then
+            python3 -m pip install pytest pytest-homeassistant-custom-component
+            pytest -q
+          else
+            echo "No tests/ directory found. Skipping pytest."
+          fi
