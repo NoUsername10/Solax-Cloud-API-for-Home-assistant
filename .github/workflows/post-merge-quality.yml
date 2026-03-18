@@ -35,6 +35,11 @@ jobs:
       - name: Home Assistant pytest suite (if present)
         run: |
           if [ -d tests ]; then
+            test_count=$(find tests -type f \( -name "test_*.py" -o -name "*_test.py" \) | wc -l | tr -d ' ')
+            if [ "$test_count" -eq 0 ]; then
+              echo "No pytest test files found under tests/. Skipping pytest."
+              exit 0
+            fi
             python3 -m pip install pytest pytest-homeassistant-custom-component
             pytest -q
           else
