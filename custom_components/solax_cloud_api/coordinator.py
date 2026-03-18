@@ -108,9 +108,6 @@ class SolaxCoordinator(DataUpdateCoordinator):
         self.unauthorized_inverters = []
         self.unauthorized_details = {}
         
-        # Get current time for rate limit tracking
-        current_time = asyncio.get_running_loop().time()
-        
         session = async_get_clientsession(self.hass)
         for idx, sn in enumerate(self.inverters):
             if (
@@ -150,12 +147,19 @@ class SolaxCoordinator(DataUpdateCoordinator):
                 _LOGGER.debug("Waiting %.1f seconds before querying inverter %s", delay, sn)
                 await asyncio.sleep(delay)
             
+            # Use fresh monotonic time per inverter to avoid stale cooldown checks.
+            now_monotonic = asyncio.get_running_loop().time()
+
             # Check if this inverter was rate-limited - align with scan interval
             last_rate_limit = getattr(self, f'_last_rate_limit_{sn}', 0)
             skip_until = last_rate_limit + self.update_interval.total_seconds() * 0.55  # 55% of scan interval
             
-            if current_time < skip_until:
-                _LOGGER.debug("Skipping %s - recently rate limited (skip until: %.1fs)", sn, skip_until - current_time)
+            if now_monotonic < skip_until:
+                _LOGGER.debug(
+                    "Skipping %s - recently rate limited (skip until: %.1fs)",
+                    sn,
+                    skip_until - now_monotonic,
+                )
                 previous = self.data.get(sn)
                 previous_raw = self.raw_api_responses.get(sn)
                 if isinstance(previous, dict) and previous.get("error") == "data_unauthorized":
@@ -175,7 +179,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
                 self.rate_limited_inverters.append(sn)
                 self.rate_limited_details[sn] = {
                     "reason": "cooldown_active",
-                    "retry_in_seconds": round(skip_until - current_time, 1),
+                    "retry_in_seconds": round(skip_until - now_monotonic, 1),
                 }
                 self.last_rate_limit_at = dt_util.utcnow()
                 continue
@@ -206,7 +210,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
                     sn, code, self.update_interval.total_seconds() * 0.55
                 )
                 # Mark this inverter as rate-limited until next cycle
-                setattr(self, f'_last_rate_limit_{sn}', current_time)
+                setattr(self, f'_last_rate_limit_{sn}', now_monotonic)
                 previous = self.data.get(sn)
                 if isinstance(previous, dict) and previous.get("error") == "data_unauthorized":
                     # Wrong-serial/no-access should take precedence over transient rate limiting.
@@ -223,7 +227,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
                         "error": "rate_limit",
                         "code": code,
                         "exception": resp.get("exception"),
-                        "skip_until": current_time + self.update_interval.total_seconds() * 0.55
+                        "skip_until": now_monotonic + self.update_interval.total_seconds() * 0.55
                     }
                 self.rate_limited_inverters.append(sn)
                 self.rate_limited_details[sn] = {
