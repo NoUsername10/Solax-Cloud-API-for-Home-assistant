@@ -26,11 +26,11 @@ jobs:
       - name: Translation guard (all languages)
         run: python3 scripts/check_translation_keys.py
 
-      - name: Static sanity lint (critical Ruff rules)
+      - name: Static lint (Ruff extended rule set)
         run: |
           python3 -m pip install --upgrade pip
           python3 -m pip install ruff
-          ruff check custom_components/solax_cloud_api scripts --select E9,F63,F7,F82
+          ruff check custom_components/solax_cloud_api scripts
 
       - name: Home Assistant pytest suite (if present)
         run: |
