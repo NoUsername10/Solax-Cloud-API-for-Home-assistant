@@ -1,21 +1,21 @@
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.components import persistent_notification
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.translation import async_get_translations
+
 from .const import (
+    CONF_INVERTERS,
+    CONF_RATE_LIMIT_NOTIFICATIONS,
+    CONF_SCAN_INTERVAL,
+    CONF_TOKEN,
     DOMAIN,
     PLATFORMS,
-    CONF_TOKEN,
-    CONF_INVERTERS,
-    CONF_SCAN_INTERVAL,
-    CONF_RATE_LIMIT_NOTIFICATIONS,
     RUNTIME_INITIAL_SETUP_STATE,
     RUNTIME_RELOAD_STATE,
     SERVICE_MANUAL_REFRESH,
 )
 from .coordinator import SolaxCoordinator
-
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 _TRANSLATION_PREFIX = f"component.{DOMAIN}."
@@ -205,7 +205,7 @@ async def async_setup(hass: HomeAssistant, config: dict):
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data.setdefault(DOMAIN, {})
     hass.data.setdefault(RUNTIME_RELOAD_STATE, {})
-    token = entry.data.get(CONF_TOKEN) 
+    token = entry.data.get(CONF_TOKEN)
     inverters = _dedupe_serials(entry.data.get(CONF_INVERTERS, []))
     scan = entry.data.get(CONF_SCAN_INTERVAL, 120)
 

@@ -9,6 +9,7 @@ from .const import (
     CONF_SYSTEM_NAME,
     DEFAULT_ENTITY_PREFIX,
     DOMAIN,
+    INVALID_ENTITY_PREFIXES,
 )
 
 
@@ -20,7 +21,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
     if not system_name:
         raise ValueError("System name must be provided in integration setup")
 
-    system_slug = entry.data.get(CONF_ENTITY_PREFIX) or slugify(system_name) or DEFAULT_ENTITY_PREFIX
+    system_slug = str(entry.data.get(CONF_ENTITY_PREFIX, "")).strip()
+    if not system_slug:
+        system_slug = slugify(system_name)
+    if not system_slug or system_slug in INVALID_ENTITY_PREFIXES:
+        system_slug = DEFAULT_ENTITY_PREFIX
 
     lang = getattr(hass.config, "language", "en")
     translations = await async_get_translations(hass, lang, "entity", [DOMAIN])

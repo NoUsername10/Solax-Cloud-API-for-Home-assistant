@@ -1,26 +1,29 @@
 import asyncio
-from typing import Any
-import voluptuous as vol
 import logging
+from typing import Any
+
+import async_timeout
+import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.core import callback
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import slugify
-import async_timeout
+
 from .const import (
-    DOMAIN,
-    CONF_TOKEN,
+    API_URL,
+    CONF_ENTITY_PREFIX,
     CONF_INVERTERS,
+    CONF_RATE_LIMIT_NOTIFICATIONS,
     CONF_SCAN_INTERVAL,
     CONF_SYSTEM_NAME,
-    CONF_ENTITY_PREFIX,
-    CONF_RATE_LIMIT_NOTIFICATIONS,
+    CONF_TOKEN,
     DEFAULT_ENTITY_PREFIX,
     DEFAULT_SCAN_INTERVAL,
-    API_URL,
+    DOMAIN,
+    INVALID_ENTITY_PREFIXES,
     RUNTIME_INITIAL_SETUP_STATE,
     RUNTIME_RELOAD_STATE,
 )
@@ -31,7 +34,18 @@ _TRANSLATION_PREFIX = f"component.{DOMAIN}."
 _ACKNOWLEDGE_FIELD = "acknowledge"
 
 def _slugify_name(value: str) -> str:
-    return slugify(value) or DEFAULT_ENTITY_PREFIX
+    if value is None:
+        return DEFAULT_ENTITY_PREFIX
+    raw = str(value).strip()
+    if not raw:
+        return DEFAULT_ENTITY_PREFIX
+
+    slug = slugify(raw)
+    if not slug:
+        return DEFAULT_ENTITY_PREFIX
+    if slug in INVALID_ENTITY_PREFIXES:
+        return DEFAULT_ENTITY_PREFIX
+    return slug
 
 def _normalize_serial(value: str) -> str:
     return value.strip()
@@ -103,7 +117,7 @@ async def _test_api_connection(hass, token: str, serial: str = "TEST123") -> boo
         headers = {"Content-Type": "application/json", "tokenId": token}
         payload = {"wifiSn": serial}
         session = async_get_clientsession(hass)
-        
+
         async with async_timeout.timeout(10):
             async with session.post(API_URL, json=payload, headers=headers) as resp:
                 if resp.status != 200:
@@ -184,7 +198,7 @@ async def _classify_preflight_inverters(
                                 "raw": text,
                             }
                             continue
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     results[serial] = {"error": "Timeout"}
                     continue
                 except Exception as request_err:
@@ -286,22 +300,22 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_abort(reason="already_configured")
 
         errors = {}
-        
+
         if user_input is not None:
             # Validate token first
             token = user_input[CONF_TOKEN].strip()
             if not token:
                 errors["base"] = "invalid_token"
-            
+
             # Only test API if token is provided
             if token and not errors:
                 if not await _test_api_connection(self.hass, token):
                     errors["base"] = "invalid_token"
-            
+
             self._system_name = user_input.get(CONF_SYSTEM_NAME, "Solax System").strip()
             if not self._system_name:
                 errors["base"] = "no_system_name"
-            
+
             # Only proceed to next step if no errors
             if not errors:
                 self._token = token
@@ -312,29 +326,29 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         data_schema = vol.Schema({
             vol.Required(CONF_TOKEN): str,
             vol.Required(CONF_SYSTEM_NAME, default="Solax System"): str,
-            vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL): 
+            vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL):
                 vol.All(vol.Coerce(int), vol.Range(min=120, max=3600)),
         })
 
         return self.async_show_form(
-            step_id="user", 
+            step_id="user",
             data_schema=data_schema,
             errors=errors
         )
 
     async def async_step_add_inverter(self, user_input: Any = None):
         errors = {}
-        
+
         if user_input is not None:
-            if "serial" in user_input and user_input["serial"]:
+            if user_input.get("serial"):
                 # Adding a new inverter
                 serial = _normalize_serial(user_input["serial"])
                 if serial and not _serial_exists(serial, self._inverters):
                     self._inverters.append(serial)
                 elif serial:
                     errors["base"] = "duplicate_inverter"
-                
-            if "finish" in user_input and user_input["finish"]:
+
+            if user_input.get("finish"):
                 if errors:
                     pass
                 elif not self._inverters:
@@ -377,7 +391,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Show current inverters and option to add more
         inverters_list = "\n".join([f"• {sn}" for sn in self._inverters]) if self._inverters else "-"
-        
+
         data_schema = vol.Schema({
             vol.Optional("serial"): str,
             vol.Required("finish", default=bool(self._inverters)): cv.boolean,
@@ -432,22 +446,22 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Add this method for YAML import support
         _LOGGER.debug("Importing Solax configuration from YAML")
-        
+
         # Validate imported config
         token = import_config.get(CONF_TOKEN)
         if not token:
             return self.async_abort(reason="invalid_token")
-        
+
         inverters = _dedupe_serials(import_config.get(CONF_INVERTERS, []))
         if not inverters:
             return self.async_abort(reason="no_inverters")
-        
+
         # Set the configuration
         self._token = token
         self._inverters = inverters
         self._scan_interval = import_config.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
         self._system_name = import_config.get(CONF_SYSTEM_NAME, "Solax System")
-        
+
         # Create the entry
         return self.async_create_entry(
             title=self._system_name,
@@ -491,27 +505,27 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         token = self._token
         system_name = self._system_name
         scan_interval = self._scan_interval
-        
+
         if user_input is not None:
             token = user_input.get(CONF_TOKEN, self._token).strip()
             system_name = user_input.get(CONF_SYSTEM_NAME, self._system_name).strip()
             scan_interval = user_input.get(CONF_SCAN_INTERVAL, self._scan_interval)
 
-            if "serial" in user_input and user_input["serial"]:
+            if user_input.get("serial"):
                 # Adding a new inverter
                 serial = _normalize_serial(user_input["serial"])
                 if serial and not _serial_exists(serial, self._inverters):
                     self._inverters.append(serial)
                 elif serial:
                     errors["base"] = "duplicate_inverter"
-            
-            if "remove_serial" in user_input and user_input["remove_serial"]:
+
+            if user_input.get("remove_serial"):
                 # Remove selected inverter
                 remove_sn = user_input["remove_serial"]
                 if remove_sn in self._inverters:
                     self._inverters.remove(remove_sn)
-            
-            if "finish" in user_input and user_input["finish"]:
+
+            if user_input.get("finish"):
                 if not token:
                     errors["base"] = "invalid_token"
 
@@ -563,7 +577,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                         "added_inverters": added_inverters,
                         "token_changed": token_changed,
                     }
-                    
+
                     # Create updated data
                     updated_data = dict(self._config_entry.data)
                     updated_data[CONF_TOKEN] = token
@@ -571,16 +585,18 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                     updated_data[CONF_SCAN_INTERVAL] = scan_interval
                     updated_data[CONF_SYSTEM_NAME] = system_name
                     # Keep entity prefix stable so system-name changes do not regenerate entities.
-                    updated_data[CONF_ENTITY_PREFIX] = self._config_entry.data.get(
-                        CONF_ENTITY_PREFIX,
-                        _slugify_name(self._config_entry.data.get(CONF_SYSTEM_NAME, system_name)),
+                    updated_data[CONF_ENTITY_PREFIX] = _slugify_name(
+                        self._config_entry.data.get(
+                            CONF_ENTITY_PREFIX,
+                            self._config_entry.data.get(CONF_SYSTEM_NAME, system_name),
+                        )
                     )
-                    
+
                     hass.config_entries.async_update_entry(
                         self._config_entry,
                         data=updated_data
                     )
-                    
+
                     # Reload the entry to apply changes
                     await hass.config_entries.async_reload(entry_id)
 
@@ -641,7 +657,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                         return await self.async_step_invalid_serial_notice()
                     if notifications_enabled and self._rate_limit_notice_inverters:
                         return await self.async_step_rate_limit_notice()
-                    
+
                     return self.async_create_entry(title="", data={})
 
         self._token = token

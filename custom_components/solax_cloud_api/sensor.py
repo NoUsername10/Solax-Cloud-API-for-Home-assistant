@@ -1,5 +1,7 @@
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorStateClass
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers import entity_registry as er
@@ -7,7 +9,8 @@ from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.restore_state import RestoreEntity
 from homeassistant.helpers.translation import async_get_translations
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from homeassistant.util import dt as dt_util, slugify
+from homeassistant.util import dt as dt_util
+from homeassistant.util import slugify
 
 from .const import (
     CONF_ENTITY_PREFIX,
@@ -16,6 +19,7 @@ from .const import (
     DEFAULT_ENTITY_PREFIX,
     DOMAIN,
     HIDDEN_SENSORS,
+    INVALID_ENTITY_PREFIXES,
     MAPPED_FIELDS,
     NUMERIC_FIELDS,
     RESULT_FIELDS,
@@ -46,7 +50,7 @@ def _parse_timestamp(value):
         return None
 
     if dt_obj.tzinfo is None:
-        dt_obj = dt_obj.replace(tzinfo=timezone.utc)
+        dt_obj = dt_obj.replace(tzinfo=UTC)
     return dt_obj
 
 
@@ -136,18 +140,14 @@ def _flatten_translations(data, parent_key=""):
 
 async def _load_local_translations(hass, lang):
     import json
-    import os
 
-    translations_file = os.path.join(
-        hass.config.path(f"custom_components/{DOMAIN}/translations"), f"{lang}.json"
-    )
-    if not os.path.exists(translations_file):
-        translations_file = os.path.join(
-            hass.config.path(f"custom_components/{DOMAIN}/translations"), "en.json"
-        )
+    translations_dir = Path(hass.config.path(f"custom_components/{DOMAIN}/translations"))
+    translations_file = translations_dir / f"{lang}.json"
+    if not translations_file.exists():
+        translations_file = translations_dir / "en.json"
 
     def _load():
-        with open(translations_file, "r", encoding="utf-8") as file:
+        with translations_file.open(encoding="utf-8") as file:
             return json.load(file)
 
     loaded = await hass.async_add_executor_job(_load)
@@ -207,7 +207,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
     if not system_name:
         raise ValueError("System name must be provided in integration setup")
 
-    system_slug = entry.data.get(CONF_ENTITY_PREFIX) or slugify(system_name) or DEFAULT_ENTITY_PREFIX
+    system_slug = str(entry.data.get(CONF_ENTITY_PREFIX, "")).strip()
+    if not system_slug:
+        system_slug = slugify(system_name)
+    if not system_slug or system_slug in INVALID_ENTITY_PREFIXES:
+        system_slug = DEFAULT_ENTITY_PREFIX
     _cleanup_removed_inverter_artifacts(hass, entry, system_slug, inverters)
     lang = getattr(hass.config, "language", "en")
     translations = await async_get_translations(hass, lang, "entity", [DOMAIN])

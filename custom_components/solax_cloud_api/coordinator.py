@@ -1,13 +1,13 @@
 import asyncio
-import async_timeout
 import logging
-from datetime import timedelta
 from copy import deepcopy
+from datetime import timedelta
 
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+import async_timeout
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 
 from .const import API_URL, DEFAULT_SCAN_INTERVAL
@@ -84,15 +84,15 @@ class SolaxCoordinator(DataUpdateCoordinator):
                     if resp.status != 200:
                         _LOGGER.warning("Solax HTTP error %s for %s: %s", resp.status, sn, text)
                         return { "error": f"HTTP {resp.status}", "raw": text }
-                    
+
                     try:
                         j = await resp.json()
                     except Exception as json_err:
                         _LOGGER.warning("JSON parse error for %s: %s", sn, json_err)
                         return { "error": f"JSON Error: {json_err}", "raw": text }
-                        
+
                     return j
-        except asyncio.TimeoutError:
+        except TimeoutError:
             _LOGGER.warning("Timeout fetching data for %s", sn)
             return { "error": "Timeout" }
         except Exception as e:
@@ -107,7 +107,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
         self.rate_limited_details = {}
         self.unauthorized_inverters = []
         self.unauthorized_details = {}
-        
+
         session = async_get_clientsession(self.hass)
         for idx, sn in enumerate(self.inverters):
             if (
@@ -146,14 +146,14 @@ class SolaxCoordinator(DataUpdateCoordinator):
                 delay = min(1 + (idx * 0.5), 5)
                 _LOGGER.debug("Waiting %.1f seconds before querying inverter %s", delay, sn)
                 await asyncio.sleep(delay)
-            
+
             # Use fresh monotonic time per inverter to avoid stale cooldown checks.
             now_monotonic = asyncio.get_running_loop().time()
 
             # Check if this inverter was rate-limited - align with scan interval
             last_rate_limit = getattr(self, f'_last_rate_limit_{sn}', 0)
             skip_until = last_rate_limit + self.update_interval.total_seconds() * 0.55  # 55% of scan interval
-            
+
             if now_monotonic < skip_until:
                 _LOGGER.debug(
                     "Skipping %s - recently rate limited (skip until: %.1fs)",
@@ -183,10 +183,10 @@ class SolaxCoordinator(DataUpdateCoordinator):
                 }
                 self.last_rate_limit_at = dt_util.utcnow()
                 continue
-            
+
             _LOGGER.debug("Fetching data for inverter %s (%d/%d)", sn, idx + 1, len(self.inverters))
             resp = await self._fetch_one(session, sn)
-            
+
             if isinstance(resp, Exception):
                 _LOGGER.warning("Fetch exception for %s: %s", sn, resp)
                 results[sn] = None
@@ -202,7 +202,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
             raw_results[sn] = deepcopy(resp)
             code = resp.get("code")
             success = resp.get("success", False)
-            
+
             # Handle rate-limit responses from Solax (seen as code 104 and code 3)
             if _is_rate_limited_response(resp):
                 _LOGGER.warning(
@@ -237,7 +237,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
                     "retry_in_seconds": round(self.update_interval.total_seconds() * 0.55, 1),
                 }
                 self.last_rate_limit_at = dt_util.utcnow()
-                
+
                 # Add extra delay before next inverter
                 if idx < len(self.inverters) - 1:
                     _LOGGER.debug("Adding 5 second delay after rate limit")
@@ -267,7 +267,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
                     "exception": resp.get("exception"),
                 }
                 continue
-                
+
             elif not success or (code is not None and code != 0):
                 _LOGGER.warning("API error for %s: code=%s, exception=%s", sn, code, resp.get("exception"))
                 results[sn] = { "error": True, "code": code, "exception": resp.get("exception"), "raw": resp }
@@ -283,16 +283,16 @@ class SolaxCoordinator(DataUpdateCoordinator):
                     delattr(self, f'_last_rate_limit_{sn}')
             else:
                 results[sn] = {}
-                    
+
         successful_updates = len([r for r in results.values() if r and not r.get("error")])
         rate_limited = len(self.rate_limited_inverters)
-        
+
         if rate_limited > 0:
             _LOGGER.warning(
                 "%d/%d inverters rate limited. Consider increasing scan interval from %ds",
                 rate_limited, len(self.inverters), self.update_interval.total_seconds()
             )
-        
+
         _LOGGER.debug("Successfully updated data for %d/%d inverters", successful_updates, len(self.inverters))
         if successful_updates > 0:
             self.last_successful_update = dt_util.utcnow()
