@@ -1,4 +1,4 @@
-# Solax Cloud API for Single and Multi Inverter Systems
+# Solax Cloud API for Single- and Multi-Inverter Systems
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/icon.png" width=20% height=20%>
 
 [![coffee_badge](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-donate-orange.svg)](https://www.buymeacoffee.com/DefaultLogin)
@@ -6,9 +6,51 @@
 [<img src="https://my.home-assistant.io/badges/hacs_repository.svg" />](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
 
 
-## ✨ Features
+**Solax Cloud API** integration to monitor Solax inverters using the official Solax Cloud API.<br>
+Supports all available API data from the SolaX Cloud API, and creates sensors dynamically based on your system.
 
-Created using the latest Solax API documentation.
+
+## ✨ Features in short:
+
+- **Per-inverter and system-wide metrics and sensors**
+- **Dynamic Sensor Creation** - Creates only sensors with real API data
+- **Optional estimated battery energy sensors**
+- **One config entry for a full site**
+- **Clear API error and rate-limit reporting**
+- **Diagnostics export with privacy masking**
+- **Support for multiple languages**
+   - 🇬🇧 🇩🇪 🇳🇱 🇨🇿 🇵🇱 🇵🇹 🇪🇸 🇮🇹 🇫🇷 🇸🇪 🇩🇰 🇳🇴 🇫🇮 🇱🇹
+
+<br>
+
+
+This integration is developed and tested in real Home Assistant setups. <br>
+Contributions, issues, and pull requests are welcome. <br> <br>
+
+
+**Total System information** (this system contains 3 micro-inverters): <br> <br>
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20system.png" width=75% height=75%>
+
+**Single-inverter info:** <br> <br>
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20inverter.png" width=75% height=75%>
+
+**Built in diagnostics:** <br>
+Serial and Token redacted diagnostics for assistance. <br> <br>
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/download-diagnostics.png" width=75% height=75%>
+
+**Solar panel array overview:** <br>
+As this system has micro inverters, we can see individual panel performance. <br> <br>
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20solar%20panels.png" width=75% height=75%>
+
+**Individual DC string performance over the day.** <br>
+One of the panels is in some shade during the winter months. <br> <br>
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20DC%20strings.png" width=75% height=75%>
+
+
+## ✨ Full Feature Set
+
+<details>
+<summary>Complete feature summary</summary><br>
 
 - **Single Integration Instance** - One config entry for a full site (single- or multi-inverter)
 - **Single API Token** - One token for all configured inverter serials
@@ -28,36 +70,7 @@ Created using the latest Solax API documentation.
 - **Built-in Diagnostics Export** - Download diagnostics with API responses with partial masked token and partial serial masking for privacy.
 - **UI Language Support** - 🇬🇧 English (`en`), 🇩🇪 German (`de`), 🇳🇱 Dutch (`nl`), 🇨🇿 Czech (`cs`), 🇵🇱 Polish (`pl`), 🇵🇹 Portuguese (`pt`), 🇪🇸 Spanish (`es`), 🇮🇹 Italian (`it`), 🇫🇷 French (`fr`), 🇸🇪 Swedish (`sv`), 🇩🇰 Danish (`da`), 🇳🇴 Norwegian Bokmal (`nb`), 🇫🇮 Finnish (`fi`), 🇱🇹 Lithuanian (`lt`)
 
-<br>
-
-**Solax Cloud API**
-Home Assistant custom integration to monitor Solax inverters using the official Solax Cloud API V2.0. <br>
-Supports both single and multi-inverter systems, dynamic sensors, system totals, and reliability-focused error handling.
-
-This integration was developed with AI-assisted collaboration and practical testing in real Home Assistant setups. <br>
-It has been iteratively improved with a focus on reliability, maintainability, and Home Assistant best practices.<br>
-Contributions, issues, and pull requests are welcome.<br>
-
-
-**Total System information** (this system contains 3 micro-inverters): <br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20system.png" width=75% height=75%>
-
-**Single-inverter info:** <br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20inverter.png" width=75% height=75%>
-
-**Built in diagnostics:** <br>
-Serial and Token redacted diagnostics for assistance. <br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/download-diagnostics.png" width=75% height=75%>
-
-**Example of displaying useful information:** <br>
-As the system has micro inverters, we can see individual panel performance. <br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20solar%20panels.png" width=75% height=75%>
-
-**Individual DC string performance over the day.** <br>
-One of the panels is in some shade during the winter months.<br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20DC%20strings.png" width=75% height=75%>
-
-
+</details> <br>
 
 ## ✅ Prerequisites
 
@@ -129,6 +142,10 @@ If rate limits or invalid serial/access errors are detected, you get a GUI popup
 ## 🔌 Supported Inverter Types
 
 This integration currently includes the following inverter type names:
+
+<details>
+<summary><b>Inverter List:</b></summary><br>
+   
 - X1-LX
 - X-Hybrid
 - X1-Hybiyd/Fit
@@ -180,6 +197,8 @@ This integration currently includes the following inverter type names:
 - X3-GRAND-HV
 - X3-FORTH-PLUS
 
+</details>
+
 If any inverter type name is missing or incorrect, please open a pull request.
 
 ## 📊 Sensor Information
@@ -189,10 +208,10 @@ Each inverter gets its own set of sensors with entity IDs like:
 - `[System Name] AC Output Power [Serial]`
 - `[System Name] Battery State of Charge [Serial]`
 - `[System Name] DC Power Inverter Total [Serial]`
-- `Estimated Battery Charge Energy Today [Serial]` (diagnostic, disabled by default)
-- `Estimated Battery Charge Energy Total [Serial]` (diagnostic, disabled by default)
-- `Estimated Battery Discharge Energy Today [Serial]` (diagnostic, disabled by default)
-- `Estimated Battery Discharge Energy Total [Serial]` (diagnostic, disabled by default)
+- `Estimated Battery Charge Energy Today [Serial]` (disabled by default)
+- `Estimated Battery Charge Energy Total [Serial]` (disabled by default)
+- `Estimated Battery Discharge Energy Today [Serial]` (disabled by default)
+- `Estimated Battery Discharge Energy Total [Serial]` (disabled by default)
 
 ### System Total Sensors
 System-wide totals:
