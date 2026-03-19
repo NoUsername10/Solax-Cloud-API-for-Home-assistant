@@ -13,9 +13,9 @@ Supports all available Solax API data, and creates sensors dynamically based on 
 ## ✨ Features in short:
 
 - **Per-inverter and system-wide metrics and sensors**
-- **Dynamic Sensor Creation** - Creates only sensors with real API data
+- **AC/DC convertion efficiency per inverter and the total system**
 - **Optional estimated battery energy sensors**
-- **One config entry for a full site**
+- **Dynamic Sensor Creation** - Creates only sensors with real API data
 - **Clear API error and rate-limit reporting**
 - **Diagnostics export with privacy masking**
 - **Support for multiple languages**
