@@ -7,7 +7,7 @@
 
 
 **Solax Cloud API** integration to monitor Solax inverters using the official Solax Cloud API.<br>
-Supports all available API data from the SolaX Cloud API, and creates sensors dynamically based on your system.
+Supports all available Solax API data, and creates sensors dynamically based on your system.
 
 
 ## ✨ Features in short:
