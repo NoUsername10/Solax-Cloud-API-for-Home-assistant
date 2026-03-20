@@ -32,11 +32,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - `yieldtotal` and `yieldtotal_total` remain `state_class: total_increasing`.
 
 ### Fixed
+- Resolved Home Assistant warning for daily estimated battery sensors: Thank you @alan0000007 for testing!
+  - `"state class 'measurement' but 'last_reset' is missing"`
 - Daily estimated battery kWh sensors now use statistics-safe metadata in Home Assistant:
   - `state_class: total`
   - daily `last_reset` at local midnight
-- Resolved Home Assistant warning for daily estimated battery sensors:
-  - `"state class 'measurement' but 'last_reset' is missing"`
 - Entity-prefix slug guarding now treats Home Assistant fallback slugs like `unknown` / `unnamed` as invalid and enforces the safe fallback `solax_cloud_api` in config flow, sensor setup, and switch setup.
 
 ## [v0.1.9.1] - 2026-03-18
