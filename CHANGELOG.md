@@ -13,6 +13,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 - No changes yet.
 
+## [v0.1.9.2] - 2026-03-20
+
+### Release Notes
+- Home Assistant statistics compatibility improvements for daily energy sensors.
+- Added regression tests for daily reset and total non-reset behavior across day rollover.
+
+### Added
+- Extended sensor tests for:
+  - daily estimated battery energy rollover at new day
+  - total estimated battery energy continuity across day rollover
+  - yieldtoday/yieldtotal state-class and reset metadata correctness
+
+### Changed
+- `yieldtoday` (per-inverter) and `yieldtoday_total` (system total) now use Home Assistant daily-energy semantics:
+  - `state_class: total`
+  - daily `last_reset` at local midnight
+- `yieldtotal` and `yieldtotal_total` remain `state_class: total_increasing`.
+
+### Fixed
+- Daily estimated battery kWh sensors now use statistics-safe metadata in Home Assistant:
+  - `state_class: total`
+  - daily `last_reset` at local midnight
+- Resolved Home Assistant warning for daily estimated battery sensors:
+  - `"state class 'measurement' but 'last_reset' is missing"`
+- Entity-prefix slug guarding now treats Home Assistant fallback slugs like `unknown` / `unnamed` as invalid and enforces the safe fallback `solax_cloud_api` in config flow, sensor setup, and switch setup.
+
 ## [v0.1.9.1] - 2026-03-18
 
 ### Release Notes
