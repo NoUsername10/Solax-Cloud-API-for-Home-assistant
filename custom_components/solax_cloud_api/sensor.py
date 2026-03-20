@@ -89,6 +89,13 @@ def _sample_local_date(sample_dt):
     return dt_util.as_local(sample_dt).date()
 
 
+def _daily_last_reset_utc(local_date):
+    if local_date is None:
+        return None
+    local_midnight = datetime.combine(local_date, datetime.min.time(), dt_util.DEFAULT_TIME_ZONE)
+    return dt_util.as_utc(local_midnight)
+
+
 def _coerce_float(value):
     try:
         return float(value)
@@ -476,7 +483,10 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
             unit, field_type = NUMERIC_FIELDS[field]
             self._attr_native_unit_of_measurement = unit
             if field_type == "energy":
-                self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+                if field == "yieldtoday":
+                    self._attr_state_class = SensorStateClass.TOTAL
+                else:
+                    self._attr_state_class = SensorStateClass.TOTAL_INCREASING
                 self._attr_device_class = SensorDeviceClass.ENERGY
                 self._attr_suggested_display_precision = 1
             elif field_type == "power":
@@ -516,6 +526,17 @@ class SolaxFieldSensor(CoordinatorEntity, SensorEntity):
         if data.get("error"):
             return False
         return data.get(self._field) is not None
+
+    @property
+    def last_reset(self):
+        if self._field != "yieldtoday":
+            return None
+        inv = self.coordinator.data.get(self._serial)
+        if not inv or not isinstance(inv, dict) or inv.get("error"):
+            return None
+        sample_dt = _sample_key_and_dt(inv)[1]
+        local_date = _sample_local_date(sample_dt)
+        return _daily_last_reset_utc(local_date)
 
     @property
     def device_info(self):
@@ -769,7 +790,7 @@ class SolaxEstimatedBatteryEnergySensor(CoordinatorEntity, SensorEntity, Restore
         if self._period == "total":
             self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         else:
-            self._attr_state_class = SensorStateClass.MEASUREMENT
+            self._attr_state_class = SensorStateClass.TOTAL
 
         self._total_kwh = 0.0
         self._today_baseline_kwh = 0.0
@@ -877,6 +898,12 @@ class SolaxEstimatedBatteryEnergySensor(CoordinatorEntity, SensorEntity, Restore
         return inverter_data.get("batPower") is not None
 
     @property
+    def last_reset(self):
+        if self._period != "today":
+            return None
+        return _daily_last_reset_utc(self._today_date)
+
+    @property
     def device_info(self):
         inverter_data = self.coordinator.data.get(self._serial)
         inverter_sn = inverter_data.get("inverterSN") if isinstance(inverter_data, dict) else None
@@ -948,7 +975,7 @@ class SolaxSystemEstimatedBatteryEnergySensor(
         if self._period == "total":
             self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         else:
-            self._attr_state_class = SensorStateClass.MEASUREMENT
+            self._attr_state_class = SensorStateClass.TOTAL
 
         self._serial_state = {}
         self._total_kwh = 0.0
@@ -1089,6 +1116,12 @@ class SolaxSystemEstimatedBatteryEnergySensor(
         return round(max(self._total_kwh - self._today_baseline_kwh, 0.0), 5)
 
     @property
+    def last_reset(self):
+        if self._period != "today":
+            return None
+        return _daily_last_reset_utc(self._today_date)
+
+    @property
     def extra_state_attributes(self):
         battery_inverters = 0
         for serial in self._inverters:
@@ -1166,7 +1199,10 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
 
         if self._metric in ("yieldtoday_total", "yieldtotal_total"):
             self._attr_device_class = SensorDeviceClass.ENERGY
-            self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+            if self._metric == "yieldtoday_total":
+                self._attr_state_class = SensorStateClass.TOTAL
+            else:
+                self._attr_state_class = SensorStateClass.TOTAL_INCREASING
             self._attr_native_unit_of_measurement = "kWh"
         elif self._metric == "systemEfficiency":
             self._attr_state_class = SensorStateClass.MEASUREMENT
@@ -1334,6 +1370,31 @@ class SolaxSystemTotalSensor(CoordinatorEntity, SensorEntity):
             elif self._metric == "dc_total":
                 total += sum(inv.get(f"powerdc{i}", 0) or 0 for i in range(1, 5))
         return total
+
+    @property
+    def last_reset(self):
+        if self._metric != "yieldtoday_total":
+            return None
+
+        latest_local_date = None
+        for sn in self._inverters:
+            inv = self.coordinator.data.get(sn)
+            if (
+                not inv
+                or not isinstance(inv, dict)
+                or inv.get("error")
+                or inv.get("yieldtoday") is None
+            ):
+                continue
+            sample_dt = _sample_key_and_dt(inv)[1]
+            local_date = _sample_local_date(sample_dt)
+            if latest_local_date is None or local_date > latest_local_date:
+                latest_local_date = local_date
+
+        if latest_local_date is None:
+            latest_local_date = dt_util.as_local(dt_util.utcnow()).date()
+
+        return _daily_last_reset_utc(latest_local_date)
 
     @property
     def extra_state_attributes(self):
