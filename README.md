@@ -343,4 +343,4 @@ This integration is not officially affiliated with Solax Power.
 
 ----
 
-**Note**: This integration is designed to be robust and user-friendly, with proper error handling and rate limit protection to ensure reliable operation with the Solax Cloud API.
+**Note**: This integration is designed to be robust and user-friendly, with proper error handling and rate limit protection to ensure reliable operation with the **Official SolaX Cloud API**.
