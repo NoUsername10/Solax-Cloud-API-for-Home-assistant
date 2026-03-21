@@ -6,7 +6,7 @@
 [<img src="https://my.home-assistant.io/badges/hacs_repository.svg" />](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
 
 
-**Solax Cloud API** integration to monitor Solax systems using the **official Solax Cloud API.**<br>
+**SolaX Cloud API** integration to monitor SolaX systems using the **official SolaX Cloud API.**<br>
 Supports all available SolaX API data, and creates sensors dynamically based on your system. <br>
 Ideal if you want a simple and cloud-based setup.
 
@@ -32,12 +32,9 @@ Contributions, issues, and pull requests are welcome. <br> <br>
 **Total System information** (this system contains 3 micro-inverters): <br> <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20system.png" width=75% height=75%>
 
-**Single-inverter info:** <br> <br>
+**Single-inverter info:**  <br>
+This is a micro inverter. <br> <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20inverter.png" width=75% height=75%>
-
-**Built in diagnostics:** <br>
-Serial and Token redacted diagnostics for assistance. <br> <br>
-<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/download-diagnostics.png" width=75% height=75%>
 
 **Solar panel array overview:** <br>
 As this system has micro inverters, we can see individual panel performance. <br> <br>
@@ -46,6 +43,10 @@ As this system has micro inverters, we can see individual panel performance. <br
 **Individual DC string performance over the day.** <br>
 One of the panels is in some shade during the winter months. <br> <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20DC%20strings.png" width=75% height=75%>
+
+**Built in diagnostics:** <br>
+Serial and Token redacted diagnostics for assistance. <br> <br>
+<img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/download-diagnostics.png" width=75% height=75%>
 
 
 ## ✨ Full Feature Set
@@ -73,7 +74,7 @@ One of the panels is in some shade during the winter months. <br> <br>
 
 </details> <br>
 
-## ✅ Prerequisites
+## ✅ Prerequisites (Step 1)
 
 Before installation, you need:
 1. **Solax Cloud Account** - Register at [solaxcloud.com](https://www.solaxcloud.com)
@@ -91,7 +92,7 @@ Before installation, you need:
       - If your inverter has built-in WiFi, use the WiFi inverter serial.
       - For microinverter systems, use the microinverter(s) serial(s).
 
-## 📦 Installation (HACS - Recommended)
+## 📦 Installation HACS (Step 2)
 
 [<img src="https://my.home-assistant.io/badges/hacs_repository.svg" />](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
 
@@ -105,7 +106,7 @@ Before installation, you need:
 2. Copy the `custom_components/solax_cloud_api` folder to your Home Assistant `custom_components` directory
 3. Restart Home Assistant
 
-## ⚙️ Configuration
+## ⚙️ Configuration (Step 3)
 
 ### 🚀 Initial Setup
 1. Go to **Settings** → **Devices & Services**
@@ -134,13 +135,13 @@ To add or remove inverters later:
 After saving, the integration reloads automatically and validates the result.  
 If rate limits or invalid serial/access errors are detected, you get a GUI popup (options flow) and a persistent notification.
 
+
 ## 📝 Important Notes
 
-- **📊 Data Refresh Rate**: Solax Cloud typically updates values about every 5 minutes.
-- **⏱️ Polling Model**: One shared interval is used, and configured inverters are queried sequentially.
-- **🔐 Token Validation**: API token is validated during setup and when changed in options.
+- **📊 Data Refresh Rate**: Solax Cloud data updates every 5 minutes, even if we query every 2 minues.
 - **💾 Transient Error Retention**: The last good values are retained during temporary rate limits/API issues.
 - **🔧 Dynamic Sensors**: Entities are created based on real fields returned for your inverter model.
+
 
 ## 🔌 Supported Inverter Types
 
@@ -208,6 +209,10 @@ If any inverter type name is missing or incorrect, please open a pull request.
 
 ### Per-Inverter Sensors
 Per inverter, the integration can create the following sensors (dynamic: only fields with API data are created):
+
+<details>
+<summary>Per inverter sensor list:</summary><br>
+
 - `AC Output Power`
 - `DC Power String 1`
 - `DC Power String 2`
@@ -239,7 +244,13 @@ Per inverter, the integration can create the following sensors (dynamic: only fi
 - `Estimated Battery Discharge Energy Today` (estimated, disabled by default, battery systems only)
 - `Estimated Battery Discharge Energy Total` (estimated, disabled by default, battery systems only)
 
+</details>
+
 ### System Total Sensors
+
+<details>
+<summary>System-wide sensor list:</summary><br>
+   
 System-wide sensors:
 - `System AC Power`
 - `System DC Power`
@@ -254,6 +265,9 @@ System-wide sensors:
 - `Estimated System Battery Charge Energy Total` (estimated, disabled by default, battery systems only)
 - `Estimated System Battery Discharge Energy Today` (estimated, disabled by default, battery systems only)
 - `Estimated System Battery Discharge Energy Total` (estimated, disabled by default, battery systems only)
+
+</details>
+
 
 ### Diagnostic / Control Entities
 - `API Access Status [Serial]` (diagnostic): API access health for each inverter
