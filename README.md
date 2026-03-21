@@ -6,18 +6,19 @@
 [<img src="https://my.home-assistant.io/badges/hacs_repository.svg" />](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
 
 
-**Solax Cloud API** integration to monitor Solax inverters using the official Solax Cloud API.<br>
-Supports all available Solax API data, and creates sensors dynamically based on your system.
+**Solax Cloud API** integration to monitor Solax systems using the **official Solax Cloud API.**<br>
+Supports all available SolaX API data, and creates sensors dynamically based on your system.
+Ideal if you want a simple and cloud-based setup.
 
 
 ## ✨ Features in short:
 
-- **Per-inverter and system-wide metrics and sensors**
-- **AC/DC convertion efficiency per inverter and the total system**
+- **Per-inverter and system-wide metrics and total sensors**
+- **AC/DC conversion efficiency per inverter and for the total system**
 - **Optional estimated battery energy sensors**
 - **Dynamic Sensor Creation** - Creates only sensors with real API data
 - **Clear API error and rate-limit reporting**
-- **Diagnostics export with privacy masking**
+- **No YAML required**
 - **Support for multiple languages**
    - 🇬🇧 🇩🇪 🇳🇱 🇨🇿 🇵🇱 🇵🇹 🇪🇸 🇮🇹 🇫🇷 🇸🇪 🇩🇰 🇳🇴 🇫🇮 🇱🇹
 
@@ -206,26 +207,53 @@ If any inverter type name is missing or incorrect, please open a pull request.
 ## 📊 Sensor Information
 
 ### Per-Inverter Sensors
-Each inverter gets its own set of sensors with entity IDs like:
-- `[System Name] AC Output Power [Serial]`
-- `[System Name] Battery State of Charge [Serial]`
-- `[System Name] DC Power Inverter Total [Serial]`
-- `Estimated Battery Charge Energy Today [Serial]` (disabled by default)
-- `Estimated Battery Charge Energy Total [Serial]` (disabled by default)
-- `Estimated Battery Discharge Energy Today [Serial]` (disabled by default)
-- `Estimated Battery Discharge Energy Total [Serial]` (disabled by default)
+Per inverter, the integration can create the following sensors (dynamic: only fields with API data are created):
+- `AC Output Power`
+- `DC Power String 1`
+- `DC Power String 2`
+- `DC Power String 3`
+- `DC Power String 4`
+- `Grid Feed-in Power`
+- `Grid Feed-in Power Meter 2`
+- `Battery Power`
+- `Battery State of Charge`
+- `Yield Today`
+- `Yield Total`
+- `Grid Feed-in Energy`
+- `Grid Consumption Energy`
+- `EPS Phase 1 Power`
+- `EPS Phase 2 Power`
+- `EPS Phase 3 Power`
+- `Inverter Status`
+- `Battery Status`
+- `Inverter Type`
+- `Inverter Serial`
+- `Inverter Serial Wi-Fi Module`
+- `Inverter Upload Time`
+- `UTC Date Time` (diagnostic, disabled by default)
+- `DC Power Inverter Total` (computed)
+- `Inverter Efficiency` (computed)
+- `API Access Status` (diagnostic)
+- `Estimated Battery Charge Energy Today` (estimated, disabled by default, battery systems only)
+- `Estimated Battery Charge Energy Total` (estimated, disabled by default, battery systems only)
+- `Estimated Battery Discharge Energy Today` (estimated, disabled by default, battery systems only)
+- `Estimated Battery Discharge Energy Total` (estimated, disabled by default, battery systems only)
 
 ### System Total Sensors
-System-wide totals:
+System-wide sensors:
 - `System AC Power`
 - `System DC Power`
 - `System Yield Today`
 - `System Yield Lifetime`
 - `System Total Efficiency`
-- `Estimated System Battery Charge Energy Today` (diagnostic, disabled by default)
-- `Estimated System Battery Charge Energy Total` (diagnostic, disabled by default)
-- `Estimated System Battery Discharge Energy Today` (diagnostic, disabled by default)
-- `Estimated System Battery Discharge Energy Total` (diagnostic, disabled by default)
+- `System Health` (diagnostic)
+- `API Rate Limit Status` (diagnostic)
+- `Last Poll Attempt` (diagnostic, disabled by default)
+- `Next Scheduled Poll` (diagnostic, disabled by default)
+- `Estimated System Battery Charge Energy Today` (estimated, disabled by default, battery systems only)
+- `Estimated System Battery Charge Energy Total` (estimated, disabled by default, battery systems only)
+- `Estimated System Battery Discharge Energy Today` (estimated, disabled by default, battery systems only)
+- `Estimated System Battery Discharge Energy Total` (estimated, disabled by default, battery systems only)
 
 ### Diagnostic / Control Entities
 - `API Access Status [Serial]` (diagnostic): API access health for each inverter
@@ -265,7 +293,7 @@ System-wide totals:
 - The integration automatically handles rate limits with backoff logic
 - Check `API Rate Limit Status` and per-inverter `API Access Status`
 
-**Wrong serial / no auth (1003)?**
+**Wrong serial / no auth**
 - You will get an invalid serial/access persistent notification
 - During options changes, you also get an acknowledgment popup
 - Affected inverter remains unavailable until serial/access is corrected
