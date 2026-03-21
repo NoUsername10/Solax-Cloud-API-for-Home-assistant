@@ -7,7 +7,7 @@
 
 
 **Solax Cloud API** integration to monitor Solax systems using the **official Solax Cloud API.**<br>
-Supports all available SolaX API data, and creates sensors dynamically based on your system.
+Supports all available SolaX API data, and creates sensors dynamically based on your system. <br>
 Ideal if you want a simple and cloud-based setup.
 
 
