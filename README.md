@@ -136,7 +136,9 @@ After saving, the integration reloads automatically and validates the result.
 If rate limits or invalid serial/access errors are detected, you get a GUI popup (options flow) and a persistent notification.
 
 
-## 📝 Important Notes
+<br><br><br>
+
+## 📝  Notes and infomation
 
 - **📊 Data Refresh Rate**: SolaX Cloud data updates every 5 minutes, even if we query every 2 minutes.
 - **💾 Transient Error Retention**: The last good values are retained during temporary rate limits/API issues.
