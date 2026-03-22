@@ -6,8 +6,8 @@
 [<img src="https://my.home-assistant.io/badges/hacs_repository.svg" />](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
 
 
-**SolaX Cloud API** integration to monitor your SolaX system in Home Assistant using the **official SolaX Cloud API**. <br>
-- Automatically creates per-inverter sensors and provides system-wide total sensors and overview. <br>
+**SolaX Cloud / SolaXCloud** integration to monitor your SolaX system in Home Assistant using the **official SolaX Cloud API**. <br>
+- Automatically creates per-inverter sensors and provides a system-wide overview with total sensors.<br>
 - Requires no YAML configuration or template sensors. <br>
 
 Ideal if you want a simple, feature-rich, plug-and-play SolaX cloud integration.
@@ -31,7 +31,8 @@ This integration is developed and tested in real Home Assistant setups. <br>
 Contributions, issues, and pull requests are welcome. <br> <br>
 
 
-**Total System information** (this system contains 3 micro-inverters): <br> <br>
+**Total System information** <br>
+This system contains 3 micro-inverters: <br> <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20system.png" width=75% height=75%>
 
 **Single-inverter info:**  <br>
