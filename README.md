@@ -6,20 +6,22 @@
 [<img src="https://my.home-assistant.io/badges/hacs_repository.svg" />](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
 
 
-**SolaX Cloud API**  integration for Home Assistant using the **official SolaX Cloud API.**<br>
-Supports all available SolaX API data, and creates sensors dynamically based on your system. <br>
-Ideal if you want a simple cloud-based setup.
+**SolaX Cloud API** integration to monitor your SolaX system in Home Assistant using the **official SolaX Cloud API**. <br>
+- Automatically creates per-inverter sensors and provides system-wide total sensors and overview. <br>
+- Requires no YAML configuration or template sensors. <br>
 
+Ideal if you want a simple, feature-rich, plug-and-play SolaX cloud integration.
 
 ## ✨ Features in short:
 
-- **Per-inverter metrics and system-wide total sensors**
-- **AC/DC conversion efficiency per inverter and for the total system**
-- **Optional estimated battery energy sensors**
-- **Dynamic sensor creation** - Creates only sensors with real API data
-- **Clear API error and rate-limit reporting**
-- **No YAML required**
-- **Support for multiple languages**
+- **🔌 Works with single or multiple inverters**
+- **📊 Automatic per-inverter and system-wide total sensors**
+- **⚡ AC/DC efficiency per inverter and total system**
+- **🔋 Optional battery energy estimation** (calculated from battery power)
+- **🧠 Dynamic sensors** (only creates sensors your system supports)  
+- **⚠️ Built-in API error and rate-limit reporting**
+- **🛠️ No YAML or templates required** (fully UI-based setup)
+- **🌍 Multiple language support**
    - 🇬🇧 🇩🇪 🇳🇱 🇨🇿 🇵🇱 🇵🇹 🇪🇸 🇮🇹 🇫🇷 🇸🇪 🇩🇰 🇳🇴 🇫🇮 🇱🇹
 
 <br>
