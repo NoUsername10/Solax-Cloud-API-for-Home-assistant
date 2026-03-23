@@ -10,7 +10,7 @@
 - Automatically creates per-inverter sensors and provides a system-wide overview with total sensors.<br>
 - Requires no YAML configuration or template sensors. <br>
 
-Ideal if you want a simple, feature-rich, plug-and-play SolaX cloud integration.
+Ideal if you want a simple, feature-rich, plug-and-play cloud integration for SolaXCloud in Home Assistant and your Energy Dashboard.
 
 ## ✨ Features in short:
 
