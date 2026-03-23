@@ -95,19 +95,27 @@ Before installation, you need:
       - If your inverter has built-in WiFi, use the WiFi inverter serial.
       - For microinverter systems, use the microinverter(s) serial(s).
 
+<br>
+
 ## 📦 Installation HACS (Step 2)
 
 [<img src="https://my.home-assistant.io/badges/hacs_repository.svg" />](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
 
 1. Add/install **SolaX Cloud API for Single- and Multi-Inverter Systems** from HACS (**Integration** category).
 2. Restart Home Assistant.
-3. Go to **Settings -> Devices & Services -> Add Integration** and add **Solax Cloud API for Single- and Multi-Inverter Systems**.
 
-### Manual Installation (Backup)
+### Manual Installation
+
+<details>
+<summary><b>Manual install (We recommend HACS):</b></summary><br>
 
 1. Download the latest release
 2. Copy the `custom_components/solax_cloud_api` folder to your Home Assistant `custom_components` directory
 3. Restart Home Assistant
+
+</details>
+
+<br>
 
 ## ⚙️ Configuration (Step 3)
 
@@ -128,6 +136,8 @@ Before installation, you need:
       - For microinverter systems, use the microinverter(s) serial(s).
 7. Check "Finish Setup" when all inverters are added
 
+<br>
+
 ### 🧩 Managing Inverters
 To add or remove inverters later:
 1. Go to your SolaX Cloud API integration
@@ -139,7 +149,7 @@ After saving, the integration reloads automatically and validates the result.
 If rate limits or invalid serial/access errors are detected, you get a GUI popup (options flow) and a persistent notification.
 
 
-<br><br><br>
+<br><br>
 
 ## 📝  Notes and infomation
 
@@ -275,12 +285,18 @@ System-wide sensors:
 
 
 ### Diagnostic / Control Entities
+
+<details>
+<summary>Diagnostic entities list:</summary><br>
+   
 - `API Access Status [Serial]` (diagnostic): API access health for each inverter
 - `System Health` (diagnostic): overall health status across configured inverters
 - `API Rate Limit Status` (diagnostic): current API rate-limit state
 - `Last Poll Attempt` (diagnostic, disabled by default): timestamp of the latest coordinator poll attempt
 - `Next Scheduled Poll` (diagnostic, disabled by default): timestamp of the next planned poll
 - `API Rate Limit Notifications` (switch under System Totals): toggle persistent rate-limit notifications
+
+</details>
 
 ### Sensor Attributes
 - Status sensors include both human-readable text and raw numeric values
