@@ -6,6 +6,7 @@
         "title": "Määritä SolaXCloud API-yhteys",
         "description": "Anna Solax Cloud API -tunnus, järjestelmän nimi ja haluttu tarkistusväli. Solax API päivittyy vain 5 minuutin välein.",
         "data": {
+          "api_region": "API-alue",
           "api_token": "API-tunnus",
           "system_name": "Järjestelmän nimi",
           "scan_interval": "Skannausväli (sekuntia)"
@@ -54,6 +55,7 @@
         "title": "Hallitse invertteriä",
         "description": "Nykyiset invertterit ({count}):\n{inverters_list}\n\nLisää uusia invertteriä tai poista olemassa olevia.",
         "data": {
+          "api_region": "API-alue",
           "api_token": "API-tunnus",
           "system_name": "Järjestelmän nimi",
           "scan_interval": "Skannausväli (sekuntia)",

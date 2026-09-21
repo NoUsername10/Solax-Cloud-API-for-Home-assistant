@@ -6,6 +6,7 @@
         "title": "Richten Sie die SolaXCloud-API-Verbindung ein",
         "description": "Geben Sie Ihr Solax Cloud API-Token, den Systemnamen und das bevorzugte Scanintervall ein. Die Solax-API wird nur alle 5 Minuten aktualisiert.",
         "data": {
+          "api_region": "API-Region",
           "api_token": "API-Token",
           "system_name": "Systemname",
           "scan_interval": "Scanintervall (Sekunden)"
@@ -54,6 +55,7 @@
         "title": "Wechselrichter verwalten",
         "description": "Aktuelle Wechselrichter ({count}):\n{inverters_list}\n\nFügen Sie neue Wechselrichter hinzu oder entfernen Sie vorhandene.",
         "data": {
+          "api_region": "API-Region",
           "api_token": "API-Token",
           "system_name": "Systemname",
           "scan_interval": "Scanintervall (Sekunden)",

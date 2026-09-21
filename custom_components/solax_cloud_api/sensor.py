@@ -786,7 +786,7 @@ class SolaxEstimatedBatteryEnergySensor(CoordinatorEntity, SensorEntity, Restore
             f"sensor.{system_slug}_estimated_battery_{direction}_energy_{period}_{serial}"
             .lower()
         )
-        self._attr_entity_registry_enabled_default = False
+        self._attr_entity_registry_enabled_default = True
         if self._period == "total":
             self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         else:
@@ -971,7 +971,7 @@ class SolaxSystemEstimatedBatteryEnergySensor(
         self._attr_unique_id = (
             f"{self._system_slug}_estimated_system_battery_{direction}_energy_{period}_solax"
         )
-        self._attr_entity_registry_enabled_default = False
+        self._attr_entity_registry_enabled_default = True
         if self._period == "total":
             self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         else:

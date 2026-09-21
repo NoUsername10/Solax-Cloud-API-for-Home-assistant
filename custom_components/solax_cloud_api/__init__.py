@@ -2,13 +2,17 @@ from homeassistant.components import persistent_notification
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.translation import async_get_translations
 
 from .const import (
+    CONF_API_REGION,
     CONF_INVERTERS,
     CONF_RATE_LIMIT_NOTIFICATIONS,
     CONF_SCAN_INTERVAL,
     CONF_TOKEN,
+    CONFIG_ENTRY_VERSION,
+    DEFAULT_API_REGION,
     DOMAIN,
     PLATFORMS,
     RUNTIME_INITIAL_SETUP_STATE,
@@ -19,6 +23,44 @@ from .coordinator import SolaxCoordinator
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 _TRANSLATION_PREFIX = f"component.{DOMAIN}."
+
+
+def _is_estimated_battery_energy_unique_id(unique_id: str) -> bool:
+    """Return whether a registry entry is one of the estimated battery sensors."""
+    return (
+        "_estimated_battery_" in unique_id
+        or "_estimated_system_battery_" in unique_id
+    )
+
+
+async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Migrate config entries and enable formerly opt-in battery sensors."""
+    if entry.version > CONFIG_ENTRY_VERSION:
+        return False
+
+    if entry.version < 2:
+        if not entry.pref_disable_new_entities:
+            registry = er.async_get(hass)
+            for entity_entry in er.async_entries_for_config_entry(
+                registry, entry.entry_id
+            ):
+                if (
+                    entity_entry.platform == DOMAIN
+                    and entity_entry.disabled_by
+                    is er.RegistryEntryDisabler.INTEGRATION
+                    and _is_estimated_battery_energy_unique_id(
+                        entity_entry.unique_id
+                    )
+                ):
+                    registry.async_update_entity(
+                        entity_entry.entity_id, disabled_by=None
+                    )
+
+        hass.config_entries.async_update_entry(
+            entry, version=CONFIG_ENTRY_VERSION
+        )
+
+    return True
 
 
 async def _load_runtime_notification_texts(hass: HomeAssistant) -> dict[str, str]:
@@ -184,8 +226,11 @@ def _matches_pending_initial_setup(entry: ConfigEntry, pending: dict) -> bool:
     match = pending.get("match", {})
     match_token = str(match.get(CONF_TOKEN, "")).strip()
     match_inverters = _dedupe_serials(match.get(CONF_INVERTERS, []))
+    entry_api_region = entry.data.get(CONF_API_REGION, DEFAULT_API_REGION)
+    match_api_region = match.get(CONF_API_REGION, DEFAULT_API_REGION)
     return (
         entry_token == match_token
+        and entry_api_region == match_api_region
         and {sn.casefold() for sn in entry_inverters}
         == {sn.casefold() for sn in match_inverters}
     )
@@ -206,6 +251,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data.setdefault(DOMAIN, {})
     hass.data.setdefault(RUNTIME_RELOAD_STATE, {})
     token = entry.data.get(CONF_TOKEN)
+    api_region = entry.data.get(CONF_API_REGION, DEFAULT_API_REGION)
     inverters = _dedupe_serials(entry.data.get(CONF_INVERTERS, []))
     scan = entry.data.get(CONF_SCAN_INTERVAL, 120)
 
@@ -214,10 +260,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     initial_data = {}
     initial_refresh_inverters = None
     if isinstance(reload_state, dict):
-        token_changed = bool(reload_state.get("token_changed", False))
+        connection_changed = bool(
+            reload_state.get(
+                "connection_changed", reload_state.get("token_changed", False)
+            )
+        )
         cached_data = reload_state.get("data", {})
         added_inverters = reload_state.get("added_inverters")
-        if not token_changed and isinstance(cached_data, dict):
+        if not connection_changed and isinstance(cached_data, dict):
             configured = {sn.casefold() for sn in inverters}
             for serial, payload in cached_data.items():
                 if serial.casefold() in configured and isinstance(payload, dict):
@@ -256,6 +306,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         scan,
         initial_data=initial_data,
         initial_refresh_inverters=initial_refresh_inverters,
+        api_region=api_region,
     )
     await coordinator.async_config_entry_first_refresh()
     i18n_texts = await _load_runtime_notification_texts(hass)

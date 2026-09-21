@@ -6,6 +6,7 @@
         "title": "Configurar conexão API SolaXCloud",
         "description": "Insira seu token da API Solax Cloud, nome do sistema e intervalo de verificação preferencial. A API Solax é atualizada apenas a cada 5 minutos.",
         "data": {
+          "api_region": "Região da API",
           "api_token": "Token de API",
           "system_name": "Nome do sistema",
           "scan_interval": "Intervalo de varredura (segundos)"
@@ -54,6 +55,7 @@
         "title": "Gerenciar inversores",
         "description": "Inversores atuais ({count}):\n{inverters_list}\n\nAdicione novos inversores ou remova os existentes.",
         "data": {
+          "api_region": "Região da API",
           "api_token": "Token de API",
           "system_name": "Nome do sistema",
           "scan_interval": "Intervalo de varredura (segundos)",

@@ -10,7 +10,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 
-from .const import API_URL, DEFAULT_SCAN_INTERVAL
+from .const import DEFAULT_API_REGION, DEFAULT_SCAN_INTERVAL, api_url_for_region
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,6 +45,7 @@ class SolaxCoordinator(DataUpdateCoordinator):
         scan_interval: int = DEFAULT_SCAN_INTERVAL,
         initial_data: dict | None = None,
         initial_refresh_inverters: list[str] | None = None,
+        api_region: str = DEFAULT_API_REGION,
     ):
         super().__init__(
             hass,
@@ -53,6 +54,8 @@ class SolaxCoordinator(DataUpdateCoordinator):
             update_interval=timedelta(seconds=scan_interval),
         )
         self.token = token
+        self.api_region = api_region
+        self.api_url = api_url_for_region(api_region)
         self.inverters = inverters
         self.data = {}
         if isinstance(initial_data, dict):
@@ -79,7 +82,9 @@ class SolaxCoordinator(DataUpdateCoordinator):
         payload = { "wifiSn": sn }
         try:
             async with async_timeout.timeout(15):
-                async with session.post(API_URL, json=payload, headers=headers) as resp:
+                async with session.post(
+                    self.api_url, json=payload, headers=headers
+                ) as resp:
                     text = await resp.text()
                     if resp.status != 200:
                         _LOGGER.warning("Solax HTTP error %s for %s: %s", resp.status, sn, text)

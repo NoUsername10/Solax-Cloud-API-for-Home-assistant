@@ -13,19 +13,23 @@ from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import slugify
 
 from .const import (
-    API_URL,
+    API_REGIONS,
+    CONF_API_REGION,
     CONF_ENTITY_PREFIX,
     CONF_INVERTERS,
     CONF_RATE_LIMIT_NOTIFICATIONS,
     CONF_SCAN_INTERVAL,
     CONF_SYSTEM_NAME,
     CONF_TOKEN,
+    CONFIG_ENTRY_VERSION,
+    DEFAULT_API_REGION,
     DEFAULT_ENTITY_PREFIX,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
     INVALID_ENTITY_PREFIXES,
     RUNTIME_INITIAL_SETUP_STATE,
     RUNTIME_RELOAD_STATE,
+    api_url_for_region,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -105,13 +109,21 @@ async def _translated_text(
 def _build_initial_setup_match(entry_data: dict[str, Any]) -> dict[str, Any]:
     return {
         CONF_TOKEN: str(entry_data.get(CONF_TOKEN, "")).strip(),
+        CONF_API_REGION: str(
+            entry_data.get(CONF_API_REGION, DEFAULT_API_REGION)
+        ).lower(),
         CONF_INVERTERS: _dedupe_serials(entry_data.get(CONF_INVERTERS, [])),
         CONF_SCAN_INTERVAL: int(entry_data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)),
         CONF_SYSTEM_NAME: str(entry_data.get(CONF_SYSTEM_NAME, "")),
     }
 
 
-async def _test_api_connection(hass, token: str, serial: str = "TEST123") -> bool:
+async def _test_api_connection(
+    hass,
+    token: str,
+    api_region: str = DEFAULT_API_REGION,
+    serial: str = "TEST123",
+) -> bool:
     """Test if the API token is valid."""
     try:
         headers = {"Content-Type": "application/json", "tokenId": token}
@@ -119,7 +131,9 @@ async def _test_api_connection(hass, token: str, serial: str = "TEST123") -> boo
         session = async_get_clientsession(hass)
 
         async with async_timeout.timeout(10):
-            async with session.post(API_URL, json=payload, headers=headers) as resp:
+            async with session.post(
+                api_url_for_region(api_region), json=payload, headers=headers
+            ) as resp:
                 if resp.status != 200:
                     return False
 
@@ -161,7 +175,11 @@ def _is_rate_limited_payload(data: dict) -> bool:
 
 
 async def _classify_preflight_inverters(
-    hass, token: str, inverters: list[str], scan_interval: int
+    hass,
+    token: str,
+    inverters: list[str],
+    scan_interval: int,
+    api_region: str = DEFAULT_API_REGION,
 ) -> dict[str, Any] | None:
     """Single-pass setup preflight for all serials.
 
@@ -185,7 +203,9 @@ async def _classify_preflight_inverters(
                     await asyncio.sleep(0.2)
                 payload = {"wifiSn": serial}
                 try:
-                    async with session.post(API_URL, json=payload, headers=headers) as resp:
+                    async with session.post(
+                        api_url_for_region(api_region), json=payload, headers=headers
+                    ) as resp:
                         text = await resp.text()
                         if resp.status != 200:
                             results[serial] = {"error": f"HTTP {resp.status}", "raw": text}
@@ -275,12 +295,13 @@ async def _classify_preflight_inverters(
 
 
 class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-    VERSION = 1
+    VERSION = CONFIG_ENTRY_VERSION
 
     def __init__(self):
         super().__init__()
         self._inverters = []
         self._token = None
+        self._api_region = DEFAULT_API_REGION
         self._scan_interval = DEFAULT_SCAN_INTERVAL
         self._system_name = "Solax System"
         self._pending_entry_data = None
@@ -304,12 +325,13 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             # Validate token first
             token = user_input[CONF_TOKEN].strip()
+            api_region = user_input.get(CONF_API_REGION, DEFAULT_API_REGION)
             if not token:
                 errors["base"] = "invalid_token"
 
             # Only test API if token is provided
             if token and not errors:
-                if not await _test_api_connection(self.hass, token):
+                if not await _test_api_connection(self.hass, token, api_region):
                     errors["base"] = "invalid_token"
 
             self._system_name = user_input.get(CONF_SYSTEM_NAME, "Solax System").strip()
@@ -319,11 +341,13 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             # Only proceed to next step if no errors
             if not errors:
                 self._token = token
+                self._api_region = api_region
                 self._scan_interval = user_input.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
                 return await self.async_step_add_inverter()
 
         # Initial form - include system name
         data_schema = vol.Schema({
+            vol.Required(CONF_API_REGION, default=DEFAULT_API_REGION): vol.In(API_REGIONS),
             vol.Required(CONF_TOKEN): str,
             vol.Required(CONF_SYSTEM_NAME, default="Solax System"): str,
             vol.Optional(CONF_SCAN_INTERVAL, default=DEFAULT_SCAN_INTERVAL):
@@ -356,13 +380,18 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 else:
                     self._pending_entry_data = {
                         CONF_TOKEN: self._token,
+                        CONF_API_REGION: self._api_region,
                         CONF_INVERTERS: self._inverters,
                         CONF_SCAN_INTERVAL: self._scan_interval,
                         CONF_SYSTEM_NAME: self._system_name,
                         CONF_ENTITY_PREFIX: _slugify_name(self._system_name),
                     }
                     self._initial_setup_state = await _classify_preflight_inverters(
-                        self.hass, self._token, self._inverters, self._scan_interval
+                        self.hass,
+                        self._token,
+                        self._inverters,
+                        self._scan_interval,
+                        self._api_region,
                     )
                     if (
                         isinstance(self._initial_setup_state, dict)
@@ -415,6 +444,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             if user_input.get(_ACKNOWLEDGE_FIELD):
                 data = self._pending_entry_data or {
                     CONF_TOKEN: self._token,
+                    CONF_API_REGION: self._api_region,
                     CONF_INVERTERS: self._inverters,
                     CONF_SCAN_INTERVAL: self._scan_interval,
                     CONF_SYSTEM_NAME: self._system_name,
@@ -458,6 +488,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Set the configuration
         self._token = token
+        self._api_region = import_config.get(CONF_API_REGION, DEFAULT_API_REGION)
         self._inverters = inverters
         self._scan_interval = import_config.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
         self._system_name = import_config.get(CONF_SYSTEM_NAME, "Solax System")
@@ -467,6 +498,7 @@ class SolaxFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             title=self._system_name,
             data={
                 CONF_TOKEN: self._token,
+                CONF_API_REGION: self._api_region,
                 CONF_INVERTERS: self._inverters,
                 CONF_SCAN_INTERVAL: self._scan_interval,
                 CONF_SYSTEM_NAME: self._system_name,
@@ -487,6 +519,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         self._config_entry = config_entry
         self._inverters = _dedupe_serials(config_entry.data.get(CONF_INVERTERS, []))
         self._token = config_entry.data.get(CONF_TOKEN)
+        self._api_region = config_entry.data.get(CONF_API_REGION, DEFAULT_API_REGION)
         self._scan_interval = config_entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL)
         self._system_name = config_entry.data.get(CONF_SYSTEM_NAME, "Solax System")
         self._rate_limit_notice_inverters = []
@@ -494,7 +527,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         self._invalid_serial_notice_details = {}
         self._show_rate_limit_after_invalid = False
         self._added_inverters = []
-        self._token_changed = False
+        self._connection_changed = False
 
     async def async_step_init(self, user_input: Any = None):
         """Manage the options."""
@@ -503,11 +536,13 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
     async def async_step_manage_inverters(self, user_input: Any = None):
         errors = {}
         token = self._token
+        api_region = self._api_region
         system_name = self._system_name
         scan_interval = self._scan_interval
 
         if user_input is not None:
             token = user_input.get(CONF_TOKEN, self._token).strip()
+            api_region = user_input.get(CONF_API_REGION, self._api_region)
             system_name = user_input.get(CONF_SYSTEM_NAME, self._system_name).strip()
             scan_interval = user_input.get(CONF_SCAN_INTERVAL, self._scan_interval)
 
@@ -535,10 +570,13 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                 if not self._inverters:
                     errors["base"] = "no_inverters"
 
-                # Validate token when saving options, especially if changed
-                if not errors and token != self._token:
+                # Validate connection settings whenever token or API region changes.
+                connection_changed = token != self._token or api_region != self._api_region
+                if not errors and connection_changed:
                     test_serial = self._inverters[0] if self._inverters else "TEST123"
-                    if not await _test_api_connection(self.hass, token, test_serial):
+                    if not await _test_api_connection(
+                        self.hass, token, api_region, test_serial
+                    ):
                         errors["base"] = "invalid_token"
 
                 if not errors:
@@ -546,6 +584,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                     hass = self.hass
                     entry_id = self._config_entry.entry_id
                     self._token = token
+                    self._api_region = api_region
                     self._system_name = system_name
                     self._scan_interval = scan_interval
 
@@ -556,11 +595,16 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                     added_inverters = [
                         sn for sn in self._inverters if sn.casefold() not in old_inverter_keys
                     ]
-                    token_changed = token != str(
-                        self._config_entry.data.get(CONF_TOKEN, "")
-                    ).strip()
+                    connection_changed = (
+                        token
+                        != str(self._config_entry.data.get(CONF_TOKEN, "")).strip()
+                        or api_region
+                        != self._config_entry.data.get(
+                            CONF_API_REGION, DEFAULT_API_REGION
+                        )
+                    )
                     self._added_inverters = list(added_inverters)
-                    self._token_changed = token_changed
+                    self._connection_changed = connection_changed
 
                     previous_data = {}
                     current_runtime = hass.data.get(DOMAIN, {}).get(entry_id, {})
@@ -575,12 +619,13 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                     hass.data.setdefault(RUNTIME_RELOAD_STATE, {})[entry_id] = {
                         "data": previous_data,
                         "added_inverters": added_inverters,
-                        "token_changed": token_changed,
+                        "connection_changed": connection_changed,
                     }
 
                     # Create updated data
                     updated_data = dict(self._config_entry.data)
                     updated_data[CONF_TOKEN] = token
+                    updated_data[CONF_API_REGION] = api_region
                     updated_data[CONF_INVERTERS] = self._inverters
                     updated_data[CONF_SCAN_INTERVAL] = scan_interval
                     updated_data[CONF_SYSTEM_NAME] = system_name
@@ -619,7 +664,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                         getattr(coordinator, "unauthorized_details", {}) if coordinator else {}
                     )
 
-                    if self._token_changed:
+                    if self._connection_changed:
                         self._invalid_serial_notice_inverters = observed_unauthorized
                     else:
                         added_casefold = {sn.casefold() for sn in self._added_inverters}
@@ -636,7 +681,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                     invalid_casefold = {
                         sn.casefold() for sn in self._invalid_serial_notice_inverters
                     }
-                    if self._token_changed:
+                    if self._connection_changed:
                         self._rate_limit_notice_inverters = [
                             sn
                             for sn in observed_rate_limited
@@ -661,6 +706,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
                     return self.async_create_entry(title="", data={})
 
         self._token = token
+        self._api_region = api_region
         self._system_name = system_name
         self._scan_interval = scan_interval
 
@@ -668,6 +714,7 @@ class SolaxOptionsFlowHandler(config_entries.OptionsFlow):
         inverters_list = "\n".join([f"• {sn}" for sn in self._inverters]) if self._inverters else "-"
 
         schema_fields = {
+            vol.Required(CONF_API_REGION, default=self._api_region): vol.In(API_REGIONS),
             vol.Required(CONF_TOKEN, default=self._token): str,
             vol.Required(CONF_SYSTEM_NAME, default=self._system_name): str,
             vol.Required(CONF_SCAN_INTERVAL, default=self._scan_interval):

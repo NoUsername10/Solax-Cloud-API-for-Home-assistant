@@ -39,9 +39,10 @@ Get SolaX Developer API
 - **🔌 Works with single or multiple inverters**
 - **📊 Automatic per-inverter and system-wide total sensors**
 - **⚡ AC/DC efficiency per inverter and total system**
-- **🔋 Optional battery energy estimation** (calculated from battery power)
+- **🔋 Battery energy estimation enabled by default for battery systems** (calculated from battery power)
 - **🧠 Dynamic sensors** (only creates sensors your system supports)  
 - **⚠️ Built-in API error and rate-limit reporting**
+- **🌏 Global and India API region support**
 - **🛠️ No YAML or templates required** (fully UI-based setup)
 - **🌍 Multiple language support**
    - 🇬🇧 🇩🇪 🇳🇱 🇨🇿 🇵🇱 🇵🇹 🇪🇸 🇮🇹 🇫🇷 🇸🇪 🇩🇰 🇳🇴 🇫🇮 🇱🇹
@@ -81,10 +82,11 @@ Redacted diagnostics with masked serials and token data for troubleshooting. <br
 
 - **Single Integration Instance** - One config entry for a full site (single- or multi-inverter)
 - **Single API Token** - One token for all configured inverter serials
+- **Regional API Support** - Choose the Global or India SolaX Cloud API endpoint during setup
 - **Dynamic Sensor Creation** - Creates only sensors with real API data
 - **Per-Inverter Metrics** - Power, yield, battery, EPS, status/type, and upload timestamps
 - **Computed Per-Inverter Sensors** - DC total and inverter efficiency
-- **Estimated Battery Energy Sensors (Opt-in)** - Estimated daily and total charge/discharge energy from `batPower` sample integration
+- **Estimated Battery Energy Sensors** - Enabled by default for battery systems, with estimated daily and total charge/discharge energy from `batPower` sample integration
 - **System Totals Device** - AC/DC totals, yield today/lifetime, system efficiency, system health, and API rate-limit status
 - **Per-Inverter API Access Status** - `OK`, `Rate Limited`, `Serial Unauthorized`, `API Error`
 - **Resilient API Handling** - Rate-limit cooldown and clear status reporting
@@ -146,6 +148,7 @@ Before installation, you need:
 2. Click **+ Add Integration**
 3. Search for **"SolaX Cloud API"**
 4. Enter your configuration:
+   - **API Region**: Select **Global** for the standard SolaX Cloud API or **India** for accounts migrated to the dedicated India API domain
    - **API Token**: The `Token ID` from SolaX Cloud **Third-party Ecosystem** → **API Realtime Data**
    - **System Name**: Name for your solar system (used for system total sensors and entity ID prefix)
    - **Scan Interval**: Polling frequency in seconds (default: 120, minimum suggested: 120)
@@ -165,7 +168,8 @@ To add or remove inverters later:
 1. Go to your SolaX Cloud API integration
 2. Click **Configure**
 3. Add new serial numbers or remove existing ones
-4. Click **Save Changes**
+4. Change **API Region** if the SolaX account has moved between the Global and India API services
+5. Click **Save Changes**
 
 After saving, the integration reloads automatically and validates the result.  
 If rate limits or invalid serial/access errors are detected, you get a GUI popup (options flow) and a persistent notification.
@@ -176,6 +180,7 @@ If rate limits or invalid serial/access errors are detected, you get a GUI popup
 ## 📝  Notes and infomation
 
 - **📊 Data Refresh Rate**: SolaX Cloud data updates every 5 minutes, even if we query every 2 minutes.
+- **🌏 API Region**: Existing installations default to **Global**. India-region users can select **India** during setup or later under **Configure**.
 - **💾 Transient Error Retention**: The last good values are retained during temporary rate limits/API issues.
 - **🔧 Dynamic Sensors**: Entities are created based on real fields returned for your inverter model.
 
@@ -276,10 +281,10 @@ Per inverter, the integration can create the following sensors (dynamic: only fi
 - `DC Power Inverter Total` (computed)
 - `Inverter Efficiency` (computed)
 - `API Access Status` (diagnostic)
-- `Estimated Battery Charge Energy Today` (estimated, disabled by default, battery systems only)
-- `Estimated Battery Charge Energy Total` (estimated, disabled by default, battery systems only)
-- `Estimated Battery Discharge Energy Today` (estimated, disabled by default, battery systems only)
-- `Estimated Battery Discharge Energy Total` (estimated, disabled by default, battery systems only)
+- `Estimated Battery Charge Energy Today` (estimated, battery systems only)
+- `Estimated Battery Charge Energy Total` (estimated, battery systems only)
+- `Estimated Battery Discharge Energy Today` (estimated, battery systems only)
+- `Estimated Battery Discharge Energy Total` (estimated, battery systems only)
 
 </details>
 
@@ -298,10 +303,10 @@ System-wide sensors:
 - `API Rate Limit Status` (diagnostic)
 - `Last Poll Attempt` (diagnostic, disabled by default)
 - `Next Scheduled Poll` (diagnostic, disabled by default)
-- `Estimated System Battery Charge Energy Today` (estimated, disabled by default, battery systems only)
-- `Estimated System Battery Charge Energy Total` (estimated, disabled by default, battery systems only)
-- `Estimated System Battery Discharge Energy Today` (estimated, disabled by default, battery systems only)
-- `Estimated System Battery Discharge Energy Total` (estimated, disabled by default, battery systems only)
+- `Estimated System Battery Charge Energy Today` (estimated, battery systems only)
+- `Estimated System Battery Charge Energy Total` (estimated, battery systems only)
+- `Estimated System Battery Discharge Energy Today` (estimated, battery systems only)
+- `Estimated System Battery Discharge Energy Total` (estimated, battery systems only)
 
 </details>
 
@@ -358,7 +363,7 @@ System-wide sensors:
 **Missing sensors?**
 - Some sensors only appear if your inverter supports that feature
 - Battery sensors only appear if you have battery storage
-- Estimated battery energy sensors are created only when `batPower` data exists and are disabled by default
+- Estimated battery energy sensors are created and enabled by default only when non-null `batPower` data exists
 - PV channel sensors depend on your inverter's configuration
 - EPS sensors only appear if you have backup power capability
 

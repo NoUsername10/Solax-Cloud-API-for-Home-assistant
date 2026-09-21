@@ -6,6 +6,7 @@
         "title": "Configurer la connexion API SolaXCloud",
         "description": "Entrez votre jeton API Solax Cloud, le nom du système et l'intervalle d'analyse préféré. L'API Solax ne se met à jour que toutes les 5 minutes.",
         "data": {
+          "api_region": "Région de l’API",
           "api_token": "Jeton API",
           "system_name": "Nom du système",
           "scan_interval": "Intervalle d'analyse (secondes)"
@@ -54,6 +55,7 @@
         "title": "Gérer les onduleurs",
         "description": "Onduleurs actuels ({count}) :\n{inverters_list}\n\nAjoutez de nouveaux onduleurs ou supprimez ceux existants.",
         "data": {
+          "api_region": "Région de l’API",
           "api_token": "Jeton API",
           "system_name": "Nom du système",
           "scan_interval": "Intervalle d'analyse (secondes)",

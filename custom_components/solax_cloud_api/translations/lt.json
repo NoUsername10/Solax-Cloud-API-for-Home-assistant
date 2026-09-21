@@ -6,6 +6,7 @@
         "title": "SolaXCloud API ryšio nustatymas",
         "description": "Įveskite savo Solax Cloud API tokeną, sistemos pavadinimą ir pageidaujamą skenavimo intervalą. Solax API atnaujinama tik kas 5 min.",
         "data": {
+          "api_region": "API regionas",
           "api_token": "API tokenas",
           "system_name": "Sistemos pavadinimas",
           "scan_interval": "Skenavimo intervalas (sekundėmis)"
@@ -54,6 +55,7 @@
         "title": "Tvarkyti inverterius",
         "description": "Dabartiniai inverteriai ({count}):\n{inverters_list}\n\nPridėkite naujus inverterius arba pašalinkite esamus.",
         "data": {
+          "api_region": "API regionas",
           "api_token": "API tokenas",
           "system_name": "Sistemos pavadinimas",
           "scan_interval": "Skenavimo intervalas (sekundėmis)",

@@ -13,6 +13,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 - No changes yet.
 
+## [v0.2.0] - 2026-09-21
+
+### Release Notes
+- Added selectable Global and India SolaX Cloud API regions.
+- Estimated battery charge/discharge energy sensors are now enabled by default for systems that return battery power data.
+
+### Added
+- Added an API Region selector with `Global` and `India` choices during initial setup and in the integration's Configure flow.
+- Added the dedicated India realtime API endpoint: `https://in.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get`.
+- Added regression tests covering India onboarding, region changes, endpoint routing, safe endpoint fallback, diagnostics, battery entity defaults, and config-entry migration behavior.
+
+### Changed
+- Existing config entries without a stored API region continue to use the Global endpoint.
+- Changing API region now validates the selected endpoint and performs a full inverter refresh without changing entity IDs.
+- Diagnostics now report the configured API region.
+- Per-inverter and System Totals estimated battery energy sensors are enabled by default when non-null `batPower` data is available.
+- Existing estimated battery entities previously disabled by the integration are enabled during the version 2 config-entry migration.
+- Entities explicitly disabled by the user remain disabled, and Home Assistant's `disable newly added entities` preference is respected.
+
 ## [v0.1.9.2] - 2026-03-20
 
 ### Release Notes

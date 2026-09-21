@@ -6,6 +6,7 @@
         "title": "Stel de SolaXCloud API-verbinding in",
         "description": "Voer uw Solax Cloud API-token, systeemnaam en gewenste scaninterval in. Solax API wordt slechts elke 5 minuten bijgewerkt.",
         "data": {
+          "api_region": "API-regio",
           "api_token": "API-token",
           "system_name": "Systeemnaam",
           "scan_interval": "Scaninterval (seconden)"
@@ -54,6 +55,7 @@
         "title": "Beheer omvormers",
         "description": "Stroomomvormers ({count}):\n{inverters_list}\n\nVoeg nieuwe omvormers toe of verwijder bestaande.",
         "data": {
+          "api_region": "API-regio",
           "api_token": "API-token",
           "system_name": "Systeemnaam",
           "scan_interval": "Scaninterval (seconden)",

@@ -6,6 +6,7 @@
         "title": "Skonfiguruj połączenie API SolaXCloud",
         "description": "Wprowadź swój token API Solax Cloud, nazwę systemu i preferowany interwał skanowania. Solax API aktualizuje się tylko co 5 minut.",
         "data": {
+          "api_region": "Region API",
           "api_token": "Token API",
           "system_name": "Nazwa systemu",
           "scan_interval": "Interwał skanowania (sekundy)"
@@ -54,6 +55,7 @@
         "title": "Zarządzaj falownikami",
         "description": "Przetwornice prądu ({count}):\n{inverters_list}\n\nDodaj nowe falowniki lub usuń istniejące.",
         "data": {
+          "api_region": "Region API",
           "api_token": "Token API",
           "system_name": "Nazwa systemu",
           "scan_interval": "Interwał skanowania (sekundy)",

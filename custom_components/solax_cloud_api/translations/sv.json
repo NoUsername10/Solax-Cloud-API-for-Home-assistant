@@ -6,6 +6,7 @@
         "title": "Konfigurera SolaXCloud API Anslutning",
         "description": "Ange din Solax Cloud API-token, systemnamn och önskat skanningsintervall. Solax API uppdateras bara var 5:e minut.",
         "data": {
+          "api_region": "API-region",
           "api_token": "API-token",
           "system_name": "Systemnamn",
           "scan_interval": "Skanningsintervall (sekunder)"
@@ -54,6 +55,7 @@
         "title": "Hantera Invertere",
         "description": "Nuvarande invertere ({count}):\n{inverters_list}\n\nLägg till nya invertere eller ta bort befintliga.",
         "data": {
+          "api_region": "API-region",
           "api_token": "API-token",
           "system_name": "Systemnamn",
           "scan_interval": "Skanningsintervall (sekunder)",
