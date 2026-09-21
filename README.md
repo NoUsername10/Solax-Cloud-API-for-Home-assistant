@@ -80,7 +80,7 @@ Redacted diagnostics with masked serials and token data for troubleshooting. <br
 
 Before installation, you need:
 1. **SolaX Cloud Account** - Register at [solaxcloud.com](https://www.solaxcloud.com)
-2. **API Token** - In SolaX Cloud, in the top-right menu and click **More Services**, select **API** from the dropdown:
+2. **API Token** - In SolaX Cloud, in the top-right menu select **API**:
 
    <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/menu-api.png">
    
