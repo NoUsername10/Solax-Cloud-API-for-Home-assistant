@@ -6,6 +6,7 @@
         "title": "Configurar conexión API de SolaXCloud",
         "description": "Introduce tu token de API de Solax Cloud, nombre del sistema y el intervalo de sondeo preferido. La API de Solax solo se actualiza cada 5 min.",
         "data": {
+          "api_region": "Región de la API",
           "api_token": "Token API",
           "system_name": "Nombre del sistema",
           "scan_interval": "Intervalo de sondeo (segundos)"
@@ -54,6 +55,7 @@
         "title": "Gestionar inversores",
         "description": "Inversores actuales ({count}):\n{inverters_list}\n\nAgrega nuevos inversores o elimina los existentes.",
         "data": {
+          "api_region": "Región de la API",
           "api_token": "Token API",
           "system_name": "Nombre del sistema",
           "scan_interval": "Intervalo de sondeo (segundos)",

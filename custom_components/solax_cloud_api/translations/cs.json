@@ -6,6 +6,7 @@
         "title": "Nastavte připojení SolaXCloud API",
         "description": "Zadejte svůj token Solax Cloud API, název systému a preferovaný interval skenování. Solax API se aktualizuje pouze každých 5 minut.",
         "data": {
+          "api_region": "Oblast API",
           "api_token": "API token",
           "system_name": "Název systému",
           "scan_interval": "Interval skenování (sekundy)"
@@ -54,6 +55,7 @@
         "title": "Správa měničů",
         "description": "Aktuální měniče ({count}):\n{inverters_list}\n\nPřidejte nové měniče nebo odstraňte stávající.",
         "data": {
+          "api_region": "Oblast API",
           "api_token": "API token",
           "system_name": "Název systému",
           "scan_interval": "Interval skenování (sekundy)",

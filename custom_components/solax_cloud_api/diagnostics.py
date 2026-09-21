@@ -9,11 +9,13 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
 from .const import (
+    CONF_API_REGION,
     CONF_INVERTERS,
     CONF_RATE_LIMIT_NOTIFICATIONS,
     CONF_SCAN_INTERVAL,
     CONF_SYSTEM_NAME,
     CONF_TOKEN,
+    DEFAULT_API_REGION,
     DOMAIN,
 )
 
@@ -128,6 +130,7 @@ async def async_get_config_entry_diagnostics(
             "entry_id": config_entry.entry_id,
             "title": config_entry.title,
             "system_name": config_entry.data.get(CONF_SYSTEM_NAME),
+            "api_region": config_entry.data.get(CONF_API_REGION, DEFAULT_API_REGION),
             "scan_interval": config_entry.data.get(CONF_SCAN_INTERVAL),
             "configured_inverters": configured_inverters,
             "rate_limit_notifications_enabled": bool(

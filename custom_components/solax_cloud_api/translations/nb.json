@@ -6,6 +6,7 @@
         "title": "Konfigurer SolaXCloud API-tilkobling",
         "description": "Skriv inn Solax Cloud API-token, systemnavn og foretrukket skanneintervall. Solax API oppdateres kun 5 min.",
         "data": {
+          "api_region": "API-region",
           "api_token": "API-token",
           "system_name": "Systemnavn",
           "scan_interval": "Skanneintervall (sekunder)"
@@ -54,6 +55,7 @@
         "title": "Administrer invertere",
         "description": "Strømomformere ({count}):\n{inverters_list}\n\nLegg til nye omformere eller fjern eksisterende.",
         "data": {
+          "api_region": "API-region",
           "api_token": "API-token",
           "system_name": "Systemnavn",
           "scan_interval": "Skanneintervall (sekunder)",
