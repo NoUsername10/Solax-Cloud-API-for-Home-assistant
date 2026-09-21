@@ -6,44 +6,21 @@
 [<img src="https://my.home-assistant.io/badges/hacs_repository.svg" />](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
 
 
-**SolaX Cloud / SolaXCloud** integration to monitor your SolaX system in Home Assistant using the **official SolaX Cloud API**. <br>
-- Automatically creates per-inverter sensors and provides a system-wide overview with total sensors.<br>
-- Requires no YAML configuration or template sensors. <br>
+**SolaX Cloud API**  integration for Home Assistant using the **official SolaX Cloud API.**<br>
+Supports all available SolaX API data, and creates sensors dynamically based on your system. <br>
+Ideal if you want a simple cloud-based setup.
 
-Ideal if you want a simple, feature-rich, plug-and-play cloud integration for SolaXCloud in Home Assistant and your Energy Dashboard.
-
-<br>
-
-**--UPDATE ON API KEY MISSING IN THE SOLAX PORTAL--**
-
-Some users have reported that the API Key is not available for the Cloud API in the SolaX website for new registrations.
-If this happens to you, use this inthegration instead:
-https://github.com/NoUsername10/Solax-Developer-API-for-Home-assistant
-
-This uses the SolaX Developer API, and is much better and feature rich!
-Do try it out and let me know how it works for you.
-
-It is now HACS approved!
-
-Get SolaX Developer API 
-
-[<img src="https://my.home-assistant.io/badges/hacs_repository.svg" alt="Open this integration in HACS">](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Developer-API-for-Home-assistant&category=integration)
-<br><br><br>
-
-
-
-## SolaX Cloud API
 
 ## ✨ Features in short:
 
-- **🔌 Works with single or multiple inverters**
-- **📊 Automatic per-inverter and system-wide total sensors**
-- **⚡ AC/DC efficiency per inverter and total system**
-- **🔋 Optional battery energy estimation** (calculated from battery power)
-- **🧠 Dynamic sensors** (only creates sensors your system supports)  
-- **⚠️ Built-in API error and rate-limit reporting**
-- **🛠️ No YAML or templates required** (fully UI-based setup)
-- **🌍 Multiple language support**
+- **Per-inverter metrics and system-wide total sensors**
+- **AC/DC conversion efficiency per inverter and for the total system**
+- **Estimated battery energy sensors for battery systems**
+- **Dynamic sensor creation** - Creates only sensors with real API data
+- **Clear API error and rate-limit reporting**
+- **Global and India API regions**
+- **No YAML required**
+- **Support for multiple languages**
    - 🇬🇧 🇩🇪 🇳🇱 🇨🇿 🇵🇱 🇵🇹 🇪🇸 🇮🇹 🇫🇷 🇸🇪 🇩🇰 🇳🇴 🇫🇮 🇱🇹
 
 <br>
@@ -53,8 +30,7 @@ This integration is developed and tested in real Home Assistant setups. <br>
 Contributions, issues, and pull requests are welcome. <br> <br>
 
 
-**Total System information** <br>
-This system contains 3 micro-inverters: <br> <br>
+**Total System information** (this system contains 3 micro-inverters): <br> <br>
 <img src="https://raw.githubusercontent.com/NoUsername10/Solax-Cloud-API-for-Home-assistant/main/assets/info%20system.png" width=75% height=75%>
 
 **Single-inverter info:**  <br>
@@ -81,10 +57,11 @@ Redacted diagnostics with masked serials and token data for troubleshooting. <br
 
 - **Single Integration Instance** - One config entry for a full site (single- or multi-inverter)
 - **Single API Token** - One token for all configured inverter serials
+- **Regional API Support** - Choose the Global or India SolaX Cloud API endpoint during setup
 - **Dynamic Sensor Creation** - Creates only sensors with real API data
 - **Per-Inverter Metrics** - Power, yield, battery, EPS, status/type, and upload timestamps
 - **Computed Per-Inverter Sensors** - DC total and inverter efficiency
-- **Estimated Battery Energy Sensors (Opt-in)** - Estimated daily and total charge/discharge energy from `batPower` sample integration
+- **Estimated Battery Energy Sensors** - Enabled by default for battery systems, with estimated daily and total charge/discharge energy from `batPower` sample integration
 - **System Totals Device** - AC/DC totals, yield today/lifetime, system efficiency, system health, and API rate-limit status
 - **Per-Inverter API Access Status** - `OK`, `Rate Limited`, `Serial Unauthorized`, `API Error`
 - **Resilient API Handling** - Rate-limit cooldown and clear status reporting
@@ -117,27 +94,19 @@ Before installation, you need:
       - If your inverter has built-in WiFi, use the WiFi inverter serial.
       - For microinverter systems, use the microinverter(s) serial(s).
 
-<br>
-
 ## 📦 Installation HACS (Step 2)
 
 [<img src="https://my.home-assistant.io/badges/hacs_repository.svg" />](https://my.home-assistant.io/redirect/hacs_repository/?owner=NoUsername10&repository=Solax-Cloud-API-for-Home-assistant&category=integration)
 
 1. Add/install **SolaX Cloud API for Single- and Multi-Inverter Systems** from HACS (**Integration** category).
 2. Restart Home Assistant.
+3. Go to **Settings -> Devices & Services -> Add Integration** and add **Solax Cloud API for Single- and Multi-Inverter Systems**.
 
-### Manual Installation
-
-<details>
-<summary><b>Manual install (We recommend HACS):</b></summary><br>
+### Manual Installation (Backup)
 
 1. Download the latest release
 2. Copy the `custom_components/solax_cloud_api` folder to your Home Assistant `custom_components` directory
 3. Restart Home Assistant
-
-</details>
-
-<br>
 
 ## ⚙️ Configuration (Step 3)
 
@@ -146,6 +115,7 @@ Before installation, you need:
 2. Click **+ Add Integration**
 3. Search for **"SolaX Cloud API"**
 4. Enter your configuration:
+   - **API Region**: Select **Global** for the standard SolaX Cloud API or **India** for accounts migrated to the dedicated India API domain
    - **API Token**: The `Token ID` from SolaX Cloud **Third-party Ecosystem** → **API Realtime Data**
    - **System Name**: Name for your solar system (used for system total sensors and entity ID prefix)
    - **Scan Interval**: Polling frequency in seconds (default: 120, minimum suggested: 120)
@@ -158,24 +128,24 @@ Before installation, you need:
       - For microinverter systems, use the microinverter(s) serial(s).
 7. Check "Finish Setup" when all inverters are added
 
-<br>
-
 ### 🧩 Managing Inverters
 To add or remove inverters later:
 1. Go to your SolaX Cloud API integration
 2. Click **Configure**
 3. Add new serial numbers or remove existing ones
-4. Click **Save Changes**
+4. Change **API Region** if the SolaX account has moved between the Global and India API services
+5. Click **Save Changes**
 
 After saving, the integration reloads automatically and validates the result.  
 If rate limits or invalid serial/access errors are detected, you get a GUI popup (options flow) and a persistent notification.
 
 
-<br><br>
+<br><br><br>
 
 ## 📝  Notes and infomation
 
 - **📊 Data Refresh Rate**: SolaX Cloud data updates every 5 minutes, even if we query every 2 minutes.
+- **🌍 API Region**: Existing installations default to **Global**. India-region users can select **India** during setup or later under **Configure**.
 - **💾 Transient Error Retention**: The last good values are retained during temporary rate limits/API issues.
 - **🔧 Dynamic Sensors**: Entities are created based on real fields returned for your inverter model.
 
@@ -276,10 +246,10 @@ Per inverter, the integration can create the following sensors (dynamic: only fi
 - `DC Power Inverter Total` (computed)
 - `Inverter Efficiency` (computed)
 - `API Access Status` (diagnostic)
-- `Estimated Battery Charge Energy Today` (estimated, disabled by default, battery systems only)
-- `Estimated Battery Charge Energy Total` (estimated, disabled by default, battery systems only)
-- `Estimated Battery Discharge Energy Today` (estimated, disabled by default, battery systems only)
-- `Estimated Battery Discharge Energy Total` (estimated, disabled by default, battery systems only)
+- `Estimated Battery Charge Energy Today` (estimated, battery systems only)
+- `Estimated Battery Charge Energy Total` (estimated, battery systems only)
+- `Estimated Battery Discharge Energy Today` (estimated, battery systems only)
+- `Estimated Battery Discharge Energy Total` (estimated, battery systems only)
 
 </details>
 
@@ -298,27 +268,21 @@ System-wide sensors:
 - `API Rate Limit Status` (diagnostic)
 - `Last Poll Attempt` (diagnostic, disabled by default)
 - `Next Scheduled Poll` (diagnostic, disabled by default)
-- `Estimated System Battery Charge Energy Today` (estimated, disabled by default, battery systems only)
-- `Estimated System Battery Charge Energy Total` (estimated, disabled by default, battery systems only)
-- `Estimated System Battery Discharge Energy Today` (estimated, disabled by default, battery systems only)
-- `Estimated System Battery Discharge Energy Total` (estimated, disabled by default, battery systems only)
+- `Estimated System Battery Charge Energy Today` (estimated, battery systems only)
+- `Estimated System Battery Charge Energy Total` (estimated, battery systems only)
+- `Estimated System Battery Discharge Energy Today` (estimated, battery systems only)
+- `Estimated System Battery Discharge Energy Total` (estimated, battery systems only)
 
 </details>
 
 
 ### Diagnostic / Control Entities
-
-<details>
-<summary>Diagnostic entities list:</summary><br>
-   
 - `API Access Status [Serial]` (diagnostic): API access health for each inverter
 - `System Health` (diagnostic): overall health status across configured inverters
 - `API Rate Limit Status` (diagnostic): current API rate-limit state
 - `Last Poll Attempt` (diagnostic, disabled by default): timestamp of the latest coordinator poll attempt
 - `Next Scheduled Poll` (diagnostic, disabled by default): timestamp of the next planned poll
 - `API Rate Limit Notifications` (switch under System Totals): toggle persistent rate-limit notifications
-
-</details>
 
 ### Sensor Attributes
 - Status sensors include both human-readable text and raw numeric values
@@ -358,7 +322,7 @@ System-wide sensors:
 **Missing sensors?**
 - Some sensors only appear if your inverter supports that feature
 - Battery sensors only appear if you have battery storage
-- Estimated battery energy sensors are created only when `batPower` data exists and are disabled by default
+- Estimated battery energy sensors are created and enabled by default only when non-null `batPower` data exists
 - PV channel sensors depend on your inverter's configuration
 - EPS sensors only appear if you have backup power capability
 
