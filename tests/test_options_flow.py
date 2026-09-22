@@ -6,9 +6,11 @@ from unittest.mock import AsyncMock
 
 import pytest
 from homeassistant.data_entry_flow import FlowResultType
-
 from solax_cloud_api.config_flow import SolaxOptionsFlowHandler
 from solax_cloud_api.const import (
+    API_REGION_GLOBAL,
+    API_REGION_INDIA,
+    CONF_API_REGION,
     CONF_SCAN_INTERVAL,
     CONF_SYSTEM_NAME,
     CONF_TOKEN,
@@ -90,7 +92,7 @@ async def test_options_token_unchanged_marks_only_new_inverters_for_refresh(
     assert result["type"] is FlowResultType.CREATE_ENTRY
 
     state = hass.data[RUNTIME_RELOAD_STATE][entry.entry_id]
-    assert state["token_changed"] is False
+    assert state["connection_changed"] is False
     assert state["added_inverters"] == ["SERIAL2"]
     assert "SERIAL1" in state["data"]
 
@@ -99,7 +101,7 @@ async def test_options_token_unchanged_marks_only_new_inverters_for_refresh(
 async def test_options_token_changed_marks_full_refresh(
     hass, mock_solax_entry, runtime_coordinator_stub, monkeypatch
 ):
-    """Changing token should set token_changed in runtime reload state."""
+    """Changing token should mark the connection for a full refresh."""
     entry = mock_solax_entry(
         token="old-token",
         inverters=["SERIAL1"],
@@ -130,5 +132,49 @@ async def test_options_token_changed_marks_full_refresh(
     assert result["type"] is FlowResultType.CREATE_ENTRY
 
     state = hass.data[RUNTIME_RELOAD_STATE][entry.entry_id]
-    assert state["token_changed"] is True
+    assert state["connection_changed"] is True
     assert state["added_inverters"] == []
+
+
+@pytest.mark.asyncio
+async def test_options_region_change_validates_and_marks_full_refresh(
+    hass, mock_solax_entry, runtime_coordinator_stub, monkeypatch
+):
+    """Changing API region should validate and refresh all inverter data."""
+    entry = mock_solax_entry(
+        token="same-token",
+        api_region=API_REGION_GLOBAL,
+        inverters=["SERIAL1"],
+        system_name="India Migration",
+        entity_prefix="india_migration",
+    )
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
+        "coordinator": runtime_coordinator_stub(data={"SERIAL1": {"acpower": 150}})
+    }
+    connection_test = AsyncMock(return_value=True)
+    monkeypatch.setattr(
+        "solax_cloud_api.config_flow._test_api_connection", connection_test
+    )
+    monkeypatch.setattr(hass.config_entries, "async_reload", AsyncMock(return_value=True))
+
+    flow = SolaxOptionsFlowHandler(entry)
+    flow.hass = hass
+    await flow.async_step_manage_inverters()
+    result = await flow.async_step_manage_inverters(
+        user_input={
+            CONF_API_REGION: API_REGION_INDIA,
+            CONF_TOKEN: "same-token",
+            CONF_SYSTEM_NAME: "India Migration",
+            CONF_SCAN_INTERVAL: 120,
+            "finish": True,
+        }
+    )
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    updated = hass.config_entries.async_get_entry(entry.entry_id)
+    assert updated is not None
+    assert updated.data[CONF_API_REGION] == API_REGION_INDIA
+    assert hass.data[RUNTIME_RELOAD_STATE][entry.entry_id]["connection_changed"] is True
+    connection_test.assert_awaited_once_with(
+        hass, "same-token", API_REGION_INDIA, "SERIAL1"
+    )

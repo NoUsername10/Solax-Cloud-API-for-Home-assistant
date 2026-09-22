@@ -6,10 +6,9 @@ from datetime import timedelta
 
 import pytest
 from homeassistant.util import dt as dt_util
-
 from solax_cloud_api import diagnostics
+from solax_cloud_api.const import API_REGION_INDIA, DOMAIN
 from solax_cloud_api.coordinator import SolaxCoordinator
-from solax_cloud_api.const import DOMAIN
 
 
 @pytest.mark.asyncio
@@ -22,6 +21,7 @@ async def test_diagnostics_masks_sensitive_values_and_includes_battery_summary(
 
     entry = mock_solax_entry(
         token=token,
+        api_region=API_REGION_INDIA,
         inverters=[serial],
         system_name="Diag System",
         entity_prefix="diag_system",
@@ -68,6 +68,7 @@ async def test_diagnostics_masks_sensitive_values_and_includes_battery_summary(
     assert "***" in config_block["raw_api_token_masked"]
     assert config_block["raw_api_token_length"] == len(token)
     assert config_block["api_token_present"] is True
+    assert config_block["api_region"] == API_REGION_INDIA
     assert config_block["configured_inverters"][0] != serial
 
     inverter_payload = payload["inverters"][0]
