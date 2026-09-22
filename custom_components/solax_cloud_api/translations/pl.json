@@ -66,7 +66,7 @@
       },
       "invalid_serial_notice": {
         "title": "Nieprawidłowe powiadomienie o numerze seryjnym/dostępie",
-        "description": "Twoje zmiany zostały zapisane, ale {count} falowników zwróciło dane Nieautoryzowane (1003):\n{details}\n\nFalowniki te pozostają niedostępne do czasu skorygowania dostępu szeregowego/autoryzacji.",
+        "description": "Twoje zmiany zostały zapisane, ale {count} falowników zwróciło dane Nieautoryzowane:\n{details}\n\nFalowniki te pozostają niedostępne do czasu skorygowania dostępu szeregowego/autoryzacji.",
         "data": {
           "acknowledge": "Wykryto nieprawidłowy numer seryjny/dostęp. Dotknięte falowniki: {details}. Falowniki te pozostają niedostępne do czasu skorygowania dostępu szeregowego/autoryzacji."
         }

@@ -66,7 +66,7 @@
       },
       "invalid_serial_notice": {
         "title": "Ongeldige serieel-/toegangsmelding",
-        "description": "Uw wijzigingen zijn opgeslagen, maar {count} omvormer(s) hebben Data Unauthorized (1003) geretourneerd:\n{details}\n\nDeze omvormers blijven onbeschikbaar totdat de seriële/authenticatietoegang is gecorrigeerd.",
+        "description": "Uw wijzigingen zijn opgeslagen, maar {count} omvormer(s) hebben Data Unauthorized geretourneerd:\n{details}\n\nDeze omvormers blijven onbeschikbaar totdat de seriële/authenticatietoegang is gecorrigeerd.",
         "data": {
           "acknowledge": "Ongeldig serieel/toegang gedetecteerd. Betrokken omvormer(s): {details}. Deze omvormers blijven onbeschikbaar totdat de seriële/authenticatietoegang is gecorrigeerd."
         }

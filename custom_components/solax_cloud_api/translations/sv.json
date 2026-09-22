@@ -66,7 +66,7 @@
       },
       "invalid_serial_notice": {
         "title": "Meddelande om Ogiltigt Serienummer/Åtkomst",
-        "description": "Dina ändringar sparades, men {count} inverter(e) returnerade Data Unauthorized (1003):\n{details}\n\nDessa invertere hålls otillgängliga tills serienummer/åtkomst har korrigerats.",
+        "description": "Dina ändringar sparades, men {count} inverter(e) returnerade Data Unauthorized:\n{details}\n\nDessa invertere hålls otillgängliga tills serienummer/åtkomst har korrigerats.",
         "data": {
           "acknowledge": "Ogiltigt serienummer/åtkomst upptäcktes. Berörda inverter(e): {details}. Dessa invertere hålls otillgängliga tills serienummer/åtkomst har korrigerats."
         }

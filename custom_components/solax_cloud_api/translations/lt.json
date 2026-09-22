@@ -66,7 +66,7 @@
       },
       "invalid_serial_notice": {
         "title": "Neteisingo serijinio numerio/Prieigos pranešimas",
-        "description": "Jūsų pakeitimai buvo išsaugoti, bet {count} inverteris(-iai) grąžino Duomenys neleistini (1003):\n{details}\n\nŠie inverteriai išlieka neprieinami, kol serijinis numeris/prieiga bus ištaisyta.",
+        "description": "Jūsų pakeitimai buvo išsaugoti, bet {count} inverteris(-iai) grąžino Duomenys neleistini:\n{details}\n\nŠie inverteriai išlieka neprieinami, kol serijinis numeris/prieiga bus ištaisyta.",
         "data": {
           "acknowledge": "Aptiktas neteisingas serijinis numeris/Prieiga. Paveikti inverteriai: {details}. Šie inverteriai išlieka neprieinami, kol serijinis numeris/prieiga bus ištaisyta."
         }

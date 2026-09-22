@@ -66,7 +66,7 @@
       },
       "invalid_serial_notice": {
         "title": "Ugyldig seriel/adgangsmeddelelse",
-        "description": "Dine ændringer blev gemt, men {count} inverter(e) returnerede Data Uautoriseret (1003):\n{details}\n\nDisse invertere holdes utilgængelige, indtil seriel/godkendelsesadgang er rettet.",
+        "description": "Dine ændringer blev gemt, men {count} inverter(e) returnerede Data Uautoriseret:\n{details}\n\nDisse invertere holdes utilgængelige, indtil seriel/godkendelsesadgang er rettet.",
         "data": {
           "acknowledge": "Ugyldig seriel/adgang fundet. Berørte inverter(e): {details}. Disse invertere holdes utilgængelige, indtil seriel/godkendelsesadgang er rettet."
         }

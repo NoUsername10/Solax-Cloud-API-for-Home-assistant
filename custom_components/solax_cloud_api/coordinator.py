@@ -10,6 +10,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.util import dt as dt_util
 
+from .api_response import is_data_unauthorized_response, is_token_invalid_response
 from .const import DEFAULT_API_REGION, DEFAULT_SCAN_INTERVAL, api_url_for_region
 
 _LOGGER = logging.getLogger(__name__)
@@ -249,15 +250,19 @@ class SolaxCoordinator(DataUpdateCoordinator):
                     await asyncio.sleep(5)
                 continue
 
-            if code == 1001:  # Token unauthorized
-                _LOGGER.error("API token unauthorized. Reauthentication required.")
+            if is_token_invalid_response(resp):
+                _LOGGER.error(
+                    "API token unauthorized (code=%s). Reauthentication required.",
+                    code,
+                )
                 raise ConfigEntryAuthFailed("API token unauthorized")
 
-            if code == 1003:  # Data unauthorized (invalid serial or no access)
+            if is_data_unauthorized_response(resp):
                 _LOGGER.error(
-                    "Data unauthorized for inverter %s (code=1003). "
+                    "Data unauthorized for inverter %s (code=%s). "
                     "Marking this inverter unavailable. Exception: %s",
                     sn,
+                    code,
                     resp.get("exception"),
                 )
                 results[sn] = {

@@ -66,7 +66,7 @@
       },
       "invalid_serial_notice": {
         "title": "Virheellinen sarja-/käyttöilmoitus",
-        "description": "Muutokset tallennettiin, mutta {count} invertteri(t) palauttivat tiedot luvatta (1003):\n{details}\n\nNämä invertterit pidetään poissa käytöstä, kunnes sarja-/auth-käyttö on korjattu.",
+        "description": "Muutokset tallennettiin, mutta {count} invertteri(t) palauttivat tiedot luvatta:\n{details}\n\nNämä invertterit pidetään poissa käytöstä, kunnes sarja-/auth-käyttö on korjattu.",
         "data": {
           "acknowledge": "Virheellinen sarja/pääsy havaittu. Vaikuttavat invertterit: {details}. Nämä invertterit pidetään poissa käytöstä, kunnes sarja-/auth-käyttö on korjattu."
         }

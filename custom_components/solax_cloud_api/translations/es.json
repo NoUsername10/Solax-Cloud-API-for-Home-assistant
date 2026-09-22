@@ -66,7 +66,7 @@
       },
       "invalid_serial_notice": {
         "title": "Aviso de serie/acceso no válido",
-        "description": "Tus cambios se guardaron, pero {count} inversor(es) devolvieron Data Unauthorized (1003):\n{details}\n\nEstos inversores se mantienen no disponibles hasta corregir la serie/acceso de autenticación.",
+        "description": "Tus cambios se guardaron, pero {count} inversor(es) devolvieron Data Unauthorized:\n{details}\n\nEstos inversores se mantienen no disponibles hasta corregir la serie/acceso de autenticación.",
         "data": {
           "acknowledge": "Se detectó serie/acceso no válido. Inversor(es) afectados: {details}. Estos inversores se mantienen no disponibles hasta corregir la serie/acceso de autenticación."
         }

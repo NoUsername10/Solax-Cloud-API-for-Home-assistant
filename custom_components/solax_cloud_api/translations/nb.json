@@ -66,7 +66,7 @@
       },
       "invalid_serial_notice": {
         "title": "Ugyldig serie-/tilgangsvarsel",
-        "description": "Endringene dine ble lagret, men {count} inverter(e) returnerte Data Uautorisert (1003):\n{details}\n\nDisse omformerne holdes utilgjengelige inntil seriell/authort-tilgang er korrigert.",
+        "description": "Endringene dine ble lagret, men {count} inverter(e) returnerte Data Uautorisert:\n{details}\n\nDisse omformerne holdes utilgjengelige inntil seriell/authort-tilgang er korrigert.",
         "data": {
           "acknowledge": "Ugyldig serienummer/tilgang oppdaget. Berørte omformere: {details}. Disse omformerne holdes utilgjengelige inntil seriell/authort-tilgang er korrigert."
         }
