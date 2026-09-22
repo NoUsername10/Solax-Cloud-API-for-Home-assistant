@@ -9,7 +9,6 @@ import re
 import sys
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 CONST_PATH = ROOT / "custom_components" / "solax_cloud_api" / "const.py"
 TRANSLATIONS_DIR = ROOT / "custom_components" / "solax_cloud_api" / "translations"
