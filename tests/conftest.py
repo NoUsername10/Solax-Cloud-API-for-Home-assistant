@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
+import sys
 from collections.abc import Callable
 from pathlib import Path
-import sys
 from types import SimpleNamespace
 
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
-
 
 ROOT = Path(__file__).resolve().parents[1]
 CUSTOM_COMPONENTS = ROOT / "custom_components"
@@ -18,11 +17,13 @@ if str(CUSTOM_COMPONENTS) not in sys.path:
     sys.path.insert(0, str(CUSTOM_COMPONENTS))
 
 from solax_cloud_api.const import (  # noqa: E402
+    CONF_API_REGION,
     CONF_ENTITY_PREFIX,
     CONF_INVERTERS,
     CONF_SCAN_INTERVAL,
     CONF_SYSTEM_NAME,
     CONF_TOKEN,
+    DEFAULT_API_REGION,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
 )
@@ -47,6 +48,7 @@ def mock_solax_entry(hass) -> Callable[..., MockConfigEntry]:
     def _factory(
         *,
         token: str = "token-123456",
+        api_region: str = DEFAULT_API_REGION,
         inverters: list[str] | None = None,
         system_name: str = "Test System",
         scan_interval: int = DEFAULT_SCAN_INTERVAL,
@@ -59,6 +61,7 @@ def mock_solax_entry(hass) -> Callable[..., MockConfigEntry]:
             title=title or system_name,
             data={
                 CONF_TOKEN: token,
+                CONF_API_REGION: api_region,
                 CONF_INVERTERS: inverters or ["SERIAL1"],
                 CONF_SCAN_INTERVAL: scan_interval,
                 CONF_SYSTEM_NAME: system_name,

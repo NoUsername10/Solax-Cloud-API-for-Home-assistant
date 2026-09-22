@@ -66,7 +66,7 @@
       },
       "invalid_serial_notice": {
         "title": "Neplatné sériové/přístupové oznámení",
-        "description": "Vaše změny byly uloženy, ale {count} střídač(ů) vrátilo neoprávněná data (1003):\n{details}\n\nTyto měniče jsou nedostupné, dokud nebude opraven sériový/auth přístup.",
+        "description": "Vaše změny byly uloženy, ale {count} střídač(ů) vrátilo neoprávněná data:\n{details}\n\nTyto měniče jsou nedostupné, dokud nebude opraven sériový/auth přístup.",
         "data": {
           "acknowledge": "Zjištěn neplatný Serial/Access. Dotčené měniče: {details}. Tyto měniče jsou nedostupné, dokud nebude opraven sériový/auth přístup."
         }

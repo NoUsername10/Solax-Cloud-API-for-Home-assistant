@@ -12,6 +12,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.translation import async_get_translations
 from homeassistant.util import slugify
 
+from .api_response import is_data_unauthorized_response, is_token_invalid_response
 from .const import (
     API_REGIONS,
     CONF_API_REGION,
@@ -82,9 +83,12 @@ def _format_invalid_serial_details(
     formatted = []
     for serial in inverters:
         detail = details.get(serial, {})
-        code = detail.get("code", 1003)
+        code = detail.get("code")
         reason = detail.get("exception") or unauthorized_text
-        formatted.append(f"{serial} (code={code}, reason={reason})")
+        if code is None:
+            formatted.append(f"{serial} (reason={reason})")
+        else:
+            formatted.append(f"{serial} (code={code}, reason={reason})")
     return "; ".join(formatted) if formatted else unknown_text
 
 
@@ -139,13 +143,10 @@ async def _test_api_connection(
 
                 data = await resp.json()
                 code = data.get("code")
-                exception = str(data.get("exception", "")).lower()
 
                 # Known invalid-auth/invalid-request responses from Solax API.
-                # 1001 = Interface Unauthorized, 1002 = Parameter validation failed.
-                if code in (1001, 1002):
-                    return False
-                if "token" in exception and "invalid" in exception:
+                # 1002 = Parameter validation failed.
+                if code == 1002 or is_token_invalid_response(data):
                     return False
 
                 # Any other well-formed API response means token reached Solax correctly.
@@ -227,11 +228,7 @@ async def _classify_preflight_inverters(
 
                 code = data.get("code")
                 success = data.get("success", False)
-                exception = str(data.get("exception", "")).lower()
-
-                if code in (1001, 1002):
-                    return {"token_invalid": True}
-                if "token" in exception and "invalid" in exception:
+                if code == 1002 or is_token_invalid_response(data):
                     return {"token_invalid": True}
 
                 if _is_rate_limited_payload(data):
@@ -250,7 +247,7 @@ async def _classify_preflight_inverters(
                     }
                     continue
 
-                if code == 1003:
+                if is_data_unauthorized_response(data):
                     unauthorized.append(serial)
                     unauthorized_details[serial] = {
                         "code": code,

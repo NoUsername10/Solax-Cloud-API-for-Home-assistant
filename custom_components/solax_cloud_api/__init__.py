@@ -180,9 +180,12 @@ def _update_invalid_serial_notification(
     details_lines = []
     for serial in invalid_serials:
         detail = invalid_details.get(serial, {})
-        code = detail.get("code", 1003)
+        code = detail.get("code")
         reason = detail.get("exception") or "Data Unauthorized"
-        details_lines.append(f"- {serial}: code={code}, reason={reason}")
+        if code is None:
+            details_lines.append(f"- {serial}: reason={reason}")
+        else:
+            details_lines.append(f"- {serial}: code={code}, reason={reason}")
     details_block = "\n".join(details_lines)
 
     texts = i18n_texts or {}

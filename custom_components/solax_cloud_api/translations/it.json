@@ -66,7 +66,7 @@
       },
       "invalid_serial_notice": {
         "title": "Avviso di accesso/seriale non valido",
-        "description": "Le modifiche sono state salvate, ma gli inverter {count} hanno restituito dati non autorizzati (1003):\n{details}\n\nQuesti inverter vengono mantenuti non disponibili finché l'accesso seriale/di autenticazione non viene corretto.",
+        "description": "Le modifiche sono state salvate, ma gli inverter {count} hanno restituito dati non autorizzati:\n{details}\n\nQuesti inverter vengono mantenuti non disponibili finché l'accesso seriale/di autenticazione non viene corretto.",
         "data": {
           "acknowledge": "Rilevato accesso/seriale non valido. Inverter interessati: {details}. Questi inverter vengono mantenuti non disponibili finché l'accesso seriale/di autenticazione non viene corretto."
         }

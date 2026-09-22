@@ -13,6 +13,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 - No changes yet.
 
+## [v0.2.1] - 2026-09-22
+
+### Release Notes
+- Improved authentication error handling for the actual responses returned by both the Global and India SolaX API endpoints.
+
+### Fixed
+- Added support for the undocumented SolaX token-invalid response `code=103`, observed on both the Global and India API endpoints.
+- Code-less `no auth!` responses are now handled as serial/access authorization failures, matching `1003` behavior while preserving the exact response in diagnostics.
+- Invalid-serial notifications no longer display a fabricated error code when the API omits it.
+
 ## [v0.2.0] - 2026-09-21
 
 ### Release Notes
