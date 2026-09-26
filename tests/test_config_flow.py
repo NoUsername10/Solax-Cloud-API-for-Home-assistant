@@ -13,6 +13,7 @@ from solax_cloud_api.config_flow import (
 )
 from solax_cloud_api.const import (
     API_REGION_INDIA,
+    API_REGION_NORTH_AMERICA,
     CONF_API_REGION,
     CONF_INVERTERS,
     CONF_SCAN_INTERVAL,
@@ -54,7 +55,7 @@ class _ApiSession:
 
 @pytest.mark.asyncio
 async def test_connection_test_rejects_observed_token_error_103(hass, monkeypatch):
-    """The live Global/India code 103 response must reject the token."""
+    """The live regional code 103 response must reject the token."""
     monkeypatch.setattr(
         "solax_cloud_api.config_flow.async_get_clientsession",
         lambda _hass: _ApiSession(
@@ -145,6 +146,59 @@ async def test_user_step_india_region_is_used_and_stored(hass, monkeypatch):
     assert result["data"][CONF_API_REGION] == API_REGION_INDIA
     preflight_test.assert_awaited_once_with(
         hass, "india-token", ["SERIAL1"], 120, API_REGION_INDIA
+    )
+
+
+@pytest.mark.asyncio
+async def test_user_step_north_america_region_is_used_and_stored(hass, monkeypatch):
+    """North America onboarding must use and store its dedicated API region."""
+    connection_test = AsyncMock(return_value=True)
+    preflight_test = AsyncMock(
+        return_value={
+            "token_invalid": False,
+            "data": {"SERIAL1": {"acpower": 500}},
+            "rate_limited_inverters": [],
+            "rate_limited_details": {},
+            "unauthorized_inverters": [],
+            "unauthorized_details": {},
+        }
+    )
+    monkeypatch.setattr(
+        "solax_cloud_api.config_flow._test_api_connection", connection_test
+    )
+    monkeypatch.setattr(
+        "solax_cloud_api.config_flow._classify_preflight_inverters", preflight_test
+    )
+    flow = SolaxFlowHandler()
+    flow.hass = hass
+    monkeypatch.setattr(flow, "_async_current_entries", lambda: [])
+
+    result = await flow.async_step_user(
+        user_input={
+            CONF_API_REGION: API_REGION_NORTH_AMERICA,
+            CONF_TOKEN: "north-america-token",
+            CONF_SYSTEM_NAME: "North America System",
+            CONF_SCAN_INTERVAL: 120,
+        }
+    )
+    assert result["step_id"] == "add_inverter"
+    connection_test.assert_awaited_once_with(
+        hass, "north-america-token", API_REGION_NORTH_AMERICA
+    )
+
+    await flow.async_step_add_inverter(
+        user_input={"serial": "SERIAL1", "finish": False}
+    )
+    result = await flow.async_step_add_inverter(user_input={"finish": True})
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert result["data"][CONF_API_REGION] == API_REGION_NORTH_AMERICA
+    preflight_test.assert_awaited_once_with(
+        hass,
+        "north-america-token",
+        ["SERIAL1"],
+        120,
+        API_REGION_NORTH_AMERICA,
     )
 
 
