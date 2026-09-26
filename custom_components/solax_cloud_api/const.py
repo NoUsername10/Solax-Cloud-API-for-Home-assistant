@@ -15,14 +15,17 @@ INVALID_ENTITY_PREFIXES = frozenset({"unknown", "unnamed"})
 DEFAULT_SCAN_INTERVAL = 120
 API_REGION_GLOBAL = "global"
 API_REGION_INDIA = "india"
+API_REGION_NA = "na"
 DEFAULT_API_REGION = API_REGION_GLOBAL
 API_REGIONS = {
     API_REGION_GLOBAL: "Global",
     API_REGION_INDIA: "India",
+    API_REGION_NA: "North America",
 }
 API_URLS = {
     API_REGION_GLOBAL: "https://global.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get",
     API_REGION_INDIA: "https://in.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get",
+    API_REGION_NA: "https://na.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get",
 }
 SERVICE_MANUAL_REFRESH = "manual_refresh"
 RUNTIME_RELOAD_STATE = f"{DOMAIN}_reload_state"

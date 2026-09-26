@@ -11,7 +11,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Improve the rate limited messages for clarity.
 
 ## [Unreleased]
-- No changes yet.
+
+### Added
+- Added a North America API Region option (`https://na.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get`), for accounts issued tokens on the SolaX NA portal, which the Global endpoint rejects.
 
 ## [v0.2.1] - 2026-09-22
 

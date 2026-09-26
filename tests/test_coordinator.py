@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 from homeassistant.exceptions import ConfigEntryAuthFailed
-from solax_cloud_api.const import API_REGION_INDIA, API_URLS
+from solax_cloud_api.const import API_REGION_INDIA, API_REGION_NA, API_URLS
 from solax_cloud_api.coordinator import SolaxCoordinator
 
 
@@ -57,6 +57,20 @@ async def test_coordinator_india_region_uses_india_endpoint(hass):
 
     assert result["code"] == 0
     assert session.url == API_URLS[API_REGION_INDIA]
+
+
+@pytest.mark.asyncio
+async def test_coordinator_na_region_uses_na_endpoint(hass):
+    """North America region must send requests only to the allowlisted NA endpoint."""
+    coordinator = SolaxCoordinator(
+        hass, "token", ["SERIAL1"], 120, api_region=API_REGION_NA
+    )
+    session = _RecordingSession()
+
+    result = await coordinator._fetch_one(session, "SERIAL1")
+
+    assert result["code"] == 0
+    assert session.url == API_URLS[API_REGION_NA]
 
 
 def test_coordinator_unknown_region_falls_back_to_global(hass):
