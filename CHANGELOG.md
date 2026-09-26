@@ -13,6 +13,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 - No changes yet.
 
+## [v0.2.2] - 2026-09-26
+
+### Release Notes
+- Added selectable North America SolaX Cloud API region support.
+
+### Added
+- Added **North America** to the API Region selector during initial setup and in the integration's Configure flow.
+- Added the dedicated North America realtime API endpoint: `https://na.solaxcloud.com/api/v2/dataAccess/realtimeInfo/get`.
+- Added regression tests covering North America onboarding and endpoint routing.
+
+### Changed
+- Updated the README regional setup and configuration guidance for Global, India, and North America.
+
 ## [v0.2.1] - 2026-09-22
 
 ### Release Notes

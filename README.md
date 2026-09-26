@@ -42,7 +42,7 @@ Get SolaX Developer API
 - **🔋 Battery energy estimation enabled by default for battery systems** (calculated from battery power)
 - **🧠 Dynamic sensors** (only creates sensors your system supports)  
 - **⚠️ Built-in API error and rate-limit reporting**
-- **🌏 Global and India API region support**
+- **🌏 Global, India, and North America API region support**
 - **🛠️ No YAML or templates required** (fully UI-based setup)
 - **🌍 Multiple language support**
    - 🇬🇧 🇩🇪 🇳🇱 🇨🇿 🇵🇱 🇵🇹 🇪🇸 🇮🇹 🇫🇷 🇸🇪 🇩🇰 🇳🇴 🇫🇮 🇱🇹
@@ -82,7 +82,7 @@ Redacted diagnostics with masked serials and token data for troubleshooting. <br
 
 - **Single Integration Instance** - One config entry for a full site (single- or multi-inverter)
 - **Single API Token** - One token for all configured inverter serials
-- **Regional API Support** - Choose the Global or India SolaX Cloud API endpoint during setup
+- **Regional API Support** - Choose the Global, India, or North America SolaX Cloud API endpoint during setup
 - **Dynamic Sensor Creation** - Creates only sensors with real API data
 - **Per-Inverter Metrics** - Power, yield, battery, EPS, status/type, and upload timestamps
 - **Computed Per-Inverter Sensors** - DC total and inverter efficiency
@@ -148,7 +148,7 @@ Before installation, you need:
 2. Click **+ Add Integration**
 3. Search for **"SolaX Cloud API"**
 4. Enter your configuration:
-   - **API Region**: Select **Global** for the standard SolaX Cloud API or **India** for accounts migrated to the dedicated India API domain
+   - **API Region**: Select **Global** for the standard SolaX Cloud API, **India** for the dedicated India API domain, or **North America** for the dedicated North America API domain
    - **API Token**: The `Token ID` from SolaX Cloud **Third-party Ecosystem** → **API Realtime Data**
    - **System Name**: Name for your solar system (used for system total sensors and entity ID prefix)
    - **Scan Interval**: Polling frequency in seconds (default: 120, minimum suggested: 120)
@@ -168,7 +168,7 @@ To add or remove inverters later:
 1. Go to your SolaX Cloud API integration
 2. Click **Configure**
 3. Add new serial numbers or remove existing ones
-4. Change **API Region** if the SolaX account has moved between the Global and India API services
+4. Change **API Region** if the SolaX account has moved between the Global, India, or North America API services
 5. Click **Save Changes**
 
 After saving, the integration reloads automatically and validates the result.  
@@ -180,7 +180,7 @@ If rate limits or invalid serial/access errors are detected, you get a GUI popup
 ## 📝  Notes and infomation
 
 - **📊 Data Refresh Rate**: SolaX Cloud data updates every 5 minutes, even if we query every 2 minutes.
-- **🌏 API Region**: Existing installations default to **Global**. India-region users can select **India** during setup or later under **Configure**.
+- **🌏 API Region**: Existing installations default to **Global**. India and North America users can select their dedicated region during setup or later under **Configure**.
 - **💾 Transient Error Retention**: The last good values are retained during temporary rate limits/API issues.
 - **🔧 Dynamic Sensors**: Entities are created based on real fields returned for your inverter model.
 
