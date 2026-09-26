@@ -14,8 +14,8 @@ def is_token_invalid_response(payload: dict[str, Any]) -> bool:
     """Return whether a response indicates an invalid API token.
 
     SolaX documents code 1001 for unauthorized API access, while both the
-    Global and India endpoints have also been observed returning code 103 with
-    ``token invalid!``.
+    Global, India, and North America endpoints have also been observed returning
+    code 103 with ``token invalid!``.
     """
     if not isinstance(payload, dict):
         return False
